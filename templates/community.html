@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Community - Peer Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 20px;
+    min-height: 100vh;
+}
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+.back-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #ccc;
+    text-decoration: none;
+}
+.back-btn:hover { color: white; }
+
+h1 { text-align: center; margin-bottom: 20px; color: #00ffff; }
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.user-card {
+    background: rgba(255,255,255,0.1);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.user-card:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+    border-color: #00ffff;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.profile-pic { 
+    width: 45px; height: 45px; 
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+.username { font-size: 18px; font-weight: bold; }
+.chat-btn {
+    background: linear-gradient(135deg, #00f2fe, #4facfe);
+    color: white;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.badge {
+    background-color: #ff4444;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+/* Current User Profile Section */
+.current-user-profile {
+    background: rgba(255,255,255,0.15);
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(0,255,255,0.3);
+}
+.large-pic {
+    width: 70px;
+    height: 70px;
+}
+.change-pic-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 5px;
+}
+.change-pic-btn:hover { background: rgba(0,255,255,0.3); }
+
+/* Modal for Upload */
+.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+.modal-content { background: #1F2937; margin: 20% auto; padding: 25px; border: 1px solid #00ffff; width: 90%; max-width: 400px; border-radius: 15px; text-align: center; position: relative; }
+.close-modal { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+.close-modal:hover { color: white; }
+#pfp-upload-input { margin: 20px 0; }
+#upload-btn { margin-top: 0; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/chatbot" class="back-btn">⬅ Back to Chatbot</a>
+    <h1> Group Study</h1>
+    <p style="text-align:center; margin-bottom:20px; opacity:0.8;">Connect with others. You are not alone.</p>
+    <div style="background:rgba(255, 235, 59, 0.2); color: #fff; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center; margin-bottom: 20px; border: 1px solid rgba(255, 235, 59, 0.4);">
+        <strong>Disclaimer:</strong> You are chatting with fellow users, not licensed professionals. Please be respectful and kind. For crisis support, use the hotlines in the main menu.
+    </div>
+
+    <div class="current-user-profile">
+        <img src="{{ current_user_pic }}" alt="Your Avatar" class="profile-pic large-pic">
+        <div class="profile-info">
+            <span class="username">{{ current_username }}</span>
+            <button class="change-pic-btn" onclick="openUploadModal()">Change Picture</button>
+        </div>
+    </div>
+
+    <div class="user-list">
+        {% if users %}
+            {% for user in users %}
+            <div class="user-card">
+                <div class="user-info">
+                    <img src="{{ user.profile_pic }}" alt="Avatar" class="profile-pic">
+                    <div>
+                        <span class="username">{{ user.username }}</span>
+                        {% if user.unread > 0 %}<span class="badge">{{ user.unread }} New</span>{% endif %}
+                    </div>
+                </div>
+                <a href="/peer_chat/{{ user.username }}" class="chat-btn">Chat</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center;">No other users found yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="closeUploadModal()">&times;</span>
+    <h2>Change Profile Picture</h2>
+    <p style="opacity: 0.7; font-size: 14px; margin-top: 5px;">Choose a new image to upload.</p>
+    <input type="file" id="pfp-upload-input" accept="image/*">
+    <button id="upload-btn" class="chat-btn">Upload</button>
+    <p id="upload-status" style="margin-top: 10px; font-size: 14px;"></p>
+  </div>
+</div>
+
+<script>
+const uploadModal = document.getElementById('uploadModal');
+const pfpInput = document.getElementById('pfp-upload-input');
+const uploadBtn = document.getElementById('upload-btn');
+const uploadStatus = document.getElementById('upload-status');
+
+function openUploadModal() {
+    uploadModal.style.display = 'block';
+}
+
+function closeUploadModal() {
+    uploadModal.style.display = 'none';
+    uploadStatus.textContent = '';
+    pfpInput.value = '';
+}
+
+uploadBtn.addEventListener('click', () => {
+    const file = pfpInput.files[0];
+    if (!file) {
+        uploadStatus.textContent = 'Please select a file.';
+        uploadStatus.style.color = '#ff4444';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    uploadStatus.textContent = 'Uploading...';
+    uploadStatus.style.color = '#ccc';
+
+    fetch('/api/upload_profile_pic', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            uploadStatus.textContent = 'Upload successful! Reloading...';
+            uploadStatus.style.color = '#00ff00';
+            setTimeout(() => { window.location.reload(); }, 1000);
+        } else {
+            uploadStatus.textContent = 'Error: ' + (data.error || 'Upload failed.');
+            uploadStatus.style.color = '#ff4444';
+        }
+    })
+    .catch(err => {
+        uploadStatus.textContent = 'An error occurred.';
+        uploadStatus.style.color = '#ff4444';
+    });
+});
+
+window.onclick = function(event) {
+    if (event.target == uploadModal) {
+        closeUploadModal();
+    }
+}
+</script>
+
+</body>
+</html>

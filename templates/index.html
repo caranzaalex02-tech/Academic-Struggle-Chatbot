@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mental Health Chatbot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Add Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@600;700&display=swap');
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter','Segoe UI',sans-serif;
+}
+
+body{
+overflow-x:hidden;
+overflow-y:auto;
+min-height:100vh;
+padding-top:140px;
+/* Natural vibe background - Pili ka dito ng gusto mo (Uncomment to use): */
+
+/* Option 1: Light Coastal Calm (Beach & Sea Vibe) */
+background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
+
+/* Option 2: Misty Green Forest (Calm & Cool) */
+/* background: url('https://images.unsplash.com/photo-1448375240586-dfd8d3f1d894?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed; */
+
+/* Option 3: Peaceful Lake & Mountains (Serene & Vast) */
+/* background: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed; */
+
+/* Option 4: Starry Night Sky (Deep & Quiet) */
+/* background: url('https://images.unsplash.com/photo-1519681393792-98eaaf542911?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed; */
+
+background-size: cover;
+}
+
+/* Dark overlay */
+body::after{
+content:"";
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.4);
+z-index:-1;
+}
+
+/* Adaptive Chat Container */
+.chat-container{
+position:relative;
+margin:0 auto 40px;
+width:clamp(360px, 38vw, 820px);
+max-width:920px;
+min-height:620px;
+height:min(85vh, 760px);
+max-height:85vh;
+background:rgba(255,255,255,0.10);
+backdrop-filter:blur(25px);
+border-radius:30px;
+padding:28px;
+display:flex;
+flex-direction:column;
+color:white;
+box-shadow:
+0 0 20px rgba(0,255,255,0.3),
+0 0 40px rgba(0,255,255,0.2),
+0 20px 60px rgba(0,0,0,0.5);
+border:1px solid rgba(0,255,255,0.4);
+overflow:hidden;
+}
+
+/* Floating effect */
+@keyframes float{
+0%{transform:translate(-50%,-50%) translateY(0px);}
+50%{transform:translate(-50%,-50%) translateY(-8px);}
+100%{transform:translate(-50%,-50%) translateY(0px);}
+}
+
+/* Menu Icon */
+.menu-container{
+position:absolute;
+top:20px;
+right:20px;
+z-index:10;
+}
+.menu-icon{
+width:40px;
+height:40px;
+background:rgba(0,255,255,0.3);
+backdrop-filter:blur(10px);
+border-radius:50%;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+box-shadow:0 0 15px rgba(0,255,255,0.5);
+transition:0.3s;
+}
+.menu-icon:hover{
+background:rgba(0,255,255,0.5);
+}
+.menu-icon:after{
+content:"≡";
+font-size:20px;
+color:white;
+}
+
+/* Dropdown Menu */
+.dropdown{
+position:absolute;
+top:50px;
+right:0;
+background:rgba(0,0,0,0.8);
+border-radius:12px;
+overflow:hidden;
+display:none;
+flex-direction:column;
+box-shadow:0 0 15px rgba(0,255,255,0.5);
+}
+.dropdown a{
+padding:10px 15px;
+text-decoration:none;
+color:white;
+font-size:14px;
+border-bottom:1px solid rgba(255,255,255,0.2);
+transition:0.3s;
+}
+.dropdown a:last-child{
+border-bottom:none;
+}
+.dropdown a:hover{
+background:#00ffff;
+color:black;
+}
+
+/* Professional Top Navigation */
+.nav-bar {
+position:fixed;
+top:18px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:10px;
+background:rgba(255,255,255,0.14);
+backdrop-filter:blur(22px);
+border:1px solid rgba(255,255,255,0.2);
+border-radius:999px;
+padding:12px 18px;
+box-shadow:0 18px 40px rgba(0,0,0,0.25);
+z-index:50;
+}
+
+/* Ensure chat container starts below the top nav */
+.chat-container {
+  margin-top: 40px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+}
+.nav-link {
+color:#f8fafc;
+text-decoration:none;
+font-size:0.98rem;
+font-weight:700;
+font-family:'Poppins','Inter','Segoe UI',sans-serif;
+text-transform:uppercase;
+letter-spacing:0.08em;
+padding:12px 18px;
+border-radius:999px;
+background: rgba(255, 255, 255, 0.08);
+border: 1px solid rgba(255, 255, 255, 0.2);
+transition:transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.nav-link:hover {
+background: rgba(0, 255, 255, 0.1);
+color: #fff;
+transform: translateY(-2px);
+box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), 0 0 25px rgba(0, 255, 255, 0.2);
+border-color: rgba(0, 255, 255, 0.4);
+}
+.nav-link:active {
+transform:translateY(0);
+background:linear-gradient(145deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.1));
+}
+
+/* Quote */
+.quote{
+font-size:13px;
+margin-bottom:10px;
+opacity:0.9;
+}
+
+/* Messenger Layout Chat */
+#chat-box{
+flex:1 1 auto;
+min-height:0;
+max-height:100%;
+overflow-y:auto;
+display:flex;
+flex-direction:column;
+gap:10px;
+padding-right:5px;
+}
+
+.input-area {
+  flex-shrink:0;
+}
+
+/* Keep messages within a fixed height and allow chat scroll */
+.chat-container {
+  overflow: hidden;
+}
+
+/* Scrollbar style */
+#chat-box::-webkit-scrollbar{
+width:6px;
+}
+#chat-box::-webkit-scrollbar-thumb{
+background:#00ffff;
+border-radius:10px;
+}
+
+/* Message */
+.message{
+max-width:75%;
+padding:10px 14px;
+border-radius:20px;
+font-size:14px;
+animation:fadeIn 0.3s ease;
+word-break: break-word;
+overflow-wrap: anywhere;
+white-space: pre-wrap;
+}
+
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(8px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+/* Gradient bubbles */
+.user{
+align-self:flex-end;
+background:linear-gradient(135deg,#667eea,#764ba2);
+color:white;
+border-bottom-right-radius:5px;
+box-shadow:0 0 10px rgba(118,75,162,0.6);
+}
+
+.bot{
+align-self:flex-start;
+background:linear-gradient(135deg,#43e97b,#38f9d7);
+color:black;
+border-bottom-left-radius:5px;
+box-shadow:0 0 10px rgba(56,249,215,0.6);
+}
+
+/* Typing indicator */
+.typing{
+font-size:12px;
+opacity:0.7;
+}
+
+/* Input */
+.input-area{
+display:flex;
+gap:8px;
+margin-top:10px;
+}
+
+.input-area input{
+flex:1;
+padding:10px;
+border-radius:25px;
+border:none;
+outline:none;
+font-size:14px;
+}
+
+.input-area button{
+padding:12px 20px;
+border:none;
+border-radius:28px;
+background:linear-gradient(135deg,#4fc3ff,#3b82f6);
+color:white;
+cursor:pointer;
+box-shadow:0 18px 35px rgba(0,0,0,0.22);
+font-family:'Poppins','Inter','Segoe UI',sans-serif;
+font-weight:700;
+letter-spacing:0.1em;
+text-transform:uppercase;
+transition:transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.input-area button:hover{
+transform:translateY(-2px);
+box-shadow:0 22px 42px rgba(0,0,0,0.24);
+filter:brightness(1.05);
+}
+
+/* Mood section */
+.mood-section{
+text-align:center;
+margin-top:8px;
+font-size:13px;
+}
+.mood-btn{
+margin:3px;
+padding:8px 12px;
+border:none;
+border-radius:16px;
+cursor:pointer;
+background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.12));
+color:white;
+font-family:'Poppins','Inter','Segoe UI',sans-serif;
+font-weight:700;
+letter-spacing:0.06em;
+text-transform:uppercase;
+border:1px solid rgba(255,255,255,0.22);
+transition:transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.mood-btn:hover{
+background:rgba(255,255,255,0.35);
+color:#020617;
+transform:translateY(-1px);
+}
+
+/* Rating section */
+.rating-section {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 13px;
+}
+.rating-stars {
+    display: inline-block;
+    direction: rtl; /* Right to left for hover effect */
+}
+.rating-stars .star {
+    font-size: 20px;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.rating-stars:hover .star,
+.rating-stars .star:hover,
+.rating-stars .star:hover ~ .star {
+    color: #ffdd59;
+}
+
+/* Modal Styles for Hotlines */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 100; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.7); 
+    backdrop-filter: blur(5px);
+}
+.modal-content {
+    background: rgba(20, 20, 30, 0.95);
+    margin: 20% auto; 
+    padding: 25px; 
+    border: 1px solid #00ffff;
+    width: 85%; 
+    max-width: 400px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+    position: relative;
+    animation: slideDown 0.4s ease;
+}
+@keyframes slideDown {
+    from {top: -100px; opacity: 0;}
+    to {top: 0; opacity: 1;}
+}
+.hotline-item { margin: 15px 0; padding: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; }
+.hotline-title { color: #00ffff; font-weight: bold; display: block; margin-bottom: 5px; }
+.hotline-number { font-size: 1.1em; letter-spacing: 1px; font-weight: bold; }
+
+/* Breathing Exercise Styles */
+.breath-container { position: relative; width: 150px; height: 150px; margin: 20px auto; display: flex; justify-content: center; align-items: center; }
+.breath-circle {
+    width: 80px; height: 80px;
+    background: radial-gradient(circle, rgba(0,255,255,0.8) 0%, rgba(0,255,255,0.1) 70%);
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(0,255,255,0.6);
+    transform: scale(1); opacity: 0.5;
+}
+.breath-circle.active { animation: breathing 4s infinite ease-in-out; }
+@keyframes breathing {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(2); opacity: 1; }
+}
+.breath-text { font-size: 20px; font-weight: bold; margin-top: 10px; color: #00ffff; min-height: 30px; }
+</style>
+</head>
+
+<body>
+
+<!-- Professional Navigation Bar -->
+<div class="nav-bar">
+  {% if session.get('role') == 'admin' %}
+  <a href="/admin_dashboard" class="nav-link">🛡️ Admin</a>
+  {% endif %}
+  <div class="nav-item">
+    <a href="{{ url_for('community') }}" class="nav-link" title="Chat with other users"><i class="fas fa-users-cog" style="margin-right: 8px;"></i> Group Study</a>
+  </div>
+  <div class="nav-item">
+    <a href="{{ url_for('archived_room') }}" class="nav-link" title="View past conversations"><i class="fas fa-box-archive" style="margin-right: 8px;"></i> Archived</a>
+  </div>
+  <div class="nav-item">
+    <a href="{{ url_for('restart_chat') }}" class="nav-link" title="Clear this conversation" onclick="return confirm('Are you sure you want to clear and archive this chat?');"><i class="fas fa-power-off" style="margin-right: 8px;"></i> Restart</a>
+  </div>
+  <div class="nav-item">
+    <a href="/logout" class="nav-link" title="Logout from your account"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+  </div>
+</div>
+
+<div class="chat-container">
+
+<div class="quote">
+<b>Daily Quote:</b> {{ daily_quote }}
+</div>
+
+<div id="chat-box">
+{% for u,b in messages %}
+<div class="message user">{{u}}</div>
+<div class="message bot">{{b}}</div>
+{% endfor %}
+</div>
+
+<div class="input-area">
+<input type="text" id="user-input" placeholder="Type message..." onkeydown="handleEnter(event)">
+<button onclick="sendMessage()">Send</button>
+</div>
+
+{% if not mood_logged_today %}
+<div class="mood-section">
+How are you feeling?
+<button class="mood-btn" onclick="logMood('Happy')">😊</button>
+<button class="mood-btn" onclick="logMood('Neutral')">😐</button>
+<button class="mood-btn" onclick="logMood('Sad')">😢</button>
+</div>
+{% else %}
+<div class="mood-section" style="opacity: 0.7; padding-top: 5px;">
+    Thank you for logging your mood today! 💙
+</div>
+{% endif %}
+<div class="rating-section">
+    Rate your experience:
+    <div class="rating-stars">
+        <span class="star" onclick="rateSession(5)">★</span>
+        <span class="star" onclick="rateSession(4)">★</span>
+        <span class="star" onclick="rateSession(3)">★</span>
+        <span class="star" onclick="rateSession(2)">★</span>
+        <span class="star" onclick="rateSession(1)">★</span>
+    </div>
+</div>
+
+</div>
+
+<!-- Crisis Hotline Modal -->
+<div id="hotlineModal" class="modal">
+  <div class="modal-content">
+    <span style="float:right; cursor:pointer; font-size:24px;" onclick="closeHotlines()">&times;</span>
+    <h2 style="color: #ff4444; margin-bottom: 15px;">🚨 Emergency Hotlines</h2>
+    <p style="font-size:13px; margin-bottom:20px; opacity:0.8;">You are not alone. Help is available 24/7.</p>
+    
+    <div class="hotline-item">
+        <span class="hotline-title">NCMH Crisis Hotline</span>
+        <span class="hotline-number">1553 / 0966-351-4518</span>
+    </div>
+    <div class="hotline-item">
+        <span class="hotline-title">In Touch Community</span>
+        <span class="hotline-number">(02) 8893-7603</span>
+    </div>
+  </div>
+</div>
+
+<!-- Breathing Exercise Modal -->
+<div id="breathingModal" class="modal">
+  <div class="modal-content" style="text-align:center;">
+    <span style="float:right; cursor:pointer; font-size:24px;" onclick="closeBreathing()">&times;</span>
+    <h2 style="color: #00ffff; margin-bottom: 10px;">🧘 Relax & Breathe</h2>
+    <div class="breath-container"><div class="breath-circle"></div></div>
+    <div id="breathInstruction" class="breath-text">Inhale...</div>
+    <p style="font-size:13px; opacity:0.8; margin-top:15px;">Follow the circle. Deep breaths calm the mind.</p>
+  </div>
+</div>
+
+<script>
+/* Modal Functions */
+function showHotlines(){
+    document.getElementById("hotlineModal").style.display = "block";
+}
+function closeHotlines(){
+    document.getElementById("hotlineModal").style.display = "none";
+}
+window.onclick = function(event) {
+    if (event.target == document.getElementById("hotlineModal")) {
+        closeHotlines();
+    }
+    if (event.target == document.getElementById("breathingModal")) {
+        closeBreathing();
+    }
+}
+
+/* Breathing Modal Functions */
+let breathInterval;
+function showBreathing(){
+    document.getElementById("breathingModal").style.display = "block";
+    toggleDropdown();
+    
+    const circle = document.querySelector(".breath-circle");
+    const text = document.getElementById("breathInstruction");
+    
+    text.textContent = "Inhale...";
+    circle.classList.remove("active");
+    void circle.offsetWidth; // trigger reflow to restart animation
+    circle.classList.add("active");
+    
+    if(breathInterval) clearInterval(breathInterval);
+    breathInterval = setInterval(() => {
+        text.textContent = text.textContent === "Inhale..." ? "Exhale..." : "Inhale...";
+    }, 2000);
+}
+function closeBreathing(){
+    document.getElementById("breathingModal").style.display = "none";
+    document.querySelector(".breath-circle").classList.remove("active");
+    clearInterval(breathInterval);
+}
+
+/* Scroll chat to bottom */
+function scrollBottom(){
+let box=document.getElementById("chat-box");
+box.scrollTop=box.scrollHeight;
+}
+scrollBottom();
+
+function handleEnter(e){
+if(e.key==="Enter"){
+e.preventDefault();
+sendMessage();
+}
+}
+
+function sendMessage(){
+let input=document.getElementById("user-input");
+let msg=input.value.trim();
+if(!msg) return;
+
+let box=document.getElementById("chat-box");
+
+// User message
+let userDiv=document.createElement("div");
+userDiv.className="message user";
+userDiv.textContent=msg;
+box.appendChild(userDiv);
+scrollBottom();
+
+// Typing indicator
+let typingDiv=document.createElement("div");
+typingDiv.className="message bot typing";
+typingDiv.textContent="Typing...";
+box.appendChild(typingDiv);
+scrollBottom();
+
+fetch("/chat",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:msg})
+})
+.then(res=>res.json())
+.then(data=>{
+box.removeChild(typingDiv);
+let botDiv=document.createElement("div");
+botDiv.className="message bot";
+botDiv.textContent=data.response;
+box.appendChild(botDiv);
+scrollBottom();
+});
+
+input.value="";
+}
+
+function logMood(mood){
+fetch("/log_mood",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({mood:mood})
+});
+
+    // Disable the mood section immediately for better UX
+    const moodSection = document.querySelector('.mood-section');
+    moodSection.innerHTML = 'Thank you for logging your mood today! 💙';
+    moodSection.style.opacity = '0.7';
+    moodSection.style.paddingTop = '5px';
+}
+
+function rateSession(rating){
+    fetch("/rate_session", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({rating: rating})
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message); // Simple feedback for now
+        // Optionally, disable the stars after rating
+        document.querySelector('.rating-stars').style.pointerEvents = 'none';
+    });
+}
+</script>
+
+</body>
+</html>

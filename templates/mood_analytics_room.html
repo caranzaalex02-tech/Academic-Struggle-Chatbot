@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mood Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>Mood Summary</h2>
+<canvas id="summaryChart"></canvas>
+
+<h2>Weekly Trend</h2>
+<canvas id="trendChart"></canvas>
+
+<br>
+<a href="/chatbot">Back to Chat</a>
+
+<script id="chart-data" type="application/json">
+{
+  "moods": {{ moods | tojson }},
+  "counts": {{ counts | tojson }},
+  "days": {{ days | tojson }},
+  "trend_data": {{ trend_data | tojson }}
+}
+</script>
+
+<script>
+const chartDataElement = document.getElementById('chart-data');
+const chartData = JSON.parse(chartDataElement.textContent);
+
+const summaryCtx = document.getElementById('summaryChart');
+new Chart(summaryCtx, {
+  type: 'bar',
+  data: {
+    labels: chartData.moods,
+    datasets: [{
+      label: 'Mood Count',
+      data: chartData.counts,
+      backgroundColor: ['green', 'gray', 'red']
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Mood Summary'
+      }
+    }
+  }
+});
+
+const trendCtx = document.getElementById('trendChart');
+new Chart(trendCtx, {
+  type: 'line',
+  data: {
+    labels: chartData.days,
+    datasets: [
+      {
+        label: 'Happy',
+        data: chartData.trend_data['Happy'],
+        borderColor: 'green',
+        tension: 0.1
+      },
+      {
+        label: 'Neutral',
+        data: chartData.trend_data['Neutral'],
+        borderColor: 'gray',
+        tension: 0.1
+      },
+      {
+        label: 'Sad',
+        data: chartData.trend_data['Sad'],
+        borderColor: 'red',
+        tension: 0.1
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Weekly Trend'
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

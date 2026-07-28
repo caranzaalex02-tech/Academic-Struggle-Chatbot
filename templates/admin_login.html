@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            --secondary-bg: #f8fafc;
+            --form-bg: #ffffff;
+            --primary-text: #0f172a;
+            --secondary-text: #64748b;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger-color: #ef4444;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=2560&q=80');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            color: var(--primary-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            perspective: 1200px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .login-container {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            min-height: 550px;
+            background-color: var(--form-bg);
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 8px 16px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: rotateIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            transition: transform 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045), opacity 0.6s;
+        }
+        .login-container.is-flipping-out {
+            transform: rotateY(90deg) scale(0.9);
+            opacity: 0;
+        }
+        .branding-side {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #FFF;
+            width: 45%;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .branding-side h1 { font-size: 2.2rem; margin-bottom: 10px; font-weight: 700; }
+        .branding-side p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; }
+        .form-side {
+            width: 55%;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .form-side h2, .form-side .subtitle, .form-side .error, .form-side form, .form-side .switch {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 0.4s forwards;
+        }
+        .form-side h2 { font-size: 1.75rem; margin-bottom: 8px; color: var(--primary-text); }
+        .subtitle { color: var(--secondary-text); margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 500; margin-bottom: 5px; font-size: 0.875rem; }
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            background-color: #fdfdfd;
+            color: var(--primary-text);
+            outline: none;
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            border: none;
+            border-radius: 0.6rem;
+            color: #FFF;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        button:hover { box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4); transform: translateY(-2px); }
+        .error { color: var(--danger-color); background-color: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 0.5rem; margin-bottom: 20px; font-size: 0.9rem; text-align: center; }
+        .switch { margin-top: 20px; font-size: 0.875rem; text-align: center; }
+        .switch a { color: var(--accent-color); text-decoration: none; font-weight: 500; }
+        .switch a:hover { text-decoration: underline; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes rotateIn {
+            from {
+                transform: rotateY(-90deg) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: rotateY(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <div class="branding-side">
+        <h1></h1>
+        <h1>Admin Portal</h1>
+    </div>
+    <div class="form-side">
+        <h2 >Administrator Sign In</h2>
+        <p class="subtitle">Please enter your credentials to proceed.</p>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Admin Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+        <div class="switch" style="margin-top: 15px;">
+            <a href="{{ url_for('admin_forgot_password') }}">Forgot Password?</a>
+        </div>
+        <p class="switch" style="margin-top: 10px;">Not an admin? <a id="go-to-login" href="{{ url_for('login') }}">User Login</a></p>
+    </div>
+</div>
+
+<script>
+    const loginContainer = document.querySelector('.login-container');
+    const loginLink = document.getElementById('go-to-login');
+
+    if (loginLink) {
+        loginLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            loginContainer.classList.add('is-flipping-out');
+            setTimeout(() => {
+                window.location.href = this.href;
+            }, 600);
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mental Health Mini Games</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  padding:15px;
+}
+.back-btn{
+  position:absolute;top:20px;left:20px;
+  text-decoration:none;color:white;
+  font-size:16px;
+  background:rgba(0,255,255,0.3);
+  padding:8px 14px;
+  border-radius:15px;
+  transition:0.3s;
+}
+.back-btn:hover{background:#00ffff;color:black;}
+h1{margin-bottom:20px;text-align:center;font-size:28px;}
+.games{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  width:100%;
+  max-width:520px;
+  margin-bottom:25px;
+}
+.game-btn{
+  padding:15px 10px;
+  border:none;
+  border-radius:15px;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+  box-shadow:0 0 15px rgba(118,75,162,0.7);
+  min-height:80px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.game-btn:hover{transform:scale(1.05);box-shadow:0 0 25px rgba(118,75,162,0.9);}
+.game-container{
+  margin-top:10px;
+  width:100%;
+  max-width:520px;
+  min-height:220px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(20px);
+  border-radius:25px;
+  padding:15px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  color:white;
+  box-shadow:0 0 20px rgba(0,255,255,0.3);
+  position:relative;
+}
+.score-board{
+  width:100%;
+  max-width:520px;
+  background:linear-gradient(135deg,rgba(102,126,234,0.3),rgba(118,75,162,0.3));
+  backdrop-filter:blur(20px);
+  border-radius:20px;
+  padding:10px;
+  margin-bottom:10px;
+  box-shadow:0 0 20px rgba(118,75,162,0.5);
+  border:2px solid rgba(255,255,255,0.2);
+}
+.score-board-title{
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:8px;
+  color:#00ffff;
+  text-shadow:0 0 10px rgba(0,255,255,0.5);
+}
+.score-board-content{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+.score-item{
+  background:rgba(0,0,0,0.3);
+  padding:8px;
+  border-radius:12px;
+  text-align:center;
+  border:1px solid rgba(255,255,255,0.1);
+}
+.score-label{
+  font-size:12px;
+  color:#aaa;
+  margin-bottom:4px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.score-value{
+  font-size:24px;
+  font-weight:bold;
+  color:#00ff00;
+  text-shadow:0 0 10px rgba(0,255,0,0.5);
+}
+.time-value{
+  font-size:24px;
+  font-weight:bold;
+  color:#ffaa00;
+  text-shadow:0 0 10px rgba(255,170,0,0.5);
+}
+.level-info{
+  grid-column:1 / -1;
+  background:rgba(0,0,0,0.3);
+  padding:8px;
+  border-radius:12px;
+  text-align:center;
+  border:1px solid rgba(255,255,255,0.1);
+  font-size:14px;
+  color:#fff;
+}
+button{
+  padding:10px 20px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:10px;
+  font-size:14px;
+  font-weight:bold;
+}
+input{
+  padding:10px;
+  border-radius:12px;
+  border:none;
+  margin-top:10px;
+  width:200px;
+  text-align:center;
+  font-size:14px;
+}
+</style>
+</head>
+<body>
+
+<a class="back-btn" href="/chatbot">⬅ Back to Chatbot</a>
+<h1>Mental Health Mini Games</h1>
+
+<button id="back-to-menu-btn" class="game-btn" style="display:none; margin:0 auto 20px auto; background:linear-gradient(135deg,#ff9966,#ff5e62);" onclick="showMenu()">⬅ Back to Menu</button>
+
+<div class="games" id="games-menu">
+  <button class="game-btn" onclick="startTrivia()">❓ Trivia Game</button>
+  <button class="game-btn" onclick="startMemoryMatch()">🧠 Memory Match</button>
+  <button class="game-btn" onclick="startWordScramble()">🔤 Word Scramble</button>
+  <button class="game-btn" onclick="startMathChallenge()">➕ Math Challenge</button>
+  <button class="game-btn" onclick="startReactionTime()">⚡ Reaction Time</button>
+  <button class="game-btn" onclick="startColorMatch()">🎨 Color Match</button>
+</div>
+
+<div class="game-container" id="game-container">
+  <p>Select a game to start!</p>
+</div>
+
+<script>
+const container = document.getElementById('game-container');
+let activeInterval = null;
+let activeTimeout = null;
+
+function clearAllScoreBoards(){
+  document.querySelectorAll('.score-board').forEach(el => el.remove());
+}
+
+function showMenu(){
+  if(activeInterval) clearInterval(activeInterval);
+  if(activeTimeout) clearTimeout(activeTimeout);
+  document.getElementById('games-menu').style.display = 'grid';
+  document.getElementById('back-to-menu-btn').style.display = 'none';
+  container.innerHTML = '<p>Select a game to start!</p>';
+  clearAllScoreBoards();
+}
+
+function prepareGame(){
+  document.getElementById('games-menu').style.display = 'none';
+  document.getElementById('back-to-menu-btn').style.display = 'block';
+  if(activeInterval) clearInterval(activeInterval);
+  if(activeTimeout) clearTimeout(activeTimeout);
+  container.innerHTML = '';
+  clearAllScoreBoards();
+}
+
+function startTrivia(){
+  prepareGame();
+  
+  let triviaScore = 0;
+  let questionCount = 0;
+  let level = 1;
+  const maxLevel = 20;
+  
+  // Create the new score board
+  const scoreBoard = document.createElement('div');
+  scoreBoard.id = 'trivia-score-board';
+  scoreBoard.className = 'score-board';
+  scoreBoard.innerHTML = `
+    <div class="score-board-title">🎮 Trivia Game</div>
+    <div class="score-board-content">
+      <div class="score-item">
+        <div class="score-label">Score</div>
+        <div class="score-value" id="score-display">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Time Left</div>
+        <div class="time-value" id="time-display">10</div>
+      </div>
+      <div class="level-info">
+        <span>📊 Level: <strong id="level-display">1</strong> / ${maxLevel}</span>
+      </div>
+    </div>
+  `;
+  
+  // Insert score board before game container
+  container.parentNode.insertBefore(scoreBoard, container);
+  
+  const allQuestions = [
+      {q:"What helps reduce stress?", a:"mindfulness", options:["exercise","mindfulness","sleep","work"]},
+      {q:"What is essential for mental wellness?", a:"gratitude", options:["money","gratitude","fame","power"]},
+      {q:"Which activity improves focus?", a:"meditation", options:["eating","meditation","running","shopping"]},
+      {q:"What is a key to happiness?", a:"positivity", options:["negativity","positivity","isolation","jealousy"]},
+      {q:"What promotes inner peace?", a:"serenity", options:["chaos","serenity","stress","noise"]},
+      {q:"Which habit supports mental clarity?", a:"sleep", options:["excessive screen time","sleep","junk food","procrastination"]},
+      {q:"What is a common symptom of anxiety?", a:"restlessness", options:["restlessness","overconfidence","euphoria","forgetfulness"]},
+      {q:"Talking to friends can boost?", a:"mood", options:["mood","weight","vision","strength"]},
+      {q:"A practice of letting go of negativity is called?", a:"forgiveness", options:["forgiveness","neglect","criticism","avoidance"]},
+      {q:"What helps build emotional resilience?", a:"self-care", options:["isolation","self-care","competition","comparison"]},
+      {q:"Name a technique for calming the mind?", a:"deep breathing", options:["deep breathing","speed reading","multitasking","daydreaming"]},
+      {q:"What promotes a positive outlook?", a:"gratitude journal", options:["gratitude journal","complaint log","gossip","rumination"]},
+      {q:"Which nutrient influences brain health?", a:"omega-3", options:["omega-3","fast food","sugar","caffeine"]},
+      {q:"Spending time in nature supports?", a:"well-being", options:["well-being","stress","forgetfulness","fear"]},
+      {q:"What daily habit can improve self-esteem?", a:"affirmations", options:["affirmations","self-criticism","comparison","avoidance"]},
+      {q:"Regular exercise benefits mental?", a:"health", options:["health","height","vision","luck"]},
+      {q:"What helps process difficult emotions?", a:"journaling", options:["journaling","ignoring","overworking","shopping"]},
+      {q:"A balanced diet can stabilize your?", a:"mood", options:["mood","hair","height","IQ"]},
+      {q:"What practice involves observing thoughts non-judgmentally?", a:"mindfulness", options:["mindfulness","worrying","daydreaming","planning"]},
+      {q:"Connecting with others prevents?", a:"loneliness", options:["loneliness","sleep","hunger","dizziness"]}
+    ];
+  // build a level sequence ensuring each question appears once before any repeat
+  const questionSequence = [];
+  while(questionSequence.length < maxLevel){
+    const pool = [...allQuestions];
+    // shuffle pool
+    for(let i=pool.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    for(const q of pool){
+      if(questionSequence.length < maxLevel) questionSequence.push(q);
+      else break;
+    }
+  }
+
+  function updateScoreBoard(){
+    document.getElementById('score-display').textContent = triviaScore;
+    document.getElementById('level-display').textContent = level;
+    document.getElementById('time-display').textContent = '10';
+  }
+
+  function playTrivia(){
+    if(level > maxLevel){
+      scoreBoard.remove();
+      container.innerHTML = `<h2 style="color:#00ff00;">🎉 You've completed all ${maxLevel} levels!</h2><p style="margin-top:15px;">Final Score: ${triviaScore}/${maxLevel}</p><button class="game-btn" onclick="startTrivia()">Restart</button>`;
+      return;
+    }
+
+    questionCount++;
+    const current = questionSequence[level-1];
+
+    const question = document.createElement('p');
+    question.textContent = `Q${questionCount}. ${current.q}`;
+    question.style.fontSize = '16px';
+    question.style.marginBottom = '15px';
+    question.style.fontWeight = 'bold';
+
+    // create buttons for each choice
+    const choiceContainer = document.createElement('div');
+    choiceContainer.style.display='grid';
+    choiceContainer.style.gridTemplateColumns='1fr 1fr';
+    choiceContainer.style.gap='8px';
+    choiceContainer.style.margin='0 auto';
+    choiceContainer.style.maxWidth='400px';
+
+    let timeLeft = 10;
+    document.getElementById('time-display').textContent = timeLeft;
+    
+    activeInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('time-display').textContent = timeLeft;
+      
+      // Change color when time is running out
+      const timeDisplay = document.getElementById('time-display');
+      if(timeLeft <= 3){
+        timeDisplay.style.color = '#ff5555';
+        timeDisplay.style.textShadow = '0 0 10px rgba(255,85,85,0.8)';
+      }
+      
+      if(timeLeft <= 0){
+        clearInterval(activeInterval);
+        level++;
+        updateScoreBoard();
+        const feedback = document.createElement('p');
+        feedback.textContent="⏰ Time's up! Moving to next level.";
+        feedback.style.color="#ff5555";
+        feedback.style.fontSize="18px";
+        feedback.style.fontWeight="bold";
+        container.appendChild(feedback);
+        activeTimeout = setTimeout(() => {
+          container.innerHTML = '';
+          playTrivia();
+        },1500);
+      }
+    }, 1000);
+
+    current.options.sort(() => Math.random()-0.5).forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.className='game-btn';
+      btn.style.padding='8px';
+      btn.style.fontSize='12px';
+      btn.style.minHeight='35px';
+      btn.textContent=opt;
+      btn.onclick=()=>{
+        clearInterval(activeInterval);
+        if(opt.toLowerCase()===current.a){
+          triviaScore++;
+          level++;
+          updateScoreBoard();
+          const feedback = document.createElement('p');
+          feedback.textContent="✅ Correct!";
+          feedback.style.color="#00ff00";
+          feedback.style.fontSize="18px";
+          feedback.style.fontWeight="bold";
+          container.appendChild(feedback);
+          activeTimeout = setTimeout(() => {
+            container.innerHTML = '';
+            playTrivia();
+          },1500);
+        } else {
+          level++;
+          updateScoreBoard();
+          const feedback = document.createElement('p');
+          feedback.textContent=`❌ Wrong! Answer: ${current.a}`;
+          feedback.style.color="#ff5555";
+          feedback.style.fontSize="18px";
+          feedback.style.fontWeight="bold";
+          container.appendChild(feedback);
+          activeTimeout = setTimeout(() => {
+            container.innerHTML = '';
+            playTrivia();
+          },1500);
+        }
+      };
+      choiceContainer.appendChild(btn);
+    });
+
+    const feedback = document.createElement('p');
+    feedback.style.marginTop="10px";
+
+    // Clear previous content
+    container.innerHTML = '';
+    container.appendChild(question);
+    container.appendChild(choiceContainer);
+    container.appendChild(feedback);
+  }
+  
+  playTrivia();
+}
+
+// ========== MEMORY MATCH GAME ==========
+function startMemoryMatch(){
+  prepareGame();
+  let memoryScore = 0;
+  let level = 1;
+  const maxLevel = 15;
+  
+  const scoreBoard = document.createElement('div');
+  scoreBoard.id = 'memory-score-board';
+  scoreBoard.className = 'score-board';
+  scoreBoard.innerHTML = `
+    <div class="score-board-title">🧠 Memory Match</div>
+    <div class="score-board-content">
+      <div class="score-item">
+        <div class="score-label">Score</div>
+        <div class="score-value" id="memory-score-display">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Time Left</div>
+        <div class="time-value" id="memory-time-display">15</div>
+      </div>
+      <div class="level-info">
+        <span>📊 Level: <strong id="memory-level-display">1</strong> / ${maxLevel}</span>
+      </div>
+    </div>
+  `;
+  
+  container.parentNode.insertBefore(scoreBoard, container);
+  
+  const words = ['CALM','PEACE','JOY','HOPE','LOVE','CARE','TRUST','SMILE','RELAX','HAPPY','BRAVE','STRONG','KIND','SAFE','HEAL'];
+  
+  function playMemory(){
+    if(level > maxLevel){
+      scoreBoard.remove();
+      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Perfect Memory!</h2><p style="margin-top:15px;">Final Score: ${memoryScore}/${maxLevel}</p><button class="game-btn" onclick="startMemoryMatch()">Restart</button>`;
+      return;
+    }
+    
+    const pairsCount = Math.min(3 + Math.floor(level/3), 8);
+    const selectedWords = words.slice(0, pairsCount);
+    const cards = [...selectedWords, ...selectedWords].sort(() => Math.random()-0.5);
+    
+    let flipped = [];
+    let matched = [];
+    let canClick = true;
+    
+    const timeLimit = 15 + (pairsCount * 2);
+    let timeLeft = timeLimit;
+    document.getElementById('memory-time-display').textContent = timeLeft;
+    document.getElementById('memory-score-display').textContent = memoryScore;
+    document.getElementById('memory-level-display').textContent = level;
+    
+    activeInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('memory-time-display').textContent = timeLeft;
+      
+      const timeDisplay = document.getElementById('memory-time-display');
+      if(timeLeft <= 5){
+        timeDisplay.style.color = '#ff5555';
+        timeDisplay.style.textShadow = '0 0 10px rgba(255,85,85,0.8)';
+      }
+      
+      if(timeLeft <= 0){
+        clearInterval(activeInterval);
+        level++;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up!</p>`;
+        activeTimeout = setTimeout(() => {
+          container.innerHTML = '';
+          playMemory();
+        }, 1500);
+      }
+    }, 1000);
+    
+    container.innerHTML = '<p style="font-size:16px;margin-bottom:10px;font-weight:bold;">Match the pairs!</p>';
+    
+    const grid = document.createElement('div');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = `repeat(${Math.min(4, pairsCount)}, 1fr)`;
+    grid.style.gap = '8px';
+    grid.style.maxWidth = '400px';
+    grid.style.margin = '0 auto';
+    
+    cards.forEach((word, idx) => {
+      const card = document.createElement('button');
+      card.className = 'game-btn';
+      card.style.padding = '10px 5px';
+      card.style.fontSize = '12px';
+      card.style.minHeight = '50px';
+      card.textContent = '?';
+      card.dataset.word = word;
+      card.dataset.index = idx;
+      
+      card.onclick = () => {
+        if(!canClick || flipped.includes(idx) || matched.includes(word)) return;
+        
+        card.textContent = word;
+        card.style.background = 'linear-gradient(135deg,#f093fb,#f5576c)';
+        flipped.push(idx);
+        
+        if(flipped.length === 2){
+          canClick = false;
+          const [idx1, idx2] = flipped;
+          const card1 = grid.children[idx1];
+          const card2 = grid.children[idx2];
+          
+          if(card1.dataset.word === card2.dataset.word){
+            matched.push(card1.dataset.word);
+            setTimeout(() => {
+              card1.style.background = 'linear-gradient(135deg,#00ff00,#00aa00)';
+              card2.style.background = 'linear-gradient(135deg,#00ff00,#00aa00)';
+              flipped = [];
+              canClick = true;
+              
+              if(matched.length === pairsCount){
+                clearInterval(activeInterval);
+                memoryScore++;
+                level++;
+                container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Perfect Match!</p>`;
+                activeTimeout = setTimeout(() => {
+                  container.innerHTML = '';
+                  playMemory();
+                }, 1500);
+              }
+            }, 500);
+          } else {
+            setTimeout(() => {
+              card1.textContent = '?';
+              card2.textContent = '?';
+              card1.style.background = 'linear-gradient(135deg,#667eea,#764ba2)';
+              card2.style.background = 'linear-gradient(135deg,#667eea,#764ba2)';
+              flipped = [];
+              canClick = true;
+            }, 800);
+          }
+        }
+      };
+      
+      grid.appendChild(card);
+    });
+    
+    container.appendChild(grid);
+  }
+  
+  playMemory();
+}
+
+// ========== WORD SCRAMBLE GAME ==========
+function startWordScramble(){
+  prepareGame();
+  let scrambleScore = 0;
+  let level = 1;
+  const maxLevel = 15;
+  
+  const scoreBoard = document.createElement('div');
+  scoreBoard.id = 'scramble-score-board';
+  scoreBoard.className = 'score-board';
+  scoreBoard.innerHTML = `
+    <div class="score-board-title">🔤 Word Scramble</div>
+    <div class="score-board-content">
+      <div class="score-item">
+        <div class="score-label">Score</div>
+        <div class="score-value" id="scramble-score-display">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Time Left</div>
+        <div class="time-value" id="scramble-time-display">20</div>
+      </div>
+      <div class="level-info">
+        <span>📊 Level: <strong id="scramble-level-display">1</strong> / ${maxLevel}</span>
+      </div>
+    </div>
+  `;
+  
+  container.parentNode.insertBefore(scoreBoard, container);
+  
+  const words = [
+    {word:'MINDFULNESS',hint:'Being present in the moment'},
+    {word:'GRATITUDE',hint:'Feeling thankful'},
+    {word:'MEDITATION',hint:'Practice for inner peace'},
+    {word:'RESILIENCE',hint:'Bouncing back from challenges'},
+    {word:'COMPASSION',hint:'Kindness towards others'},
+    {word:'SERENITY',hint:'State of calm'},
+    {word:'WELLNESS',hint:'Overall health'},
+    {word:'BALANCE',hint:'Harmony in life'},
+    {word:'COURAGE',hint:'Bravery to face fears'},
+    {word:'HEALING',hint:'Recovery process'},
+    {word:'EMPATHY',hint:'Understanding others feelings'},
+    {word:'POSITIVE',hint:'Optimistic outlook'},
+    {word:'STRENGTH',hint:'Inner power'},
+    {word:'PEACEFUL',hint:'Free from stress'},
+    {word:'HAPPINESS',hint:'State of joy'}
+  ];
+  
+  function scrambleWord(word){
+    const arr = word.split('');
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr.join('');
+  }
+  
+  function playScramble(){
+    if(level > maxLevel){
+      scoreBoard.remove();
+      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Word Master!</h2><p style="margin-top:15px;">Final Score: ${scrambleScore}/${maxLevel}</p><button class="game-btn" onclick="startWordScramble()">Restart</button>`;
+      return;
+    }
+    
+    const current = words[level - 1];
+    const scrambled = scrambleWord(current.word);
+    
+    let timeLeft = 20;
+    document.getElementById('scramble-time-display').textContent = timeLeft;
+    document.getElementById('scramble-score-display').textContent = scrambleScore;
+    document.getElementById('scramble-level-display').textContent = level;
+    
+    activeInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('scramble-time-display').textContent = timeLeft;
+      
+      const timeDisplay = document.getElementById('scramble-time-display');
+      if(timeLeft <= 5){
+        timeDisplay.style.color = '#ff5555';
+        timeDisplay.style.textShadow = '0 0 10px rgba(255,85,85,0.8)';
+      }
+      
+      if(timeLeft <= 0){
+        clearInterval(activeInterval);
+        level++;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up! The correct word was: ${current.word}</p>`;
+        activeTimeout = setTimeout(() => {
+          container.innerHTML = '';
+          playScramble();
+        }, 3000);
+      }
+    }, 1000);
+    
+    // Re-architected to be more robust
+    container.innerHTML = `
+      <p style="font-size:16px;margin-bottom:8px;font-weight:bold;">Unscramble this word:</p>
+      <p style="font-size:24px;color:#00ffff;margin-bottom:8px;font-weight:bold;letter-spacing:2px;">${scrambled}</p>
+      <p style="font-size:12px;color:#aaa;margin-bottom:10px;">Hint: ${current.hint}</p>
+      <input type="text" id="scramble-input" placeholder="Type your answer" style="text-transform: uppercase; width: 250px;">
+      <button id="scramble-submit" class="game-btn">Submit</button>
+    `;
+    
+    const input = document.getElementById('scramble-input');
+    const submitBtn = document.getElementById('scramble-submit');
+    
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') checkAnswer();
+    });
+    
+    submitBtn.addEventListener('click', checkAnswer);
+
+    function checkAnswer(){
+      const answer = input.value.trim().toUpperCase();
+      clearInterval(activeInterval);
+      // Disable further interaction
+      input.disabled = true;
+      submitBtn.disabled = true;
+      
+      if(answer === current.word){
+        scrambleScore++;
+        level++;
+        container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Correct!</p>`;
+        activeTimeout = setTimeout(() => {
+          playScramble();
+        }, 2000);
+      } else {
+        level++;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">❌ Wrong! The correct word was: ${current.word}</p>`;
+        activeTimeout = setTimeout(() => {
+          playScramble();
+        }, 3000);
+      }
+    }
+    
+    input.focus();
+  }
+  
+  playScramble();
+}
+
+// ========== MATH CHALLENGE GAME ==========
+function startMathChallenge(){
+  prepareGame();
+  let mathScore = 0;
+  let level = 1;
+  const maxLevel = 20;
+  
+  const scoreBoard = document.createElement('div');
+  scoreBoard.id = 'math-score-board';
+  scoreBoard.className = 'score-board';
+  scoreBoard.innerHTML = `
+    <div class="score-board-title">➕ Math Challenge</div>
+    <div class="score-board-content">
+      <div class="score-item">
+        <div class="score-label">Score</div>
+        <div class="score-value" id="math-score-display">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Time Left</div>
+        <div class="time-value" id="math-time-display">10</div>
+      </div>
+      <div class="level-info">
+        <span>📊 Level: <strong id="math-level-display">1</strong> / ${maxLevel}</span>
+      </div>
+    </div>
+  `;
+  
+  container.parentNode.insertBefore(scoreBoard, container);
+  
+  function generateProblem(){
+    const difficulty = Math.min(Math.floor(level / 4) + 1, 5);
+    const operations = ['+', '-', '×'];
+    const op = operations[Math.floor(Math.random() * operations.length)];
+    
+    let num1, num2, answer;
+    
+    if(op === '+'){
+      num1 = Math.floor(Math.random() * (10 * difficulty)) + 1;
+      num2 = Math.floor(Math.random() * (10 * difficulty)) + 1;
+      answer = num1 + num2;
+    } else if(op === '-'){
+      num1 = Math.floor(Math.random() * (10 * difficulty)) + 10;
+      num2 = Math.floor(Math.random() * num1) + 1;
+      answer = num1 - num2;
+    } else {
+      num1 = Math.floor(Math.random() * (5 * difficulty)) + 2;
+      num2 = Math.floor(Math.random() * 10) + 2;
+      answer = num1 * num2;
+    }
+    
+    return {problem: `${num1} ${op} ${num2}`, answer};
+  }
+  
+  function playMath(){
+    if(level > maxLevel){
+      scoreBoard.remove();
+      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Math Genius!</h2><p style="margin-top:15px;">Final Score: ${mathScore}/${maxLevel}</p><button class="game-btn" onclick="startMathChallenge()">Restart</button>`;
+      return;
+    }
+    
+    const {problem, answer} = generateProblem();
+    
+    let timeLeft = 10;
+    document.getElementById('math-time-display').textContent = timeLeft;
+    document.getElementById('math-score-display').textContent = mathScore;
+    document.getElementById('math-level-display').textContent = level;
+    
+    activeInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('math-time-display').textContent = timeLeft;
+      
+      const timeDisplay = document.getElementById('math-time-display');
+      if(timeLeft <= 3){
+        timeDisplay.style.color = '#ff5555';
+        timeDisplay.style.textShadow = '0 0 10px rgba(255,85,85,0.8)';
+      }
+      
+      if(timeLeft <= 0){
+        clearInterval(activeInterval);
+        level++;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up! Answer: ${answer}</p>`;
+        activeTimeout = setTimeout(() => {
+          container.innerHTML = '';
+          playMath();
+        }, 1500);
+      }
+    }, 1000);
+    
+    container.innerHTML = `
+      <p style="font-size:16px;margin-bottom:10px;font-weight:bold;">Solve this problem:</p>
+      <p style="font-size:32px;color:#00ffff;margin-bottom:15px;font-weight:bold;">${problem} = ?</p>
+    `;
+    
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.placeholder = 'Your answer';
+    input.style.width = '200px';
+    
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'game-btn';
+    submitBtn.textContent = 'Submit';
+    submitBtn.onclick = () => checkAnswer();
+    
+    input.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') checkAnswer();
+    });
+    
+    function checkAnswer(){
+      const userAnswer = parseInt(input.value);
+      clearInterval(activeInterval);
+      
+      if(userAnswer === answer){
+        mathScore++;
+        level++;
+        container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Correct!</p>`;
+        activeTimeout = setTimeout(() => {
+          container.innerHTML = '';
+          playMath();
+        }, 1500);
+      } else {
+        level++;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">❌ Wrong! Answer: ${answer}</p>`;
+        activeTimeout = setTimeout(() => {
+          container.innerHTML = '';
+          playMath();
+        }, 1500);
+      }
+    }
+    
+    container.appendChild(input);
+    container.appendChild(submitBtn);
+    input.focus();
+  }
+  
+  playMath();
+}
+
+// ========== REACTION TIME GAME ==========
+function startReactionTime(){
+  prepareGame();
+  let reactionScore = 0;
+  let level = 1;
+  const maxLevel = 15;
+  
+  const scoreBoard = document.createElement('div');
+  scoreBoard.id = 'reaction-score-board';
+  scoreBoard.className = 'score-board';
+  scoreBoard.innerHTML = `
+    <div class="score-board-title">⚡ Reaction Time</div>
+    <div class="score-board-content">
+      <div class="score-item">
+        <div class="score-label">Score</div>
+        <div class="score-value" id="reaction-score-display">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Time Left</div>
+        <div class="time-value" id="reaction-time-display">3</div>
+      </div>
+      <div class="level-info">
+        <span>📊 Level: <strong id="reaction-level-display">1</strong> / ${maxLevel}</span>
+      </div>
+    </div>
+  `;
+  
+  container.parentNode.insertBefore(scoreBoard, container);
+  
+  function playReaction(){
+    if(level > maxLevel){
+      scoreBoard.remove();
+      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Lightning Fast!</h2><p style="margin-top:15px;">Final Score: ${reactionScore}/${maxLevel}</p><button class="game-btn" onclick="startReactionTime()">Restart</button>`;
+      return;
+    }
+    
+    document.getElementById('reaction-score-display').textContent = reactionScore;
+    document.getElementById('reaction-level-display').textContent = level;
+    
+    container.innerHTML = `<p style="font-size:16px;font-weight:bold;">Wait for the green button...</p>`;
+    
+    const delay = Math.random() * 3000 + 1000;
+    let clicked = false;
+    
+    activeTimeout = setTimeout(() => {
+      if(!clicked){
+        const btn = document.createElement('button');
+        btn.className = 'game-btn';
+        btn.textContent = 'CLICK NOW!';
+        btn.style.background = 'linear-gradient(135deg,#00ff00,#00aa00)';
+        btn.style.fontSize = '20px';
+        btn.style.padding = '20px';
+        btn.style.minHeight = '80px';
+
+        // Randomize button position
+        btn.style.position = 'absolute';
+        const btnWidth = 150; // Estimated width
+        const btnHeight = 80;  // Estimated height
+
+        // clientWidth/Height includes padding, which is what we want
+        const randomTop = Math.floor(Math.random() * (container.clientHeight - btnHeight));
+        const randomLeft = Math.floor(Math.random() * (container.clientWidth - btnWidth));
+
+        btn.style.top = `${randomTop}px`;
+        btn.style.left = `${randomLeft}px`;
+        
+        let timeLeft = 3;
+        document.getElementById('reaction-time-display').textContent = timeLeft;
+        
+        activeInterval = setInterval(() => {
+          timeLeft--;
+          document.getElementById('reaction-time-display').textContent = timeLeft;
+          
+          const timeDisplay = document.getElementById('reaction-time-display');
+          if(timeLeft <= 1){
+            timeDisplay.style.color = '#ff5555';
+            timeDisplay.style.textShadow = '0 0 10px rgba(255,85,85,0.8)';
+          }
+          
+          if(timeLeft <= 0){
+            clearInterval(activeInterval);
+            if(!clicked){
+              level++;
+              container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Too slow!</p>`;
+              activeTimeout = setTimeout(() => {
+                container.innerHTML = '';
+                playReaction();
+              }, 1500);
+            }
+          }
+        }, 1000);
+        
+        btn.onclick = () => {
+          if(!clicked){
+            clicked = true;
+            clearInterval(activeInterval);
+            reactionScore++;
+            level++;
+            container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">⚡ Great reflexes!</p>`;
+            activeTimeout = setTimeout(() => {
+              container.innerHTML = '';
+              playReaction();
+            }, 1500);
+          }
+        };
+        
+        container.innerHTML = '';
+        container.appendChild(btn);
+      }
+    }, delay);
+  }
+  
+  playReaction();
+}
+
+// ========== COLOR MATCH GAME ==========
+function startColorMatch(){
+  prepareGame();
+  let colorScore = 0;
+  let level = 1;
+  const maxLevel = 20;
+  
+  const scoreBoard = document.createElement('div');
+  scoreBoard.id = 'color-score-board';
+  scoreBoard.className = 'score-board';
+  scoreBoard.innerHTML = `
+    <div class="score-board-title">🎨 Color Match</div>
+    <div class="score-board-content">
+      <div class="score-item">
+        <div class="score-label">Score</div>
+        <div class="score-value" id="color-score-display">0</div>
+      </div>
+      <div class="score-item">
+        <div class="score-label">Time Left</div>
+        <div class="time-value" id="color-time-display">8</div>
+      </div>
+      <div class="level-info">
+        <span>📊 Level: <strong id="color-level-display">1</strong> / ${maxLevel}</span>
+      </div>
+    </div>
+  `;
+  
+  container.parentNode.insertBefore(scoreBoard, container);
+  
+  const colors = [
+    {name:'RED', color:'#ff0000'},
+    {name:'BLUE', color:'#0000ff'},
+    {name:'GREEN', color:'#00ff00'},
+    {name:'YELLOW', color:'#ffff00'},
+    {name:'PURPLE', color:'#ff00ff'},
+    {name:'ORANGE', color:'#ff8800'}
+  ];
+  
+  function playColor(){
+    if(level > maxLevel){
+      scoreBoard.remove();
+      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Color Expert!</h2><p style="margin-top:15px;">Final Score: ${colorScore}/${maxLevel}</p><button class="game-btn" onclick="startColorMatch()">Restart</button>`;
+      return;
+    }
+    
+    let wordColor, textColor;
+    // Ensure the word and color are different to make it a challenge
+    do {
+        wordColor = colors[Math.floor(Math.random() * colors.length)];
+        textColor = colors[Math.floor(Math.random() * colors.length)];
+    } while (wordColor.name === textColor.name);
+    
+    let timeLeft = 8;
+    document.getElementById('color-time-display').textContent = timeLeft;
+    document.getElementById('color-score-display').textContent = colorScore;
+    document.getElementById('color-level-display').textContent = level;
+    
+    activeInterval = setInterval(() => {
+      timeLeft--;
+      document.getElementById('color-time-display').textContent = timeLeft;
+      
+      const timeDisplay = document.getElementById('color-time-display');
+      if(timeLeft <= 3){
+        timeDisplay.style.color = '#ff5555';
+        timeDisplay.style.textShadow = '0 0 10px rgba(255,85,85,0.8)';
+      }
+      
+      if(timeLeft <= 0){
+        clearInterval(activeInterval);
+        level++;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up!</p>`;
+        activeTimeout = setTimeout(() => {
+          container.innerHTML = '';
+          playColor();
+        }, 1500);
+      }
+    }, 1000);
+    
+    const correctAns = textColor.name; // The correct answer is always the color of the text
+    
+    container.innerHTML = `
+      <p style="font-size:16px;margin-bottom:10px;font-weight:bold;">What COLOR is the text?</p>
+      <p style="font-size:36px;color:${textColor.color};margin-bottom:15px;font-weight:bold;text-shadow:0 0 10px ${textColor.color};">${wordColor.name}</p>
+    `;
+    
+    const btnContainer = document.createElement('div');
+    btnContainer.style.display = 'grid';
+    btnContainer.style.gridTemplateColumns = '1fr 1fr';
+    btnContainer.style.gap = '10px';
+    btnContainer.style.maxWidth = '350px';
+    
+    colors.forEach(c => {
+      const btn = document.createElement('button');
+      btn.className = 'game-btn';
+      btn.textContent = c.name;
+      btn.style.padding = '10px';
+      btn.style.fontSize = '12px';
+      btn.style.minHeight = '40px';
+      
+      btn.onclick = () => {
+        clearInterval(activeInterval);
+        
+        if(c.name === correctAns){
+          colorScore++;
+          level++;
+          container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Correct!</p>`;
+          activeTimeout = setTimeout(() => {
+            container.innerHTML = '';
+            playColor();
+          }, 1500);
+        } else {
+          level++;
+          container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">❌ Wrong! Answer: ${correctAns}</p>`;
+          activeTimeout = setTimeout(() => {
+            container.innerHTML = '';
+            playColor();
+          }, 1500);
+        }
+      };
+      
+      btnContainer.appendChild(btn);
+    });
+    
+    container.appendChild(btnContainer);
+  }
+  
+  playColor();
+}
+</script>
+</body>
+</html>

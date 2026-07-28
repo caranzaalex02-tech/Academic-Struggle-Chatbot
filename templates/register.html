@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS for Modal Styling -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            perspective: 1200px; /* Add perspective for 3D effect */
+            font-family: 'Poppins', sans-serif;
+            padding: 5vh 20px; /* Add vertical padding */
+        }       
+        .auth-box select option {
+            color: black !important; /* Para makita ang text sa dropdown */
+        }
+        .form-check {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .terms-text {
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        .terms-text .form-check-label,
+        .form-check-label {
+            color: #ccc !important; /* Light gray para makita sa dark background */
+            font-size: 14px;
+            text-align: left;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .form-check-input {
+            margin: 0;
+            flex-shrink: 0;
+        }
+        .form-check-label a {
+            color: #00c6ff !important; /* Match the link color */
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #ccc;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .auth-box {
+            width: 95%;
+            max-width: 700px; /* Pinalapad ang form */
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 25px rgba(0,255,255,0.2);
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-box h2 { margin-bottom: 20px; font-weight: 600; }
+        .auth-box input, .auth-box select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .password-container input {
+            padding-right: 54px;
+        }
+        .auth-box input::placeholder, .auth-box select, .auth-box select option[disabled] {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .auth-box input:focus, .auth-box select:focus {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .auth-box button {
+            width: 100%;
+            padding: 12px;
+            background: #00c6ff;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .auth-box button:hover { background: #0072ff; }
+        .error { color: #ff6b6b; margin-bottom: 10px; font-size: 14px; }
+        .switch { margin-top: 15px; font-size: 14px; }
+        .switch a { color: #00c6ff; text-decoration: none; font-weight: 500; }
+
+        /* Password additions */
+        .password-container {
+            position: relative;
+        }
+        .password-container span {
+            position: absolute;
+            right: 15px;
+            top: 66%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            user-select: none;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .password-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -5px;
+            margin-bottom: 10px;
+        }
+        #passwordHint {
+            font-size: 12px;
+            color: #aaa;
+            text-align: left;
+        }
+        #suggestBtn {
+            font-size: 12px;
+            color: #00c6ff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* New styles for side-by-side fields */
+        .form-row {
+            display: flex;
+            gap: 10px; /* Space between fields */
+            margin: 10px 0;
+        }
+        .form-row > * {
+            margin: 0 !important; /* Override default margin for inputs inside a row */
+        }
+
+        /* New Transition Styles */
+        .auth-box h2, .auth-box .error, .auth-box form, .auth-box .switch {
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out 0.4s forwards; /* Delay this animation */
+        }
+        .auth-box {
+            animation: rotateIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            transition: transform 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045), opacity 0.6s;
+        }
+        .auth-box.is-flipping-out {
+            transform: rotateY(90deg) scale(0.9);
+            opacity: 0;
+        }
+        .auth-box h2 { animation-delay: 0.1s; }
+        .auth-box .error { animation-delay: 0.2s; }
+        .auth-box form { animation-delay: 0.3s; }
+        .auth-box .switch { animation-delay: 0.4s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* New keyframes for the box rotation */
+        @keyframes rotateIn {
+            from {
+                transform: rotateY(-90deg) scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: rotateY(0deg) scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="auth-box">
+    <h2>Create Account</h2>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" autocomplete="off">
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" placeholder="e.g., Juan" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" placeholder="e.g., Dela Cruz" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-container">
+                <input type="password" name="password" id="password" placeholder="Enter your password" required>
+                <span id="togglePassword">
+                    <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5M12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5s5 2.24 5 5s-2.24 5-5 5m0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3s3-1.34 3-3s-1.34-3-3-3"/></svg>
+                    <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" width="1.2em" height="1.2em" viewBox="0 0 24 24" style="display: none;"><path fill="currentColor" d="M12 7c2.76 0 5 2.24 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75c-1.73-4.39-6-7.5-11-7.5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7M2.28 4.49L.86 5.91L2 7.05C1.29 7.95.72 9 1 10.24c.73 3.38 3.97 6.03 7 6.71v-1.7c-1.73-.43-3.23-1.55-4.26-3.01c.3-.5.66-1 1.06-1.47l1.42 1.42c-.15.43-.28.88-.36 1.34h1.5c.08-.44.21-.86.39-1.26l2.11 2.11c-.4.1-.81.15-1.23.15c-2.76 0-5-2.24-5-5c0-.59.11-1.16.31-1.69l-2.02-2.02L2.28 4.49M12 17c.95 0 1.82-.27 2.57-.72l1.43 1.43c-1.1.73-2.39 1.29-3.82 1.55v1.7c3.03-.68 6.27-3.33 7-6.71c.28-1.24-.29-2.29-1-3.19l-1.43-1.43L21.14 4.5L19.73 3.09l-9.26 9.26l-1.49-1.49L7.5 9.38l-1.42-1.42L2.28 4.49Z"/></svg>
+                </span>
+            </div>
+        </div>
+        <div class="password-footer">
+            <p id="passwordHint">Use 8+ characters with letters, numbers & symbols.</p>
+            <button type="button" id="suggestBtn">Suggest</button>
+        </div>
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label for="age">Age</label>
+                <input type="number" id="age" name="age" placeholder="e.g., 21" min="13" max="120" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Non-binary">Non-binary</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+                <label for="course">College/Department</label>
+                <select id="course" name="course" required>
+                    <option value="" disabled selected>Select your college</option>
+                    <option value="College of Arts And Scieance">College of Arts And Scieance</option>
+                    <option value="College of Business Management and accountancy">College of Business Management and accountancy</option>
+                    <option value="College of Computer Studies">College of Computer Studies</option>
+                    <option value="College of Criminal Justice Education">College of Criminal Justice Education</option>
+                    <option value="College of Education">College of Education</option>
+                    <option value="College of Engineering">College of Engineering</option>
+                    <option value="College of Hospitality Management">College of Hospitality Management</option>
+                    <option value="College Of Nursing">College Of Nursing</option>
+                    <option value="College of Technology">College of Technology</option>
+                </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" placeholder="e.g., 09123456789" required>
+            </div>
+        </div>
+        <div class="terms-text">
+            <span class="form-check-label">I accept the 
+                <a href="#" data-toggle="modal" data-target="#termsModal">Terms and Conditions</a>
+            </span>
+        </div>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="accept_terms" name="accept_terms" value="yes" required>
+            <label class="form-check-label" for="accept_terms">I agree</label>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <p class="switch">
+        Already have an account? <a id="go-to-login" href="{{ url_for('login') }}">Sign In</a>
+    </p>
+</div>
+
+<!-- Modal for Terms and Conditions -->
+<div class="modal fade" id="termsModal" tabindex="-1" role="dialog" aria-labelledby="termsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="termsModalLabel" style="color: #333;">Terms and Conditions</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="color: #555;">
+        <p>Welcome to Academic Struggle Support! By using this service, you agree to the following terms:</p>
+        <ul>
+            <li><strong>Not a Substitute for Professional Help:</strong> This chatbot is designed for emotional support and is NOT a substitute for professional medical advice, diagnosis, or treatment from a licensed therapist, psychologist, or psychiatrist.</li>
+            <li><strong>Crisis Situations:</strong> If you are in a crisis or feel you may hurt yourself or others, please contact emergency services (911) or a crisis hotline immediately. This app is not monitored 24/7 for crisis situations.</li>
+            <li><strong>Privacy:</strong> We are committed to protecting your privacy. Your conversations are stored securely. However, in cases of detected crisis or self-harm intent, we may be required to notify a designated school official or authority as per our crisis intervention protocol.</li>
+            <li><strong>User Conduct:</strong> You agree not to use abusive, harassing, or inappropriate language. Violation of this rule may result in the suspension or termination of your account.</li>
+            <li><strong>Age Requirement:</strong> You must be 13 years or older to use this application.</li>
+        </ul>
+        <p>By clicking "accept," you acknowledge that you have read, understood, and agree to these terms.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts for Modal Functionality -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const authBox = document.querySelector('.auth-box');
+    const loginLink = document.getElementById('go-to-login');
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const eyeOpen = document.getElementById('eye-open');
+    const eyeClosed = document.getElementById('eye-closed');
+    const passwordHint = document.getElementById('passwordHint');
+    const suggestBtn = document.getElementById('suggestBtn');
+
+    loginLink.addEventListener('click', function(event) {
+        event.preventDefault();
+        authBox.classList.add('is-flipping-out');
+        setTimeout(() => {
+            window.location.href = this.href;
+        }, 600);
+    });
+
+    togglePassword.addEventListener('click', () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        eyeOpen.style.display = isPassword ? 'none' : 'inline';
+        eyeClosed.style.display = isPassword ? 'inline' : 'none';
+    });
+
+    passwordInput.addEventListener('input', () => {
+        const val = passwordInput.value;
+        if (val.length === 0) {
+            passwordHint.textContent = 'Use 8+ characters with letters, numbers & symbols.';
+            passwordHint.style.color = '#aaa';
+        } else if (val.length < 8) {
+            passwordHint.textContent = '❌ Too short (minimum 8 characters).';
+            passwordHint.style.color = '#ff6b6b';
+        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])/.test(val)) {
+            passwordHint.textContent = '🟡 Good, but add uppercase, numbers, & symbols.';
+            passwordHint.style.color = '#ffdd59';
+        } else {
+            passwordHint.textContent = '✅ Strong password!';
+            passwordHint.style.color = '#2ed573';
+        }
+    });
+
+    suggestBtn.addEventListener('click', () => {
+        const upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lower = "abcdefghijklmnopqrstuvwxyz";
+        const numbers = "0123456789";
+        const symbols = "!@#$%^&*()_+[]{}|;:,.<>?";
+        const all = upper + lower + numbers + symbols;
+        let newPassword = "";
+        newPassword += upper[Math.floor(Math.random() * upper.length)];
+        newPassword += lower[Math.floor(Math.random() * lower.length)];
+        newPassword += numbers[Math.floor(Math.random() * numbers.length)];
+        newPassword += symbols[Math.floor(Math.random() * symbols.length)];
+        for (let i = 4; i < 12; i++) {
+            newPassword += all[Math.floor(Math.random() * all.length)];
+        }
+        passwordInput.value = newPassword.split('').sort(() => 0.5 - Math.random()).join('');
+        passwordInput.dispatchEvent(new Event('input')); // Trigger strength check
+    });
+</script>
+
+</body>
+</html>

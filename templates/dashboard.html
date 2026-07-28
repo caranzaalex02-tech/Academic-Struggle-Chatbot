@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>User Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body { margin:0; padding:0; font-family:Arial; background:url("{{ url_for('static', filename='images/strawhat.jpg') }}") no-repeat center center fixed; background-size:cover; }
+body::before { content:""; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:-1; }
+.dashboard-container { max-width:900px; margin:40px auto; padding:30px; background:rgba(255,255,255,0.15); backdrop-filter:blur(15px); border-radius:20px; box-shadow:0 0 40px rgba(0,0,0,0.6); color:white; }
+h2,h3{text-align:center;}
+.top-links{text-align:center;margin-bottom:20px;}
+.top-links a{text-decoration:none;color:white;padding:8px 15px;margin:0 5px;border-radius:10px;background: rgba(255,255,255,0.2);transition:0.3s;}
+.top-links a:hover{background:#ffcc00;color:black;}
+.chart-container{width:100%;max-width:500px;margin:0 auto 30px auto;}
+.chat-history{margin-top:20px;}
+.chat-item{background:rgba(0,0,0,0.5);padding:15px;margin-bottom:10px;border-radius:12px;}
+.timestamp{font-size:12px;color:#ccc;}
+.user{color:#ffcc00;font-weight:bold;}
+.bot{color:#00e5ff;font-weight:bold;}
+.restore-link{display:inline-block;margin-top:5px;text-decoration:none;color:#00ffcc;}
+.restore-link:hover{text-decoration:underline;}
+#searchArchived{width:100%;padding:8px;margin-bottom:15px;border-radius:5px;border:none;}
+.tip-box{color:#ffeb3b;text-align:center;margin:15px 0;font-weight:bold;}
+</style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <h2>Welcome, {{ username }}!</h2>
+    <div class="top-links">
+        <a href="{{ url_for('mini_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('archived_room') }}">Archived Conversations Room</a>
+        <a href="{{ url_for('restart_chat') }}" onclick="return confirm('Restart chat?');">Restart Chat</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <div class="tip-box">💡 Tip of the Day: {{ tip_of_the_day }}</div>
+
+    <!-- Mood Charts -->
+    <div class="chart-container">
+        <h3>Mood Summary</h3>
+        <canvas id="moodChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h3>Weekly Mood Trend</h3>
+        <canvas id="trendChart"></canvas>
+    </div>
+
+    <!-- Archived -->
+    <input type="text" id="searchArchived" placeholder="Search archived...">
+    <div class="chat-history">
+        <h3>Archived Conversations</h3>
+        {% if archived %}
+            {% for chat in archived %}
+                <div class="chat-item">
+                    <div class="timestamp">{{ chat[2] }}</div>
+                    <div><span class="user">You:</span> {{ chat[0] }}</div>
+                    <div><span class="bot">Bot:</span> {{ chat[1] }}</div>
+                    <a class="restore-link" href="{{ url_for('restore_chat', archive_id=chat[3]) }}">Restore</a>
+                    | <a class="restore-link" href="{{ url_for('delete_chat', archive_id=chat[3]) }}" onclick="return confirm('Delete?');">Delete</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No archived conversations yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Use data-attributes to pass Jinja data into JS to avoid editor warnings -->
+<div id="chartData"
+     data-moods='{{ moods|tojson|safe }}'
+     data-counts='{{ counts|tojson|safe }}'
+     data-days='{{ days|tojson|safe }}'
+     data-trend-happy='{{ trend_data["Happy"]|tojson|safe }}'
+     data-trend-neutral='{{ trend_data["Neutral"]|tojson|safe }}'
+     data-trend-sad='{{ trend_data["Sad"]|tojson|safe }}'>
+</div>
+
+<script>
+// Fetch data from data-attributes to avoid Jinja in JS
+const dataDiv = document.getElementById('chartData');
+const moods = JSON.parse(dataDiv.dataset.moods);
+const counts = JSON.parse(dataDiv.dataset.counts);
+const days = JSON.parse(dataDiv.dataset.days);
+const trendHappy = JSON.parse(dataDiv.dataset.trendHappy);
+const trendNeutral = JSON.parse(dataDiv.dataset.trendNeutral);
+const trendSad = JSON.parse(dataDiv.dataset.trendSad);
+
+// Doughnut Chart
+const ctx = document.getElementById('moodChart');
+if(ctx){
+    new Chart(ctx.getContext('2d'), {
+        type:'doughnut',
+        data:{ labels:moods, datasets:[{label:'Mood Count', data:counts, backgroundColor:['#ffcc00','#00e5ff','#ff6666','#66ff66'], borderWidth:1}]},
+        options:{responsive:true, plugins:{legend:{position:'bottom',labels:{color:'white'}}, title:{display:true,text:'Mood Analytics',color:'white',font:{size:18}}}}
+    });
+}
+
+// Trend Chart
+const trendCtx = document.getElementById('trendChart');
+if(trendCtx){
+    new Chart(trendCtx.getContext('2d'), {
+        type:'line',
+        data:{
+            labels:days,
+            datasets:[
+                {label:'Happy',data:trendHappy,borderColor:'#ffcc00',fill:false},
+                {label:'Neutral',data:trendNeutral,borderColor:'#00e5ff',fill:false},
+                {label:'Sad',data:trendSad,borderColor:'#ff6666',fill:false}
+            ]
+        },
+        options:{
+            responsive:true,
+            plugins:{legend:{position:'bottom',labels:{color:'white'}},title:{display:true,text:'Mood Trend Last 7 Days',color:'white',font:{size:16}}},
+            scales:{x:{ticks:{color:'white'}}, y:{ticks:{color:'white', stepSize:1},beginAtZero:true}}
+        }
+    });
+}
+
+// Archived search
+document.getElementById('searchArchived').addEventListener('keyup', function(){
+    let filter = this.value.toLowerCase();
+    document.querySelectorAll('.chat-item').forEach(item=>{
+        let text = item.innerText.toLowerCase();
+        item.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
+</script>
+
+</body>
+</html>
