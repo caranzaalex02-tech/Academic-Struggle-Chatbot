@@ -213,29 +213,28 @@ def init_db():
     )
     """)
 
+    # --- Commit table creation before running migrations ---
+    conn.commit()
+
     # --- Migrations for older databases (safe to run multiple times) ---
-    def add_column(table, column, definition):
-        try:
-            c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
-            conn.commit()
-        except (sqlite3.OperationalError, psycopg2.errors.DuplicateColumn):
-            # This will catch errors if the column already exists in both SQLite and PostgreSQL
-            conn.rollback() # Rollback the failed transaction
+    # Only run migrations for SQLite (existing databases that may be missing columns).
+    # PostgreSQL databases are created fresh with all columns included above.
+    if not is_postgres:
+        def add_column(table, column, definition):
+            try:
+                c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+                conn.commit()
+            except Exception:
+                # Column already exists or other error - rollback the ALTER TABLE only
+                conn.rollback()
 
-    # This migration is complex. It's safer to guide the user to reset the DB.
-    # For now, we will assume a fresh DB or one that can be reset.
-    # The following changes are for a clean setup.
-    # To handle existing data, a more complex migration script would be needed.
-
-    add_column("users", "first_name", "TEXT")
-    add_column("users", "last_name", "TEXT")
-    # Ensure email is NOT NULL
-    # c.execute("UPDATE users SET email = username WHERE email IS NULL") # Example migration step
-    add_column("users", "profile_pic", "TEXT DEFAULT '/static/images/default_avatar.svg'")
-    add_column("users", "ban_expires_at", "DATETIME DEFAULT NULL")
-    add_column("users", "abuse_offense_count", "INTEGER DEFAULT 0")
-    add_column("messages", "is_abusive", "INTEGER DEFAULT 0")
-    add_column("peer_messages", "is_read", "INTEGER DEFAULT 0")
+        add_column("users", "first_name", "TEXT")
+        add_column("users", "last_name", "TEXT")
+        add_column("users", "profile_pic", "TEXT DEFAULT '/static/images/default_avatar.svg'")
+        add_column("users", "ban_expires_at", "DATETIME DEFAULT NULL")
+        add_column("users", "abuse_offense_count", "INTEGER DEFAULT 0")
+        add_column("messages", "is_abusive", "INTEGER DEFAULT 0")
+        add_column("peer_messages", "is_read", "INTEGER DEFAULT 0")
 
     # --- Seed Data ---
     # Seed FAQs if table is empty
