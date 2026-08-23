@@ -22,10 +22,11 @@
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
+
         font-family: 'Poppins', sans-serif; 
         background-color: var(--main-bg); 
         color: var(--primary-text);
-        background-image: url('https://images.unsplash.com/photo-1460925895917-aaf4b51ba9a7?auto=format&fit=crop&w=2560&q=80');
+        background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2560&q=80');
         background-attachment: fixed;
         background-size: cover;
         background-position: center;
@@ -38,7 +39,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(248, 250, 252, 0.65);
+        background: rgba(248, 250, 252, 0.75); /* Made the light overlay a bit stronger */
         z-index: -1;
         pointer-events: none;
     }
@@ -140,6 +141,7 @@
 <div class="dashboard-layout">
     <aside class="sidebar">
         <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='images/essu_logo.png') }}" alt="ESSU Logo" style="width: 60px; margin-bottom: 10px; border-radius: 50%;">
             <h1>Admin Panel</h1>
         </div>
         <nav>
@@ -211,15 +213,15 @@
 
                 <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
                     {% if user.is_banned %}
-                        <form action="{{ url_for('admin_unban_user', username=user.username) }}" method="POST" style="display: inline;">
+                        <form action="{{ url_for('admin_unban_user', username=user.email) }}" method="POST" style="display: inline;">
                             <button type="submit" class="unban-user-btn">Unban User</button>
                         </form>
                     {% else %}
-                        <form action="{{ url_for('admin_ban_user', username=user.username) }}" method="POST" style="display: inline;" onsubmit="return confirm('Sigurado ka bang gusto mong i-ban nang permanente ang user na ito?');">
+                        <form action="{{ url_for('admin_ban_user', username=user.email) }}" method="POST" style="display: inline;" onsubmit="return confirm('Sigurado ka bang gusto mong i-ban nang permanente ang user na ito?');">
                             <button type="submit" class="ban-user-btn">Ban Permanently</button>
                         </form>
                     {% endif %}
-                    <form action="{{ url_for('admin_delete_user', username=user.username) }}" method="POST" onsubmit="return confirm('WARNING: This will permanently delete the user and all their data. Are you sure?');">
+                    <form action="{{ url_for('admin_delete_user', username=user.email) }}" method="POST" onsubmit="return confirm('WARNING: This will permanently delete the user and all their data. Are you sure?');">
                         <button type="submit" class="delete-user-btn">Delete User</button>
                     </form>
                 </div>

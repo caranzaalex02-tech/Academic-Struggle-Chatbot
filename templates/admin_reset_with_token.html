@@ -28,14 +28,46 @@
         }
         h1 { color: #00ffff; margin-bottom: 20px; }
         p { margin-bottom: 20px; line-height: 1.6; }
-        input[type="password"] {
-            width: calc(100% - 20px);
-            padding: 10px;
+        .password-field {
+            position: relative;
             margin: 10px 0;
+        }
+        .password-field input[type="password"],
+        .password-field input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px 42px 10px 10px;
             border: 1px solid #00ffff;
             border-radius: 5px;
             background: rgba(255, 255, 255, 0.05);
             color: #e0e0e0;
+            box-sizing: border-box;
+        }
+        button.toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            padding: 0;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 50%;
+            color: #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            z-index: 2;
+        }
+        button.toggle-password:hover {
+            background: rgba(0, 255, 255, 0.12);
+            border-color: rgba(0, 255, 255, 0.35);
+            color: #00ffff;
+            transform: translateY(-50%) scale(1.05);
         }
         button {
             background: linear-gradient(135deg, #00f2fe, #4facfe);
@@ -65,10 +97,28 @@
             {% endif %}
         {% endwith %}
         <form method="POST">
-            <input type="password" name="password" placeholder="New Password" required>
-            <input type="password" name="confirm_password" placeholder="Confirm New Password" required>
+            <div class="password-field">
+                <input type="password" id="password" name="password" placeholder="New Password" required>
+                <button type="button" class="toggle-password" onclick="togglePasswordField('password', this)" aria-label="Toggle password visibility">●</button>
+            </div>
+            <div class="password-field">
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm New Password" required>
+                <button type="button" class="toggle-password" onclick="togglePasswordField('confirm_password', this)" aria-label="Toggle password visibility">●</button>
+            </div>
             <button type="submit">Reset Password</button>
         </form>
     </div>
+    <script>
+    function togglePasswordField(fieldId, button) {
+        const input = document.getElementById(fieldId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            button.textContent = '�';
+        } else {
+            input.type = 'password';
+            button.textContent = '○';
+        }
+    }
+    </script>
 </body>
 </html>

@@ -16,6 +16,22 @@ body {
     max-width: 600px;
     margin: 0 auto;
 }
+.search-container {
+    margin-bottom: 20px;
+    position: relative;
+    max-width: 400px; /* Adjusted width */
+    margin-left: auto; /* Center the search bar */
+    margin-right: auto; /* Center the search bar */
+}
+.search-container input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.3);
+    font-size: 1rem;
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
 .back-btn {
     display: inline-block;
     margin-bottom: 20px;
@@ -123,10 +139,16 @@ h1 { text-align: center; margin-bottom: 20px; color: #00ffff; }
         <strong>Disclaimer:</strong> You are chatting with fellow users, not licensed professionals. Please be respectful and kind. For crisis support, use the hotlines in the main menu.
     </div>
 
+    <!-- Search Bar -->
+    <div class="search-container" style="margin-bottom: 20px; position: relative;">
+        <input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="Search user by email or name...">
+    </div>
+
     <div class="current-user-profile">
         <img src="{{ current_user_pic }}" alt="Your Avatar" class="profile-pic large-pic">
         <div class="profile-info">
-            <span class="username">{{ current_username }}</span>
+            <span class="username">{{ current_username.split('@')[0] }}</span>
+            <small style="opacity: 0.7;">{{ current_username }}</small>
             <button class="change-pic-btn" onclick="openUploadModal()">Change Picture</button>
         </div>
     </div>
@@ -134,7 +156,7 @@ h1 { text-align: center; margin-bottom: 20px; color: #00ffff; }
     <div class="user-list">
         {% if users %}
             {% for user in users %}
-            <div class="user-card">
+            <div class="user-card" data-name="{{ user.name|lower }}" data-email="{{ user.username|lower }}">
                 <div class="user-info">
                     <img src="{{ user.profile_pic }}" alt="Avatar" class="profile-pic">
                     <div>
@@ -142,7 +164,7 @@ h1 { text-align: center; margin-bottom: 20px; color: #00ffff; }
                         {% if user.unread > 0 %}<span class="badge">{{ user.unread }} New</span>{% endif %}
                     </div>
                 </div>
-                <a href="/peer_chat/{{ user.username }}" class="chat-btn">Chat</a>
+                <a href="{{ url_for('peer_chat', partner=user.username) }}" class="chat-btn">Chat</a>
             </div>
             {% endfor %}
         {% else %}
@@ -164,6 +186,28 @@ h1 { text-align: center; margin-bottom: 20px; color: #00ffff; }
 </div>
 
 <script>
+// --- Search Functionality ---
+function filterUsers() {
+    const input = document.getElementById('userSearch');
+    const filter = input.value.toLowerCase();
+    const userList = document.querySelector('.user-list');
+    const users = userList.getElementsByClassName('user-card');
+
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i];
+        const name = user.getAttribute('data-name');
+        const email = user.getAttribute('data-email');
+
+        // Check if the name or email contains the search text
+        if (name.includes(filter) || email.includes(filter)) {
+            user.style.display = "flex"; // Show if it matches
+        } else {
+            user.style.display = "none"; // Hide if it doesn't
+        }
+    }
+}
+
+// --- Modal and Upload Functionality ---
 const uploadModal = document.getElementById('uploadModal');
 const pfpInput = document.getElementById('pfp-upload-input');
 const uploadBtn = document.getElementById('upload-btn');

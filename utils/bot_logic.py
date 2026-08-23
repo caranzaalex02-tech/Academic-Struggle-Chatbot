@@ -18,6 +18,12 @@ try:
 except ImportError:
     genai = None
 
+# Import Groq
+try:
+    import groq
+except ImportError:
+    groq = None
+
 try:
     from dotenv import load_dotenv
 except ImportError:
@@ -191,7 +197,8 @@ INTENTS = {
             "Hi there! I hope you're doing well. How can I support you today?",
             "Hey! It's good to hear from you. How's your day going?",
             "Kumusta ka? Palagi mo tandaan na mahalaga ka at may mga tao na handang makinig sa iyo. Ano ang maitutulong ko sa iyo ngayon?",
-            "Hi! handa ako makinig saiyo. May alam ako na pwedeng makatulong sa iyo sa iyo."
+            "Hi! Handa akong makinig sa'yo. May alam ako na pwedeng makatulong sa iyo.",
+            "Hello! Bago tayo magsimula, isang paalala para sa iyong seguridad: iwasan ang pagbabahagi ng personal na impormasyon tulad ng buong pangalan, address, o contact details dito. Handa na akong makinig. 🤍"
         ],
         "follow_up": [
             "Gusto mo bang ikwento kung ano ang bumibigat sa’yo ngayon?",
@@ -306,35 +313,29 @@ INTENTS = {
     
     "stress_exams": {
         "signals": ["exam", "tests", "studying", "midterm", "finals", "how to manage exam", "reduce exam stress", "tips exam", "paano i-manage exam", "pano stress sa exam", "how to study", "manage exam anxiety", "test anxiety", "exam pressure", "makuri an exam", "kulba ha exam", "baraka ha test", "paso"],
-        "response": ["""Test anxiety is a manifestation of academic stress with cognitive apprehension and physiological arousal. This is clinically manageable.
+        "response": ["""Naiintindihan ko ang bigat ng exam stress. Normal 'yan, pero may mga paraan para gumaan ang pakiramdam mo. 🤍
 
-EVIDENCE-BASED INTERVENTIONS:
-1. Cognitive-Behavioral Approach: Challenge catastrophic thoughts (e.g., "I'll fail") with evidence-based thinking. Practice cognitive restructuring.
-2. Physiological Regulation: Use diaphragmatic breathing (4-7-8 technique) or progressive muscle relaxation to regulate your autonomic nervous system.
-3. Study Optimization: Implement spaced repetition and active recall for memory consolidation. Use Pomodoro intervals (25 min focus/5 min break).
-4. Sleep Hygiene: Maintain 7-9 hours nightly—sleep deprivation impairs executive function and increases anxiety.
+Subukan natin 'to:
+🧠 **Isip:** Kapag naiisip mong "babagsak ako," palitan mo ng "ginagawa ko ang best ko."
+🌬️ **Hininga:** Bago mag-exam, huminga nang malalim. Inhale (4 seconds), hold (4 seconds), exhale (6 seconds). Ulitin ng 3 beses.
+📚 **Aral:** Mag-aral nang paunti-unti (e.g., 25 mins aral, 5 mins pahinga). Mas epektibo 'to kaysa sa isang bagsakan.
+😴 **Tulog:** Unahin ang 7-8 oras na tulog. Mas matalino ang utak na nakapagpahinga.
 
-PROFESSIONAL SUPPORT: If symptoms persist despite self-intervention, consult campus counseling for cognitive therapy assessment. Academic performance reflects preparation, not inherent capability.
-
-Research shows test anxiety significantly diminishes with structured preparation and professional support when needed."""],
+Ang score mo sa exam ay hindi sukatan ng pagkatao mo. Ang mahalaga ay ang iyong pagsisikap. Kaya mo 'yan! 💪"""]
+,
         "follow_up": []
     },
     "procrastination": {
         "signals": ["procrastinate", "procrastinating", "deadline", "last minute", "late submission", "how to stop procrastinating", "avoid procrastination", "pano hindi magprocrastinate", "tips procrastination", "manage procrastination"],
-        "response": ["""Procrastination is a self-regulation failure rooted in emotion regulation difficulties, not laziness. Neurologically, delaying aversive tasks provides temporary emotional relief—reinforcing avoidance behavior.
+        "response": ["""Ang procrastination ay hindi katamaran; paraan ito ng isip natin para iwasan ang stress. Pero may paraan para labanan 'yan.
 
-CLINICAL INTERVENTIONS:
-1. Task Decomposition: Break assignments into micro-steps. This reduces task aversiveness and activates initiation.
-2. Temporal Motivation Theory: Create specific deadlines and BEGIN immediately. Initiation triggers momentum.
-3. Implementation Intentions: Use "If-Then" plans—"If I feel avoidance, THEN I'll work for 5 minutes." Strengthens behavioral conditioning.
-4. Environmental Design: Remove distractions and increase friction for procrastination-enabling behaviors.
+Subukan ang **"5-Minute Rule"**:
+1.  Piliin ang isang maliit na parte ng gawain mo.
+2.  Mag-timer ng 5 minuto at gawin lang 'yun. Walang pressure.
+3.  Pagkatapos ng 5 minuto, pwede kang huminto.
 
-PSYCHOLOGICAL TECHNIQUES:
-- Counteract temporal discounting by visualizing future consequences.
-- Practice self-compassion (not self-criticism)—research shows self-compassion predicts lower procrastination.
-- If chronic procrastination impairs daily functioning, assess for underlying ADHD, anxiety, or depression.
-
-CRITICAL: Action precedes motivation. Start NOW with the smallest first step. Momentum builds momentum."""],
+Kadalasan, ang pinakamahirap na parte ay ang pagsisimula. Kapag nasimulan mo na, mas madali nang magtuloy-tuloy. Isang maliit na hakbang lang muna. 👟"""]
+,
         "follow_up": []
     },
     "perfectionism": {
@@ -353,9 +354,16 @@ Change your study environment, study with friends, or take a strategic break. Sm
     },
     "failing_subject": {
         "signals": ["failing", "fail", "failed", "flunking", "bad grade", "low score", "hagubo an grado", "bagsak", "waray makapasa", "singko", "diri pasar"],
-        "response": ["""One grade or subject does not define you. Most successful people have failed. This is feedback, not failure.
-Talk to your professor, get tutoring, or explore a different learning method. Your resilience matters more than one setback.
-"I have not failed. I've just found 10,000 ways that won't work." – Thomas Edison"""],
+        "response": ["""Masakit makakita ng bagsak na grado, at valid ang nararamdaman mo. Pero tandaan: hindi ito ang katapusan.
+
+Ito ay **feedback**, hindi hatol sa pagkatao mo.
+
+Mga pwedeng gawin:
+1.  **Kausapin ang iyong propesor.** Magtanong kung paano ka makakabawi.
+2.  **Humingi ng tulong.** Maghanap ng tutor o magpaturo sa kaklaseng nakakaintindi.
+
+Ang pagbangon mula dito ang magpapatatag sa'yo. Hindi ka nag-iisa rito. 🫂"""]
+,
         "follow_up": []
     },
     "major_uncertainty": {
@@ -382,10 +390,18 @@ Prioritize sleep, health, and sanity over grinding. Burnout wastes more time tha
         "follow_up": []
     },
     "burnout": {
-        "signals": ["burned out", "burnout", "exhausted", "tired", "energy", "drained", "empty", "ikapoy", "waray gana mag-aral", "kakapoy", "bug-at an lawas"],
-        "response": ["""Burnout is a warning sign that you need rest and boundaries. This is serious—listen to your body and mind.
-Step back, even if temporarily. Talk to your doctor and counselor. You are not weak; you're human.
-"Burnout is what happens when you try to avoid being human for too long." – Michael Gungor"""],
+        "signals": ["burned out", "burnout", "exhausted", "pagod na pagod", "drained", "empty", "ikapoy", "waray gana mag-aral", "kakapoy", "bug-at an lawas"],
+        "response": ["""Ang burnout ay seryosong warning sign mula sa katawan at isip mo na kailangan mo na ng pahinga. 🛑
+
+Pakinggan mo 'yan. Hindi ito kahinaan; ito ay pagiging tao.
+
+Subukan mo ito:
+•  **Mag-iskedyul ng "walang gagawin" na oras.** Kahit 15 minuto lang.
+•  **Sabihin ang "hindi"** sa mga bagay na hindi mo na kaya.
+•  **Matulog.** Ang tulog ang pinakamabisang lunas.
+
+Ang pahinga ay hindi pagiging tamad. Ito ay kailangan para makapagpatuloy ka. 🔋"""]
+,
         "follow_up": []
     },
     "time_management": {
@@ -394,7 +410,7 @@ Step back, even if temporarily. Talk to your doctor and counselor. You are not w
 Time is your most valuable resource. Protect it fiercely. Even 10 minutes of planning saves hours of stress.
 "The key is in not spending time, but in investing it." – Stephen R. Covey"""],
         "follow_up": []
-    },
+    },    
 
     "imposter_syndrome": {
         "signals": ["imposter", "fraudster", "don't deserve", "fake", "not smart enough"],
@@ -687,7 +703,8 @@ WARAY_RESPONSES = {
         "Maupay! 😊 Ano an imo gibabati?",
         "Kumusta! Hinaot nga okay ka la yana.",
         "Maupay! Aadi la ako para mamati ha imo.",
-        "Kumusta ka? Hinumdumi nga importante ka. Ano an maitutulong ko ha imo yana?"
+        "Kumusta ka? Hinumdumi nga importante ka. Ano an maitutulong ko ha imo yana?",
+        "Maupay nga adlaw! San-o kita magtikang, usa nga pahinumdom para han imo seguridad: likayi an paghatag hin personal nga impormasyon sugad han bug-os nga ngaran, address, o contact details dinhi. Handa na ako mamati. 🤍"
     ],
     "gratitude": [
         "Waray sapayan 🤍 Nalilipay ako nga nakabulig ha imo.",
@@ -862,10 +879,66 @@ def _openai_available():
     return openai is not None and _get_openai_api_key() is not None
 
 
+def _get_groq_api_key():
+    """Fetches the Groq API key from environment variables."""
+    key = os.environ.get("GROQ_API_KEY")
+    return key if key else None
+
+
+def _groq_available():
+    """Checks if the Groq library is installed and an API key is available."""
+    return groq is not None and _get_groq_api_key() is not None
+
+
+def _call_groq_api(user_input, language='tagalog'):
+    """Calls the Groq API (Llama 3.1) as the primary AI fallback."""
+    if not _groq_available():
+        logging.warning("Groq API not available (library not installed or key not set).")
+        return None
+
+    try:
+        api_key = _get_groq_api_key()
+        if not api_key:
+            logging.error("Groq API key not found. Please set GROQ_API_KEY in the .env file.")
+            return None
+
+        key_preview = f"{api_key[:5]}...{api_key[-4:]}" if len(api_key) > 9 else "Invalid Key"
+        logging.info(f"Attempting to use Groq API key: {key_preview}")
+
+        client = groq.Groq(api_key=api_key)
+        model = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+
+        system_prompt = _build_openai_system_prompt(language)
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_input}
+        ]
+
+        completion = client.chat.completions.create(
+            model=model,
+            messages=messages,
+            max_tokens=280,
+            temperature=0.8,
+        )
+
+        if completion.choices and completion.choices[0].message:
+            return completion.choices[0].message.content.strip()
+
+        logging.warning("Groq response was empty or malformed.")
+        return None
+
+    except Exception as e:
+        logging.exception(f"Groq API call failed: {e}")
+        error_type = type(e).__name__
+        if 'rate' in str(e).lower() or 'quota' in str(e).lower():
+            if language == 'waray':
+                return "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro."
+            return "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo."
+        return None
+
+
 def _call_gemini_api(user_input, language='tagalog'):
     """Calls the Google Gemini API as a fallback."""
-    # CRITICAL FIX: Return a user-facing error message instead of None
-    # to prevent falling through to the generic fallback message.
     if not _gemini_available():
         logging.warning("Gemini API not available (library not installed or key not set).")
         if language == 'waray':
@@ -880,81 +953,100 @@ def _call_gemini_api(user_input, language='tagalog'):
                 return "Mayda problema ha AI service (waray API key). Alayon pagsumat ha administrator."
             return "Nagkaproblema sa AI service (walang API key). Paki-abiso sa administrator."
 
-        # --- DIAGNOSTIC LOG ---
-        # This will show us which key the app is actually using.
         key_preview = f"{api_key[:5]}...{api_key[-4:]}" if len(api_key) > 9 else "Invalid Key"
         logging.info(f"Attempting to use Gemini API key: {key_preview}")
 
         genai.configure(api_key=api_key)
 
-        # Safety settings to block harmful content
-        safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_MEDIUM_AND_ABOVE"},
+        preferred_models = [
+            os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-lite",
+            "gemini-1.5-flash",
+            "gemini-1.5-pro",
         ]
+        seen_models = set()
+        for model_name in preferred_models:
+            if not model_name or model_name in seen_models:
+                continue
+            seen_models.add(model_name)
+            try:
+                model = genai.GenerativeModel(model_name)
+                system_prompt = _build_openai_system_prompt(language)
+                full_prompt = f"{system_prompt}\n\nUser: {user_input}\nAssistant:"
+                response = model.generate_content(contents=full_prompt)
+                if getattr(response, "parts", None):
+                    return response.text.strip()
+                logging.error("Gemini API call was blocked by safety settings or returned no content.")
+                if language == 'waray':
+                    return "Pasensya, diri ko mababaton iton nga pakiana. Bangin an topic kay sensitibo."
+                return "Paumanhin, hindi ko masasagot ang tanong na iyan. Ang paksa ay maaaring masyadong sensitibo."
+            except Exception as model_error:
+                logging.warning("Gemini model %s failed: %s", model_name, model_error)
+                if "invalidargument" in str(model_error).lower() and model_name != preferred_models[-1]:
+                    continue
+                raise model_error
 
-        # Use the latest recommended model for chat applications.
-        # 'gemini-1.5-flash-latest' is fast and effective.
-        model = genai.GenerativeModel('gemini-1.5-flash-latest')
-        
-        system_prompt = _build_openai_system_prompt(language) # We can reuse the same system prompt
-        full_prompt = f"{system_prompt}\n\nUser: {user_input}\nAssistant:"
-
-        response = model.generate_content(contents=full_prompt, safety_settings=safety_settings)
-
-        # CRITICAL FIX: Check if the response was blocked by safety settings.
-        # If response.parts is empty, it means the content was blocked.
-        if not response.parts:
-            logging.error("Gemini API call was blocked by safety settings. The prompt or response was flagged.")
-            if language == 'waray':
-                return "Pasensya, diri ko mababaton iton nga pakiana. Bangin an topic kay sensitibo."
-            return "Paumanhin, hindi ko masasagot ang tanong na iyan. Ang paksa ay maaaring masyadong sensitibo."
-
-        return response.text.strip()
+        raise RuntimeError("No Gemini model could satisfy the request.")
 
     except Exception as e:
         logging.exception(f"Google Gemini API call failed: {e}")
         error_type = type(e).__name__
         logging.error(f"Gemini API call failed with a {error_type}. This will be shown to the user.")
-        
-        # Provide a more user-friendly message based on the error type
+
         if "block" in str(e).lower():
             if language == 'waray':
-                return "Pasensya, diri ko mababaton iton nga pakiana. Bangin an topic kay sensitibo."
-            return "Paumanhin, hindi ko masasagot ang tanong na iyan. Ang paksa ay maaaring masyadong sensitibo."
+                return "Pasensya, diri ko mababaton iton nga pakiana tungod han safety settings."
+            return "Paumanhin, hindi ko masasagot ang tanong na iyan dahil sa safety settings."
 
         if error_type in ['PermissionDenied', 'Unauthenticated'] or 'API_KEY_INVALID' in str(e).upper():
             if language == 'waray':
-                error_message = "Sayop o invalid an imo Gemini API key. Alayon pag-check han .env file ngan siguroha nga tama an key."
+                error_message = "Mayda problema ha AI service. Alayon pagsumat ha administrator. (API Key Error)"
             else:
-                error_message = "Mali o invalid ang iyong Gemini API key. Paki-check ang .env file at siguraduhing tama ang key na nakalagay."
-
+                error_message = "Nagkaproblema sa AI service. Paki-abiso sa administrator. (API Key Error)"
         elif 'deadline' in str(e).lower():
             error_message = "Masyadong matagal bago sumagot ang AI. Subukang muli."
+        elif 'invalidargument' in str(e).lower() or error_type == 'InvalidArgument':
+            error_message = "Nagkaproblema sa AI service. Paki-abiso sa administrator. (Invalid Argument)"
         else:
-            error_message = f"Nagkaproblema sa AI service (Error: {error_type}). Paki-check ang terminal logs."
+            error_message = f"Nagkaproblema sa AI service. Paki-abiso sa administrator. (Error: {error_type})"
         return error_message
 
 
 
 
 def _build_openai_system_prompt(language='tagalog'):
+    base_guidelines = (
+        "SAFETY RULES (follow strictly):\n"
+        "1. NEVER diagnose any medical or mental health condition.\n"
+        "2. NEVER prescribe medication or suggest stopping medication.\n"
+        "3. NEVER claim to be a licensed therapist, doctor, or counselor.\n"
+        "4. NEVER encourage harmful behavior, self-harm, or violence.\n"
+        "5. NEVER share personal opinions on politics, religion, or controversial topics.\n"
+        "6. NEVER generate hate speech, discriminatory, or offensive content.\n"
+        "7. If the user is in crisis, ALWAYS direct them to professional help and hotlines.\n"
+        "8. If asked about illegal activities, refuse and redirect to positive support.\n"
+        "9. Keep responses focused on academic stress, study habits, and emotional well-being.\n"
+        "10. If unsure or the topic is outside your scope, politely say you cannot answer and suggest talking to a trusted adult or counselor.\n"
+        "\n"
+        "RESPONSE STYLE:\n"
+        "- Be warm, empathetic, validating, and calm.\n"
+        "- Use simple, clear language appropriate for students.\n"
+        "- Keep responses concise (2-4 sentences when possible).\n"
+        "- Acknowledge the user's feelings before offering suggestions.\n"
+        "- Use a supportive, non-judgmental tone.\n"
+        "- Include practical, actionable tips when relevant.\n"
+    )
     if language == 'waray':
         return (
             "You are a compassionate Waray mental health support chatbot for students. "
-            "Respond in gentle Waray whenever possible. Be empathetic, validating, and calm. "
-            "If the user expresses suicidal or self-harm thoughts, do not minimize their feelings and encourage them to seek immediate help. "
-            "If they are in crisis, prioritize safety and recommend contacting emergency services or a crisis hotline. "
-            "Do not diagnose or offer clinical treatment. Use simple words and respect the user's emotional state."
+            "Respond in gentle Waray whenever possible.\n\n"
+            + base_guidelines
         )
     return (
         "You are a compassionate mental health support chatbot for students. "
-        "Answer in Tagalog or Taglish based on the user's input. Be empathetic, validating, and calm. "
-        "If the user expresses suicidal or self-harm thoughts, do not minimize their feelings and encourage them to seek immediate help. "
-        "If they are in crisis, prioritize safety and recommend contacting emergency services or a crisis hotline. "
-        "Do not diagnose or offer clinical treatment. Use simple words and respect the user's emotional state."
+        "Answer in Tagalog or Taglish based on the user's input.\n\n"
+        + base_guidelines
     )
 
 
@@ -1143,19 +1235,25 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
 
         return (response, new_intent, is_crisis, is_abusive)
 
-    # 5. Generative AI Fallback
+    # 5. Generative AI Fallback (Groq → OpenAI → Gemini)
     if not is_abusive:
-        # First, try Gemini
-        if _gemini_available():
-            gemini_reply = _call_gemini_api(user_input, language)
-            if gemini_reply:
-                return (gemini_reply, None, 0, is_abusive)
-        
-        # If Gemini fails or is not available, try OpenAI as a secondary fallback
+        # Primary: Groq (Libre, mabilis, Llama 3.1)
+        if _groq_available():
+            groq_reply = _call_groq_api(user_input, language)
+            if groq_reply:
+                return (groq_reply, None, 0, is_abusive)
+
+        # Fallback 1: OpenAI (kung may valid key at credits)
         if _openai_available():
             openai_reply = _call_openai_api(user_input, language=language)
             if openai_reply:
                 return (openai_reply, None, 0, is_abusive)
+
+        # Fallback 2: Gemini (kung may valid key)
+        if _gemini_available():
+            gemini_reply = _call_gemini_api(user_input, language)
+            if gemini_reply:
+                return (gemini_reply, None, 0, is_abusive)
 
     # 6. Fallback Response if no intent is detected and not abusive
     generic_fallbacks = [
@@ -1163,6 +1261,8 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
         "I understand. Please tell me more about how you're feeling.",
         "Mahalaga ang nararamdaman mo. Handa akong makinig.",
         "Thank you for sharing. I'm here to support you.",
+        "Masaya akong narinig ang iyong kuwento. Nandito ako para sa'yo.",
+        "Hindi mo kailangang harapin ang lahat mag-isa. Pwede mo akong kausapin tungkol dito."
     ]
     fallback = WARAY_FALLBACKS if language == 'waray' else generic_fallbacks
     return (random.choice(fallback), new_intent, 0, is_abusive)

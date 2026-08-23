@@ -1,4 +1,5 @@
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
 import logging
@@ -9,19 +10,46 @@ try:
 except ImportError:
     pass
 
-EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "console")
+def _get_email_backend():
+    backend = os.environ.get("EMAIL_BACKEND", "").strip().lower()
+    if backend:
+        return backend
+    # If SMTP credentials exist, use SMTP by default so password reset works without forcing console mode.
+    if os.environ.get("EMAIL_SENDER") and os.environ.get("EMAIL_PASSWORD"):
+        return "smtp"
+    return "console"
+
+EMAIL_BACKEND = _get_email_backend()
 
 def _get_email_config():
     """Helper to fetch all email configuration from environment variables."""
-    # Use general EMAIL_SENDER/PASSWORD, but fall back to CRISIS_ ones if not present.
     return {
         "sender": os.environ.get("EMAIL_SENDER") or os.environ.get("CRISIS_EMAIL_SENDER"),
         "password": os.environ.get("EMAIL_PASSWORD") or os.environ.get("CRISIS_EMAIL_PASSWORD"),
         "host": os.environ.get("EMAIL_HOST", "smtp.sendgrid.net"),
         "port": int(os.environ.get("EMAIL_PORT", 587)),
-        # For Gmail, user is the same as the sender email.
+        "use_tls": os.environ.get("EMAIL_USE_TLS", "true").strip().lower() in ["true", "1", "yes"],
+        "use_ssl": os.environ.get("EMAIL_USE_SSL", "false").strip().lower() in ["true", "1", "yes"],
         "user": os.environ.get("EMAIL_HOST_USER") or os.environ.get("EMAIL_SENDER") or os.environ.get("CRISIS_EMAIL_SENDER"),
+        "display_name": os.environ.get("EMAIL_DISPLAY_NAME", "Academic Struggle Chatbot").strip(),
+        "logo_url": os.environ.get("EMAIL_LOGO_URL", "").strip(),
     }
+
+
+def _format_sender(config):
+    if not config.get("sender"):
+        return ""
+    display_name = config.get("display_name") or "Academic Struggle Chatbot"
+    return f"{display_name} <{config['sender']}>"
+
+
+def _build_html_message(subject, plain_body, html_body):
+    msg = MIMEMultipart("alternative")
+    msg.attach(MIMEText(plain_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))
+    msg["Subject"] = subject
+    return msg
+
 
 def send_crisis_email(username, message):
     config = _get_email_config()
@@ -67,55 +95,82 @@ def send_registration_email(username, user_email):
     """Sends a welcome email to a newly registered user."""
     config = _get_email_config()
     
+    formatted_sender = _format_sender(config)
     if EMAIL_BACKEND == 'console':
         print("\n" + "="*20 + " CONSOLE EMAIL " + "="*20)
         print(f"TO: {user_email}")
-        print(f"FROM: {config.get('sender')}")
-        print(f"SUBJECT: Welcome to Student Support Chatbot!")
+        print(f"FROM: {formatted_sender}")
+        print(f"SUBJECT: Welcome to Academic Struggle Chatbot")
         print("-" * 55)
         print(f"Hi {username},\n\nWelcome! Your account is ready.")
+        print("Thank you for joining our Academic Struggle Chatbot. You can now log in and start receiving help with study stress, motivation, and wellbeing.")
         print("="*55 + "\n")
-        return
+        return True
 
-    if not all([config['sender'], config['password']]):
+    if not all([config['sender'], config['password'], config['user']]):
         logging.warning("Registration email not sent. Email credentials are not configured in environment variables.")
-        return
+        return False
 
-    body = f"""
+    plain_body = f"""
 Hi {username},
 
-Welcome to the Student Support Chatbot!
+Welcome to Academic Struggle Chatbot!
 
 Your account has been successfully created. You can now log in and start using the chatbot for support with your academic challenges.
 
 We're here to help you navigate the stresses of student life.
 
 Best,
-The Student Support Team
+Academic Struggle Chatbot Team
     """
-    
-    msg = MIMEText(body)
-    msg["Subject"] = "Welcome to the Student Support Chatbot!"
-    msg["From"] = config['sender']
+
+    logo_html = ""
+    if config['logo_url']:
+        logo_html = f"<div style='margin-bottom:18px;'><img src=\"{config['logo_url']}\" alt=\"Academic Struggle Chatbot\" style=\"max-width:180px;height:auto;display:block;margin:0 auto;\"></div>"
+
+    html_body = f"""
+<html>
+  <body style=\"font-family:Arial, sans-serif; color:#111; line-height:1.6;\">
+    {logo_html}
+    <p>Hi {username},</p>
+    <p>Welcome to <strong>Academic Struggle Chatbot</strong>!</p>
+    <p>Your account has been successfully created. You can now log in and start using the chatbot for support with your academic challenges.</p>
+    <p>We're here to help you navigate the stresses of student life.</p>
+    <p>Best,<br><strong>Academic Struggle Chatbot Team</strong></p>
+  </body>
+</html>
+"""
+
+    msg = _build_html_message("Welcome to Academic Struggle Chatbot", plain_body, html_body)
+    msg["From"] = formatted_sender
     msg["To"] = user_email
 
     try:
-        with smtplib.SMTP(config['host'], config['port']) as server:
-            server.starttls()
-            server.login(config['user'], config['password'])
-            server.send_message(msg)
-            logging.info(f"Registration email sent successfully to {user_email}")
+        if config['use_ssl']:
+            with smtplib.SMTP_SSL(config['host'], config['port']) as server:
+                server.login(config['user'], config['password'])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(config['host'], config['port']) as server:
+                if config['use_tls']:
+                    server.starttls()
+                server.login(config['user'], config['password'])
+                server.send_message(msg)
+        logging.info(f"Registration email sent successfully to {user_email}")
+        return True
     except Exception as e:
         logging.error(f"Failed to send registration email to {user_email}: {e}")
+        return False
 
 def send_password_reset_email(user_email, reset_link):
     """Sends a password reset email to the user."""
     config = _get_email_config()
 
+    formatted_sender = _format_sender(config)
     if EMAIL_BACKEND == 'console':
         print("\n" + "="*20 + " CONSOLE EMAIL " + "="*20)
         print(f"TO: {user_email}")
-        print(f"FROM: {config['sender']}")
+        print(f"FROM: {formatted_sender}")
         print(f"SUBJECT: Reset Your Password")
         print("-" * 55)
         print("A password reset was requested for your account.")
@@ -124,11 +179,11 @@ def send_password_reset_email(user_email, reset_link):
         print("="*55 + "\n")
         return True
 
-    if not all([config['sender'], config['password']]):
-        logging.warning("Password reset email not sent. Email credentials are not configured.")
+    if not all([config['sender'], config['password'], config['user']]):
+        logging.warning("Password reset email not sent. Email credentials are not fully configured.")
         return False
 
-    body = f"""
+    plain_body = f"""
 Hi,
 
 A password reset was requested for your account.
@@ -139,20 +194,45 @@ Please click the link below to reset your password. This link is valid for 1 hou
 If you did not request this, please ignore this email.
 
 Best,
-The Student Support Team
+Academic Struggle Chatbot Team
     """
-    msg = MIMEText(body)
-    msg["Subject"] = "Reset Your Password"
-    msg["From"] = config['sender']
+
+    logo_html = ""
+    if config['logo_url']:
+        logo_html = f"<div style='margin-bottom:18px;'><img src=\"{config['logo_url']}\" alt=\"Academic Struggle Chatbot\" style=\"max-width:180px;height:auto;display:block;margin:0 auto;\"></div>"
+
+    html_body = f"""
+<html>
+  <body style=\"font-family:Arial, sans-serif; color:#111; line-height:1.6;\">
+    {logo_html}
+    <p>Hi,</p>
+    <p>A password reset was requested for your account.</p>
+    <p>Please click the link below to reset your password. This link is valid for 1 hour.</p>
+    <p><a href=\"{reset_link}\" style=\"color:#1a73e8;\">Reset your password</a></p>
+    <p>If you did not request this, please ignore this email.</p>
+    <p>Best,<br><strong>Academic Struggle Chatbot Team</strong></p>
+  </body>
+</html>
+"""
+
+    msg = _build_html_message("Reset Your Password", plain_body, html_body)
+    msg["From"] = formatted_sender
     msg["To"] = user_email
 
     try:
-        with smtplib.SMTP(config['host'], config['port']) as server:
-            server.starttls()
-            server.login(config['user'], config['password'])
-            server.send_message(msg)
-            logging.info(f"Password reset email sent successfully to {user_email}")
-            return True
+        if config['use_ssl']:
+            with smtplib.SMTP_SSL(config['host'], config['port']) as server:
+                server.login(config['user'], config['password'])
+                server.send_message(msg)
+        else:
+            with smtplib.SMTP(config['host'], config['port']) as server:
+                if config['use_tls']:
+                    server.starttls()
+                server.login(config['user'], config['password'])
+                server.send_message(msg)
+
+        logging.info(f"Password reset email sent successfully to {user_email}")
+        return True
     except Exception as e:
         logging.error(f"Failed to send password reset email to {user_email}: {e}")
         return False

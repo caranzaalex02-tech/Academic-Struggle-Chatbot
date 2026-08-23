@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: academic-struggle-support-essu-guiuan
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.4
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: RENDER
+        value: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MENTALHEALTHWEB_OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: DATABASE_URL
+        sync: false
+      - key: MENTALHEALTHWEB_DB
+        value: database.db

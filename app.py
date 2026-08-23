@@ -8,9 +8,12 @@ from threading import Timer
 
 # Third-Party Libraries
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, g, flash, make_response
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 from werkzeug.utils import secure_filename
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 try:
     import psycopg2
@@ -28,14 +31,30 @@ if load_dotenv is not None:
 
 # Local Application Imports
 from utils.bot_logic import generate_response
-from utils.email_utils import send_crisis_email, send_registration_email, send_password_reset_email
+from utils.email_utils import send_crisis_email, send_registration_email, send_password_reset_email, EMAIL_BACKEND
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key-change-in-production")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.environ.get("SECRET_KEY") or "dev-secret-key-change-in-production"
+if os.environ.get("FLASK_SECRET_KEY") is None and os.environ.get("SECRET_KEY") is None:
+    app.logger.warning("FLASK_SECRET_KEY is not set; using a temporary fallback secret.")
 DATABASE = os.environ.get("MENTALHEALTHWEB_DB", "database.db")
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# --- Rate Limiting Setup ---
+# Use Redis in production if REDIS_URL is set, otherwise fall back to in-memory storage.
+redis_url = os.environ.get("REDIS_URL")
+storage_uri = redis_url if redis_url else "memory://"
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri=storage_uri,
+)
+if redis_url:
+    app.logger.info("Flask-Limiter is using Redis for rate limiting.")
 
 # For password reset tokens
 s = URLSafeTimedSerializer(app.secret_key)
@@ -57,12 +76,12 @@ def get_db():
     if 'db' not in g:
         db_url = os.environ.get('DATABASE_URL')
         if db_url:
-            # Production environment: Connect to PostgreSQL
+            # Production environment: Connect to PostgreSQL when a valid URL is provided.
             try:
                 g.db = psycopg2.connect(db_url)
-            except psycopg2.OperationalError as e:
-                app.logger.error(f"!!! Could not connect to PostgreSQL: {e}")
-                raise
+            except Exception as e:
+                app.logger.warning(f"Falling back to SQLite because PostgreSQL connection failed: {e}")
+                g.db = sqlite3.connect(DATABASE)
         else:
             # Development environment: Connect to local SQLite database
             g.db = sqlite3.connect(DATABASE)
@@ -183,6 +202,16 @@ def init_db():
     )
     """)
 
+    c.execute(f"""
+    CREATE TABLE IF NOT EXISTS user_settings (
+        id {autoincrement_pk},
+        user_email TEXT UNIQUE NOT NULL,
+        show_in_community INTEGER DEFAULT 1,
+        allow_peer_messages INTEGER DEFAULT 1,
+        language TEXT DEFAULT 'tagalog'
+    )
+    """)
+
     # --- Migrations for older databases (safe to run multiple times) ---
     def add_column(table, column, definition):
         try:
@@ -220,17 +249,6 @@ def init_db():
             c.executemany("INSERT INTO faq_dataset (question, answer) VALUES (%s, %s)", sample_faqs)
         else:
             c.executemany("INSERT INTO faq_dataset (question, answer) VALUES (?, ?)", sample_faqs)
-
-    # Create default admin if not exists
-    c.execute("SELECT * FROM users WHERE role='admin'")
-    if not c.fetchone():
-        # Use %s for PostgreSQL compatibility
-        if is_postgres:
-            c.execute("INSERT INTO users (email, password, first_name, last_name, role) VALUES (%s, %s, %s, %s, %s)",
-                      ("admin", generate_password_hash("admin123"), "Admin", "User", "admin"))
-        else:
-            c.execute("INSERT INTO users (email, password, first_name, last_name, role) VALUES (?, ?, ?, ?, ?)",
-                      ("admin", generate_password_hash("admin123"), "Admin", "User", "admin"))
 
     conn.commit()
 
@@ -315,6 +333,7 @@ def home():
 
 # ---- LOGIN ----
 @app.route("/login", methods=["GET","POST"])
+@limiter.limit("10 per minute")
 def login():
     error = None
     if request.method=="POST":
@@ -342,6 +361,7 @@ def login():
 
 # ---- ADMIN LOGIN (Separate Route) ----
 @app.route("/admin_login", methods=["GET","POST"])
+@limiter.limit("5 per minute")
 def admin_login():
     error = None
     if request.method=="POST":
@@ -366,6 +386,53 @@ def admin_login():
         else:
             error = "Invalid admin credentials."
     return render_template("admin_login.html", error=error)
+
+# ---- ADMIN REGISTER (First-time setup) ----
+@app.route("/admin/register", methods=["GET", "POST"])
+def admin_register():
+    db = get_db()
+    c = db.cursor()
+    
+    # Security: Check if an admin already exists.
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT id FROM users WHERE role = 'admin'")
+    else:
+        c.execute("SELECT id FROM users WHERE role = 'admin'")
+    
+    if c.fetchone():
+        flash("Admin registration is closed. An admin account already exists.", "error")
+        return redirect(url_for('admin_login'))
+
+    error = None
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not email:
+            error = "Email is required."
+        elif not password or len(password) < 8:
+            error = "Password must be at least 8 characters long."
+        elif password != confirm_password:
+            error = "Passwords do not match."
+        
+        if error is None:
+            hashed_password = generate_password_hash(password)
+            try:
+                if 'DATABASE_URL' in os.environ:
+                    c.execute("INSERT INTO users (email, password, first_name, last_name, role) VALUES (%s, %s, %s, %s, %s)",
+                              (email, hashed_password, "Admin", "User", "admin"))
+                else:
+                    c.execute("INSERT INTO users (email, password, first_name, last_name, role) VALUES (?, ?, ?, ?, ?)",
+                              (email, hashed_password, "Admin", "User", "admin"))
+                db.commit() # type: ignore
+                flash("Admin account created successfully! You can now log in.", "success")
+                return redirect(url_for('admin_login'))
+            except (sqlite3.IntegrityError, psycopg2.IntegrityError):
+                error = "An unexpected error occurred. Please try again."
+
+    # If we are here, it's a GET request or there was a POST error
+    return render_template("admin_register.html", error=error)
 
 # ---- REGISTER ----
 @app.route("/register", methods=["GET","POST"])
@@ -395,8 +462,28 @@ def register():
             error = "Email address is required."
         elif not phone:
             error = "Phone number is required."
+        elif not age:
+            error = "Age is required."
+        elif age: # Continue the elif chain for age validation
+            try:
+                age_int = int(age)
+                if age_int < 18:
+                    error = "You must be at least 18 years old to register."
+            except ValueError:
+                error = "Invalid age. Please enter a valid number."
         elif not accept_terms:
             error = "You must accept the Terms and Conditions to register."
+
+        # Check for existing email only if other validations pass
+        if error is None:
+            db = get_db()
+            c = db.cursor()
+            if 'DATABASE_URL' in os.environ:
+                c.execute("SELECT id FROM users WHERE email = %s", (email,))
+            else:
+                c.execute("SELECT id FROM users WHERE email = ?", (email,))
+            if c.fetchone():
+                error = "Email address is already registered. Please use a different one."
 
         if error is None:
             db = get_db()
@@ -405,30 +492,32 @@ def register():
             if 'DATABASE_URL' in os.environ:
                 c.execute("SELECT id FROM users WHERE email = %s", (email,))
             else:
-                c.execute("SELECT id FROM users WHERE email = ?", (email,))
-            if c.fetchone():
-                error = "Email address is already registered. Please use a different one."
-
+                c.execute("SELECT id FROM users WHERE email = ?", (email,)) # This check is now redundant but harmless
             try:
-                if error is None: # Re-check error after manual validation
-                    hashed_password = generate_password_hash(password)
-                    if 'DATABASE_URL' in os.environ:
-                        c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
-                                  (first_name, last_name, hashed_password, email, phone, age, gender, course))
-                    else:
-                        c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (?,?,?,?,?,?,?,?)",
-                                  (first_name, last_name, hashed_password, email, phone, age, gender, course))
-                    db.commit() # type: ignore
-                    # Send a welcome email to the user
-                    # send_registration_email(first_name, email) # Temporarily disable to avoid email errors during setup
-                    return redirect(url_for("login"))
-            except (sqlite3.IntegrityError, psycopg2.IntegrityError): # Handle both DB types
-                error = "Email already exists. Please use a different one."
+                hashed_password = generate_password_hash(password)
+                if 'DATABASE_URL' in os.environ:
+                    c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                              (first_name, last_name, hashed_password, email, phone, int(age), gender, course))
+                else:
+                    c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                              (first_name, last_name, hashed_password, email, phone, int(age), gender, course))
+                
+                # Send a welcome email to the new user
+                send_registration_email(first_name, email)
+                db.commit()
+                flash("Registration successful! Please log in.", "success")
+                return redirect(url_for("login"))
+            except (sqlite3.IntegrityError, psycopg2.IntegrityError):
+                # Security Improvement: Use a generic message to prevent email enumeration.
+                # Instead of confirming the email exists, we just redirect as if it was successful.
+                flash("Thank you for registering! If your email is valid, you can now log in.", "success")
+                return redirect(url_for("login"))
 
     return render_template("register.html", error=error)
 
 # ---- FORGOT PASSWORD ----
 @app.route("/forgot_password", methods=["GET", "POST"])
+@limiter.limit("5 per hour")
 def forgot_password():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
@@ -444,7 +533,11 @@ def forgot_password():
             # User found, generate and send reset link
             token = s.dumps(email, salt='password-reset-salt')
             reset_link = url_for('reset_with_token', token=token, _external=True)
+            app.logger.info(f"User password reset link generated: {reset_link}")
             email_sent = send_password_reset_email(email, reset_link)
+            # For development convenience, optionally show the reset link when emails are printed to console
+            if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+                flash(f"Password reset link (dev): {reset_link}", "success")
             if not email_sent:
                 flash("Could not send email. Please check server logs and ensure EMAIL_SENDER/EMAIL_PASSWORD are set in the .env file.", "error")
                 return redirect(url_for('forgot_password'))
@@ -492,6 +585,7 @@ def reset_with_token(token):
 
 # ---- ADMIN FORGOT/RESET PASSWORD ----
 @app.route("/admin/forgot_password", methods=["GET", "POST"])
+@limiter.limit("5 per hour")
 def admin_forgot_password():
     if request.method == "POST":
         email = request.form.get("email", "").strip()
@@ -504,14 +598,23 @@ def admin_forgot_password():
             c.execute("SELECT email FROM users WHERE email = ? AND role = 'admin'", (email,))
         user = c.fetchone()
 
+        app.logger.info(f"Admin password reset requested for {email}")
+
         if user:
             # User is an admin, generate and send reset link
             token = s.dumps(email, salt='admin-password-reset-salt')
             reset_link = url_for('admin_reset_with_token', token=token, _external=True)
+            app.logger.info(f"Admin password reset link generated: {reset_link}")
             email_sent = send_password_reset_email(email, reset_link)
+            # For development convenience, optionally show the reset link when emails are printed to console
+            if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+                flash(f"Admin password reset link (dev): {reset_link}", "success")
             if not email_sent:
+                app.logger.warning("Admin password reset email could not be sent for %s", email)
                 flash("Could not send email. Please check the server logs and .env configuration for email settings.", "error")
                 return redirect(url_for('admin_forgot_password'))
+        else:
+            app.logger.info("Admin password reset requested for non-existent admin email: %s", email)
 
         # Always show a generic success message for security
         flash(f"If an admin account with the email {email} exists, a password reset link has been sent.", "success")
@@ -519,7 +622,7 @@ def admin_forgot_password():
 
     return render_template("admin_forgot_password.html")
 
-@app.route('/admin/reset/<token>', methods=["GET", "POST"])
+@app.route('/admin/reset/<token>', methods=["GET", "POST"]) # Changed function name
 def admin_reset_with_token(token):
     try:
         email = s.loads(token, salt='admin-password-reset-salt', max_age=3600)
@@ -883,6 +986,16 @@ def community():
     for u_row in all_users:
         u_email = u_row['email']
         u_profile_pic = get_profile_pic_url(u_row['profile_pic'])
+        
+        # Check if this user has opted to show in community
+        if 'DATABASE_URL' in os.environ:
+            c.execute("SELECT show_in_community FROM user_settings WHERE user_email=%s", (u_email,))
+        else:
+            c.execute("SELECT show_in_community FROM user_settings WHERE user_email=?", (u_email,))
+        setting_row = c.fetchone()
+        if setting_row and setting_row['show_in_community'] == 0:
+            continue  # Skip users who opted out
+        
         # Count unread messages from this user (u) to current user (using %s)
         if 'DATABASE_URL' in os.environ:
             c.execute("SELECT COUNT(*) FROM peer_messages WHERE sender=%s AND receiver=%s AND is_read=0", (u_email, session["user"]))
@@ -1284,44 +1397,111 @@ def admin_logs():
     # This route is disabled as per user request. Redirect to the main dashboard.
     return redirect(url_for("admin_dashboard"))
 
-@app.route("/admin/change_password", methods=["GET", "POST"])
-def admin_change_password():
-    if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("admin_login"))
-
-    admin_email = session['user']
-
-    if request.method == "POST":
-        current_password = request.form.get("current_password")
-        new_password = request.form.get("new_password")
-        confirm_password = request.form.get("confirm_password")
-
-        db = get_db()
-        c = db.cursor()
+# ================= USER SETTINGS =================
+@app.route("/settings", methods=["GET", "POST"])
+def user_settings():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    
+    db = get_db()
+    c = db.cursor()
+    user_email = session["user"]
+    
+    # Get user info
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT first_name, last_name, email FROM users WHERE email=%s", (user_email,))
+    else:
+        c.execute("SELECT first_name, last_name, email FROM users WHERE email=?", (user_email,))
+    user_info = c.fetchone()
+    
+    # Get or create settings
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT show_in_community, allow_peer_messages, language FROM user_settings WHERE user_email=%s", (user_email,))
+    else:
+        c.execute("SELECT show_in_community, allow_peer_messages, language FROM user_settings WHERE user_email=?", (user_email,))
+    settings = c.fetchone()
+    
+    if not settings:
+        # Create default settings for existing users
         if 'DATABASE_URL' in os.environ:
-            c.execute("SELECT password FROM users WHERE email = %s", (admin_email,))
+            c.execute("INSERT INTO user_settings (user_email) VALUES (%s)", (user_email,))
         else:
-            c.execute("SELECT password FROM users WHERE email = ?", (admin_email,))
-        user = c.fetchone()
-
-        if not user or not check_password_hash(user['password'], current_password):
-            flash("Your current password is not correct.", "error")
-        elif not new_password or len(new_password) < 6:
-            flash("New password must be at least 6 characters long.", "error")
-        elif new_password != confirm_password:
-            flash("New passwords do not match.", "error")
-        else:
-            hashed_password = generate_password_hash(new_password)
+            c.execute("INSERT INTO user_settings (user_email) VALUES (?)", (user_email,))
+        db.commit()
+        settings = {"show_in_community": 1, "allow_peer_messages": 1, "language": "tagalog"}
+    
+    success_msg = None
+    error_msg = None
+    
+    if request.method == "POST":
+        action = request.form.get("action", "")
+        
+        if action == "save_settings":
+            show_community = 1 if request.form.get("show_in_community") else 0
+            allow_peer = 1 if request.form.get("allow_peer_messages") else 0
+            language = request.form.get("language", "tagalog")
+            
+            if language not in ["tagalog", "waray"]:
+                language = "tagalog"
+            
             if 'DATABASE_URL' in os.environ:
-                c.execute("UPDATE users SET password = %s WHERE email = %s", (hashed_password, admin_email))
+                c.execute("UPDATE user_settings SET show_in_community=%s, allow_peer_messages=%s, language=%s WHERE user_email=%s",
+                          (show_community, allow_peer, language, user_email))
             else:
-                c.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password, admin_email))
-            db.commit() # type: ignore
-            log_admin_action(admin_email, 'changed_own_password', admin_email)
-            flash("Your password has been successfully changed.", "success")
-            return redirect(url_for('admin_dashboard'))
+                c.execute("UPDATE user_settings SET show_in_community=?, allow_peer_messages=?, language=? WHERE user_email=?",
+                          (show_community, allow_peer, language, user_email))
+            db.commit()
+            
+            # Update session language
+            session["language"] = language
+            settings = {"show_in_community": show_community, "allow_peer_messages": allow_peer, "language": language}
+            success_msg = "Settings saved successfully!"
+        
+        elif action == "change_password":
+            current_password = request.form.get("current_password", "")
+            new_password = request.form.get("new_password", "")
+            confirm_password = request.form.get("confirm_password", "")
+            
+            if not current_password or not new_password or not confirm_password:
+                error_msg = "All password fields are required."
+            elif len(new_password) < 6:
+                error_msg = "New password must be at least 6 characters long."
+            elif new_password != confirm_password:
+                error_msg = "New passwords do not match."
+            else:
+                # Verify current password
+                if 'DATABASE_URL' in os.environ:
+                    c.execute("SELECT password FROM users WHERE email=%s", (user_email,))
+                else:
+                    c.execute("SELECT password FROM users WHERE email=?", (user_email,))
+                user_row = c.fetchone()
+                
+                if user_row and check_password_hash(user_row['password'], current_password):
+                    hashed_password = generate_password_hash(new_password)
+                    if 'DATABASE_URL' in os.environ:
+                        c.execute("UPDATE users SET password=%s WHERE email=%s", (hashed_password, user_email))
+                    else:
+                        c.execute("UPDATE users SET password=? WHERE email=?", (hashed_password, user_email))
+                    db.commit()
+                    success_msg = "Password changed successfully!"
+                else:
+                    error_msg = "Current password is incorrect."
+    
+    return render_template("settings.html", 
+                           user=user_info, 
+                           settings=settings,
+                           success_msg=success_msg,
+                           error_msg=error_msg)
 
-    return render_template("admin_change_password.html")
+# ---- AUTO-INIT FOR PRODUCTION (Gunicorn) ----
+# When running with gunicorn, the `if __name__=="__main__"` block below won't execute.
+# We need to initialize the database at module load time for production.
+# Using `CREATE TABLE IF NOT EXISTS` makes this safe to call multiple times.
+if os.environ.get("RENDER") or os.environ.get("FLASK_ENV") == "production":
+    with app.app_context():
+        app.logger.info("Production environment detected. Initializing database...")
+        init_db()
+        preload_quotes()
 
 # ---- RUN APP ----
 if __name__=="__main__":

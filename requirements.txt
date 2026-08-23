@@ -18,3 +18,8 @@ itsdangerous
 # AI SDKs for Chatbot Logic
 google-generativeai
 openai
+groq
+
+# For Rate Limiting with Redis in production
+flask-limiter
+redis
