@@ -78,14 +78,15 @@ def get_db():
         if db_url:
             # Production environment: Connect to PostgreSQL when a valid URL is provided.
             try:
-                g.db = psycopg2.connect(db_url)
+                g.db = psycopg2.connect(db_url, cursor_factory=DictCursor)
             except Exception as e:
                 app.logger.warning(f"Falling back to SQLite because PostgreSQL connection failed: {e}")
                 g.db = sqlite3.connect(DATABASE)
+                g.db.row_factory = sqlite3.Row
         else:
             # Development environment: Connect to local SQLite database
             g.db = sqlite3.connect(DATABASE)
-        g.db.row_factory = sqlite3.Row
+            g.db.row_factory = sqlite3.Row
     return g.db
 
 @app.teardown_appcontext
