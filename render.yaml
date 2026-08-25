@@ -13,13 +13,48 @@ services:
         generateValue: true
       - key: RENDER
         value: true
+
+      # --- AI Services ---
+      # Primary AI (libre): Groq. Ilagay ang aktwal na key sa Render dashboard.
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
+      # Fallback AI services (opsyonal).
       - key: GEMINI_API_KEY
         sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: MENTALHEALTHWEB_OPENAI_MODEL
         value: gpt-4o-mini
+
+      # --- Database ---
+      # Auto-filled kapag gumawa ka ng Render PostgreSQL database.
       - key: DATABASE_URL
         sync: false
       - key: MENTALHEALTHWEB_DB
         value: database.db
+
+      # --- Email (SMTP) ---
+      - key: EMAIL_BACKEND
+        value: smtp
+      - key: EMAIL_SENDER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: 587
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_USE_TLS
+        value: "true"
+      - key: EMAIL_USE_SSL
+        value: "false"
+      - key: EMAIL_DISPLAY_NAME
+        value: Academic Struggle Chatbot
+      - key: EMAIL_LOGO_URL
+        value: ""
+      - key: CRISIS_EMAIL_RECEIVER
+        sync: false
