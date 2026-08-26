@@ -10,7 +10,7 @@ from threading import Timer
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, g, flash, make_response
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
-from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature, BadSignature
 from werkzeug.utils import secure_filename
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -534,7 +534,11 @@ def forgot_password():
             token = s.dumps(email, salt='password-reset-salt')
             reset_link = url_for('reset_with_token', token=token, _external=True)
             app.logger.info(f"User password reset link generated: {reset_link}")
-            email_sent = send_password_reset_email(email, reset_link)
+            try:
+                email_sent = send_password_reset_email(email, reset_link)
+            except Exception as e:
+                app.logger.error("Unexpected error sending password reset email to %s: %s", email, e)
+                email_sent = False
             # For development convenience, optionally show the reset link when emails are printed to console
             if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                 flash(f"Password reset link (dev): {reset_link}", "success")
@@ -559,6 +563,9 @@ def reset_with_token(token):
         return redirect(url_for('forgot_password'))
     except BadTimeSignature:
         flash("Invalid password reset link.", "error")
+        return redirect(url_for('forgot_password'))
+    except BadSignature:
+        flash("Invalid password reset link. Please request a new one.", "error")
         return redirect(url_for('forgot_password'))
 
     if request.method == "POST":
@@ -605,7 +612,11 @@ def admin_forgot_password():
             token = s.dumps(email, salt='admin-password-reset-salt')
             reset_link = url_for('admin_reset_with_token', token=token, _external=True)
             app.logger.info(f"Admin password reset link generated: {reset_link}")
-            email_sent = send_password_reset_email(email, reset_link)
+            try:
+                email_sent = send_password_reset_email(email, reset_link)
+            except Exception as e:
+                app.logger.error("Unexpected error sending admin password reset email to %s: %s", email, e)
+                email_sent = False
             # For development convenience, optionally show the reset link when emails are printed to console
             if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                 flash(f"Admin password reset link (dev): {reset_link}", "success")
@@ -631,6 +642,9 @@ def admin_reset_with_token(token):
         return redirect(url_for('admin_forgot_password'))
     except BadTimeSignature:
         flash("Invalid password reset link.", "error")
+        return redirect(url_for('admin_forgot_password'))
+    except BadSignature:
+        flash("Invalid password reset link. Please request a new one.", "error")
         return redirect(url_for('admin_forgot_password'))
 
     if request.method == "POST":

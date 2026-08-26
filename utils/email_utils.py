@@ -23,11 +23,18 @@ EMAIL_BACKEND = _get_email_backend()
 
 def _get_email_config():
     """Helper to fetch all email configuration from environment variables."""
+    def _safe_int(value, default):
+        try:
+            return int(value) if value else default
+        except (ValueError, TypeError):
+            logging.warning("Invalid EMAIL_PORT value '%s'. Using default %s.", value, default)
+            return default
+
     return {
         "sender": os.environ.get("EMAIL_SENDER") or os.environ.get("CRISIS_EMAIL_SENDER"),
         "password": os.environ.get("EMAIL_PASSWORD") or os.environ.get("CRISIS_EMAIL_PASSWORD"),
         "host": os.environ.get("EMAIL_HOST", "smtp.sendgrid.net"),
-        "port": int(os.environ.get("EMAIL_PORT", 587)),
+        "port": _safe_int(os.environ.get("EMAIL_PORT"), 587),
         "use_tls": os.environ.get("EMAIL_USE_TLS", "true").strip().lower() in ["true", "1", "yes"],
         "use_ssl": os.environ.get("EMAIL_USE_SSL", "false").strip().lower() in ["true", "1", "yes"],
         "user": os.environ.get("EMAIL_HOST_USER") or os.environ.get("EMAIL_SENDER") or os.environ.get("CRISIS_EMAIL_SENDER"),
