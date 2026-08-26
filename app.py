@@ -428,7 +428,8 @@ def admin_register():
                 db.commit() # type: ignore
                 flash("Admin account created successfully! You can now log in.", "success")
                 return redirect(url_for('admin_login'))
-            except (sqlite3.IntegrityError, psycopg2.IntegrityError):
+            except Exception:
+                db.rollback()
                 error = "An unexpected error occurred. Please try again."
 
     # If we are here, it's a GET request or there was a POST error
@@ -464,15 +465,19 @@ def register():
             error = "Phone number is required."
         elif not age:
             error = "Age is required."
-        elif age: # Continue the elif chain for age validation
+        elif not gender:
+            error = "Gender is required."
+        elif not course:
+            error = "College/Department is required."
+        else:
             try:
                 age_int = int(age)
                 if age_int < 18:
                     error = "You must be at least 18 years old to register."
-            except ValueError:
+            except (ValueError, TypeError):
                 error = "Invalid age. Please enter a valid number."
-        elif not accept_terms:
-            error = "You must accept the Terms and Conditions to register."
+            if error is None and not accept_terms:
+                error = "You must accept the Terms and Conditions to register."
 
         # Check for existing email only if other validations pass
         if error is None:
@@ -488,11 +493,6 @@ def register():
         if error is None:
             db = get_db()
             c = db.cursor()
-            # Check for existing email before trying to insert
-            if 'DATABASE_URL' in os.environ:
-                c.execute("SELECT id FROM users WHERE email = %s", (email,))
-            else:
-                c.execute("SELECT id FROM users WHERE email = ?", (email,)) # This check is now redundant but harmless
             try:
                 hashed_password = generate_password_hash(password)
                 if 'DATABASE_URL' in os.environ:
@@ -501,16 +501,20 @@ def register():
                 else:
                     c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                               (first_name, last_name, hashed_password, email, phone, int(age), gender, course))
-                
-                # Send a welcome email to the new user
-                send_registration_email(first_name, email)
+                # Commit BEFORE sending the welcome email so an email failure can never
+                # block or break registration.
                 db.commit()
+            except Exception:
+                db.rollback()
+                error = "Email address is already registered. Please use a different one."
+
+            if error is None:
+                # Send a welcome email (best effort) - never fail registration because of email.
+                try:
+                    send_registration_email(first_name, email)
+                except Exception as e:
+                    app.logger.error("Failed to send registration email to %s: %s", email, e)
                 flash("Registration successful! Please log in.", "success")
-                return redirect(url_for("login"))
-            except (sqlite3.IntegrityError, psycopg2.IntegrityError):
-                # Security Improvement: Use a generic message to prevent email enumeration.
-                # Instead of confirming the email exists, we just redirect as if it was successful.
-                flash("Thank you for registering! If your email is valid, you can now log in.", "success")
                 return redirect(url_for("login"))
 
     return render_template("register.html", error=error)

@@ -52,6 +52,8 @@ services:
         value: "true"
       - key: EMAIL_USE_SSL
         value: "false"
+      - key: EMAIL_TIMEOUT
+        value: "15"
       - key: EMAIL_DISPLAY_NAME
         value: Academic Struggle Chatbot
       - key: EMAIL_LOGO_URL

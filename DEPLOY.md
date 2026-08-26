@@ -58,6 +58,7 @@ Set these under Web Service → Environment:
 | `EMAIL_PORT` | No | SMTP port |
 | `EMAIL_HOST_USER` | No | SMTP username |
 | `EMAIL_PASSWORD` | No | SMTP password |
+| `EMAIL_TIMEOUT` | No | SMTP connection timeout in seconds (default: `15`) |
 | `CRISIS_EMAIL_RECEIVER` | No | Email for crisis alerts |
 
 ## Important Notes
