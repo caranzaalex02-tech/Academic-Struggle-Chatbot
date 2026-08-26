@@ -70,6 +70,22 @@ def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     return response
 
+
+# --- Global error handlers ---
+@app.errorhandler(500)
+def internal_error(e):
+    """Log the full traceback and show a friendly message instead of a blank 500 page."""
+    app.logger.error("Internal Server Error: %s", e, exc_info=True)
+    try:
+        return render_template("error_500.html"), 500
+    except Exception:
+        return "<h1>Internal Server Error</h1><p>Something went wrong. Please try again later.</p>", 500
+
+
+@app.errorhandler(429)
+def rate_limited(e):
+    return render_template("error_500.html", message="Too many requests. Please wait a while and try again."), 429
+
 # ================= DATABASE REFACTOR =================
 def get_db():
     """Opens a new database connection if there is none yet for the current application context."""
@@ -217,24 +233,29 @@ def init_db():
     conn.commit()
 
     # --- Migrations for older databases (safe to run multiple times) ---
-    # Only run migrations for SQLite (existing databases that may be missing columns).
-    # PostgreSQL databases are created fresh with all columns included above.
-    if not is_postgres:
-        def add_column(table, column, definition):
-            try:
+    # Run for BOTH SQLite and PostgreSQL so databases created by older
+    # versions of the app automatically get any newly-added columns.
+    def add_column(table, column, definition):
+        try:
+            if is_postgres:
+                c.execute(f"ALTER TABLE {table} ADD COLUMN IF NOT EXISTS {column} {definition}")
+            else:
                 c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
-                conn.commit()
-            except Exception:
-                # Column already exists or other error - rollback the ALTER TABLE only
-                conn.rollback()
+            conn.commit()
+        except Exception as e:
+            # Column already exists or other error - rollback and continue safely.
+            conn.rollback()
+            err_msg = str(e).lower()
+            if "duplicate" not in err_msg and "already exists" not in err_msg:
+                app.logger.warning("Skipping column migration %s.%s: %s", table, column, e)
 
-        add_column("users", "first_name", "TEXT")
-        add_column("users", "last_name", "TEXT")
-        add_column("users", "profile_pic", "TEXT DEFAULT '/static/images/default_avatar.svg'")
-        add_column("users", "ban_expires_at", "DATETIME DEFAULT NULL")
-        add_column("users", "abuse_offense_count", "INTEGER DEFAULT 0")
-        add_column("messages", "is_abusive", "INTEGER DEFAULT 0")
-        add_column("peer_messages", "is_read", "INTEGER DEFAULT 0")
+    add_column("users", "first_name", "TEXT")
+    add_column("users", "last_name", "TEXT")
+    add_column("users", "profile_pic", "TEXT DEFAULT '/static/images/default_avatar.svg'")
+    add_column("users", "ban_expires_at", f"{ban_expires_type} DEFAULT NULL")
+    add_column("users", "abuse_offense_count", "INTEGER DEFAULT 0")
+    add_column("messages", "is_abusive", "INTEGER DEFAULT 0")
+    add_column("peer_messages", "is_read", "INTEGER DEFAULT 0")
 
     # --- Seed Data ---
     # Seed FAQs if table is empty
@@ -504,9 +525,16 @@ def register():
                 # Commit BEFORE sending the welcome email so an email failure can never
                 # block or break registration.
                 db.commit()
-            except Exception:
+            except Exception as e:
                 db.rollback()
-                error = "Email address is already registered. Please use a different one."
+                # Log the real error so it can be diagnosed; show a friendly message.
+                app.logger.error("Registration INSERT failed for %s: %s", email, e, exc_info=True)
+                err_name = type(e).__name__.lower()
+                err_msg = str(e).lower()
+                if "integrity" in err_name or "unique" in err_msg or "duplicate" in err_msg or "already exists" in err_msg:
+                    error = "Email address is already registered. Please use a different one."
+                else:
+                    error = "An unexpected error occurred. Please try again later."
 
             if error is None:
                 # Send a welcome email (best effort) - never fail registration because of email.
