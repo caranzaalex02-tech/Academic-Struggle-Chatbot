@@ -54,6 +54,10 @@ services:
         value: "false"
       - key: EMAIL_TIMEOUT
         value: "15"
+      # Resend HTTP API key. Render blocks outbound SMTP, so use Resend to
+      # actually deliver emails from production.
+      - key: RESEND_API_KEY
+        sync: false
       - key: EMAIL_DISPLAY_NAME
         value: Academic Struggle Chatbot
       - key: EMAIL_LOGO_URL

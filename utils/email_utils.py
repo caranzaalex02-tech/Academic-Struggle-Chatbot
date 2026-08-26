@@ -2,7 +2,9 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import os
+import json
 import logging
+import urllib.request
 
 try:
     from dotenv import load_dotenv
@@ -14,12 +16,61 @@ def _get_email_backend():
     backend = os.environ.get("EMAIL_BACKEND", "").strip().lower()
     if backend:
         return backend
+    # Prefer the Resend HTTP API when a key is present (works on Render,
+    # which blocks direct SMTP connections).
+    if os.environ.get("RESEND_API_KEY"):
+        return "resend"
     # If SMTP credentials exist, use SMTP by default so password reset works without forcing console mode.
     if os.environ.get("EMAIL_SENDER") and os.environ.get("EMAIL_PASSWORD"):
         return "smtp"
     return "console"
 
 EMAIL_BACKEND = _get_email_backend()
+
+
+def _send_via_resend(to_email, subject, plain_body, html_body):
+    """Send email through the Resend HTTP API.
+
+    Render (and many other PaaS providers) block outbound SMTP ports
+    (25/465/587), which is why Gmail SMTP fails with
+    "Connection unexpectedly closed". Resend exposes a simple HTTPS API
+    that works from any environment.
+    """
+    api_key = os.environ.get("RESEND_API_KEY")
+    if not api_key:
+        logging.warning("RESEND_API_KEY is not set; cannot send via Resend.")
+        return False
+
+    sender = os.environ.get("EMAIL_SENDER") or "onboarding@resend.dev"
+    display_name = os.environ.get("EMAIL_DISPLAY_NAME", "Academic Struggle Chatbot").strip()
+    from_addr = f"{display_name} <{sender}>"
+
+    payload = {
+        "from": from_addr,
+        "to": [to_email],
+        "subject": subject,
+        "html": html_body,
+        "text": plain_body,
+    }
+
+    req = urllib.request.Request(
+        "https://api.resend.com/emails",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = resp.read().decode("utf-8")
+            logging.info("Resend email sent to %s (status %s)", to_email, resp.status)
+            return True
+    except Exception as e:
+        logging.error("Failed to send email via Resend to %s: %s", to_email, e)
+        return False
 
 def _get_email_config():
     """Helper to fetch all email configuration from environment variables."""
@@ -154,6 +205,8 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Welcome to Academic Struggle Chatbot", plain_body, html_body)
+    if EMAIL_BACKEND == 'resend':
+        return _send_via_resend(user_email, "Welcome to Academic Struggle Chatbot", plain_body, html_body)
     msg["From"] = formatted_sender
     msg["To"] = user_email
 
@@ -230,6 +283,8 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Reset Your Password", plain_body, html_body)
+    if EMAIL_BACKEND == 'resend':
+        return _send_via_resend(user_email, "Reset Your Password", plain_body, html_body)
     msg["From"] = formatted_sender
     msg["To"] = user_email
 

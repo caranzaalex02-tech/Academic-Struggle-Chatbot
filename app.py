@@ -59,6 +59,19 @@ if redis_url:
 # For password reset tokens
 s = URLSafeTimedSerializer(app.secret_key)
 
+
+def hash_password(password):
+    """Hash a password using pbkdf2:sha256.
+
+    Werkzeug 3.x defaults to scrypt, which is memory-intensive enough to
+    trigger an out-of-memory kill (SIGKILL) on small Render/Heroku dynos
+    (~512 MB), causing "internal server error" during registration.
+    pbkdf2:sha256 is still secure and uses far less memory.
+    check_password_hash() auto-detects the hashing method, so previously
+    stored scrypt hashes keep working.
+    """
+    return generate_password_hash(password, method="pbkdf2:sha256")
+
 typing_users = {}
 
 # --- Security Headers ---
@@ -438,7 +451,7 @@ def admin_register():
             error = "Passwords do not match."
         
         if error is None:
-            hashed_password = generate_password_hash(password)
+            hashed_password = hash_password(password)
             try:
                 if 'DATABASE_URL' in os.environ:
                     c.execute("INSERT INTO users (email, password, first_name, last_name, role) VALUES (%s, %s, %s, %s, %s)",
@@ -515,7 +528,7 @@ def register():
             db = get_db()
             c = db.cursor()
             try:
-                hashed_password = generate_password_hash(password)
+                hashed_password = hash_password(password)
                 if 'DATABASE_URL' in os.environ:
                     c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                               (first_name, last_name, hashed_password, email, phone, int(age), gender, course))
@@ -575,7 +588,10 @@ def forgot_password():
             if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                 flash(f"Password reset link (dev): {reset_link}", "success")
             if not email_sent:
-                flash("Could not send email. Please check server logs and ensure EMAIL_SENDER/EMAIL_PASSWORD are set in the .env file.", "error")
+                # Render blocks outbound SMTP, so fall back to showing the link
+                # so the user can still reset their password.
+                flash("Could not send the reset email. Use this link to reset your password:", "error")
+                flash(f"{reset_link}", "info")
                 return redirect(url_for('forgot_password'))
 
         # For better UX and security, always show a generic success message.
@@ -609,7 +625,7 @@ def reset_with_token(token):
         elif password != confirm_password:
             flash("Passwords do not match.", "error")
         else:
-            hashed_password = generate_password_hash(password)
+            hashed_password = hash_password(password)
             db = get_db()
             c = db.cursor()
             if 'DATABASE_URL' in os.environ:
@@ -654,7 +670,8 @@ def admin_forgot_password():
                 flash(f"Admin password reset link (dev): {reset_link}", "success")
             if not email_sent:
                 app.logger.warning("Admin password reset email could not be sent for %s", email)
-                flash("Could not send email. Please check the server logs and .env configuration for email settings.", "error")
+                flash("Could not send the reset email. Use this link to reset your admin password:", "error")
+                flash(f"{reset_link}", "info")
                 return redirect(url_for('admin_forgot_password'))
         else:
             app.logger.info("Admin password reset requested for non-existent admin email: %s", email)
@@ -688,7 +705,7 @@ def admin_reset_with_token(token):
         elif password != confirm_password:
             flash("Passwords do not match.", "error")
         else:
-            hashed_password = generate_password_hash(password)
+            hashed_password = hash_password(password)
             db = get_db()
             c = db.cursor()
             if 'DATABASE_URL' in os.environ:
@@ -1523,7 +1540,7 @@ def user_settings():
                 user_row = c.fetchone()
                 
                 if user_row and check_password_hash(user_row['password'], current_password):
-                    hashed_password = generate_password_hash(new_password)
+                    hashed_password = hash_password(new_password)
                     if 'DATABASE_URL' in os.environ:
                         c.execute("UPDATE users SET password=%s WHERE email=%s", (hashed_password, user_email))
                     else:
