@@ -64,6 +64,39 @@
             transition: background-color 0.3s;
         }
         .auth-box button:hover { background: #0072ff; }
+        .password-wrapper {
+            position: relative;
+            margin: 10px 0;
+        }
+        .password-wrapper input {
+            margin: 0;
+            padding-right: 50px;
+        }
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 14px;
+            transform: translateY(-50%);
+            width: 26px;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 50%;
+            color: rgba(255, 255, 255, 0.95);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+            user-select: none;
+        }
+        .toggle-password:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.28);
+            color: #00c6ff;
+            transform: translateY(-50%) scale(1.05);
+        }
+        .toggle-password svg { width: 16px; height: 16px; }
         .flash-message {
             padding: 10px;
             margin-bottom: 15px;
@@ -97,11 +130,41 @@
     {% endwith %}
 
     <form method="POST" autocomplete="off">
-        <input type="password" name="password" placeholder="Enter new password" required>
-        <input type="password" name="confirm_password" placeholder="Confirm new password" required>
+        <div class="password-wrapper">
+            <input type="password" name="password" id="password" placeholder="Enter new password" required>
+            <span class="toggle-password" onclick="togglePassword('password', 'eye-closed-1', 'eye-open-1')" aria-label="Toggle password visibility">
+                <svg id="eye-closed-1" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 7.61 17 4.5 12 4.5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7M2.28 4.49L.86 5.91 2 7.05C1.29 7.95.72 9 1 10.24c.73 3.38 3.97 6.03 7 6.71v-1.7c-1.73-.43-3.23-1.55-4.26-3.01.3-.5.66-1 1.06-1.47l1.42 1.42c-.15.43-.28.88-.36 1.34h1.5c.08-.44.21-.86.39-1.26l2.11 2.11c-.4.1-.81.15-1.23.15-2.76 0-5-2.24-5-5c0-.59.11-1.16.31-1.69L2.28 4.49M12 17c.95 0 1.82-.27 2.57-.72l1.43 1.43C15.9 18.44 14.62 19 13.19 19v1.7c3.03-.68 6.27-3.33 7-6.71.28-1.24-.29-2.29-1-3.19L17.73 8.57 12 14.3 2.28 4.49Z"/></svg>
+                <svg id="eye-open-1" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5m0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Z"/></svg>
+            </span>
+        </div>
+        <div class="password-wrapper">
+            <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm new password" required>
+            <span class="toggle-password" onclick="togglePassword('confirm_password', 'eye-closed-2', 'eye-open-2')" aria-label="Toggle password visibility">
+                <svg id="eye-closed-2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 7.61 17 4.5 12 4.5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7M2.28 4.49L.86 5.91 2 7.05C1.29 7.95.72 9 1 10.24c.73 3.38 3.97 6.03 7 6.71v-1.7c-1.73-.43-3.23-1.55-4.26-3.01.3-.5.66-1 1.06-1.47l1.42 1.42c-.15.43-.28.88-.36 1.34h1.5c.08-.44.21-.86.39-1.26l2.11 2.11c-.4.1-.81.15-1.23.15-2.76 0-5-2.24-5-5c0-.59.11-1.16.31-1.69L2.28 4.49M12 17c.95 0 1.82-.27 2.57-.72l1.43 1.43C15.9 18.44 14.62 19 13.19 19v1.7c3.03-.68 6.27-3.33 7-6.71.28-1.24-.29-2.29-1-3.19L17.73 8.57 12 14.3 2.28 4.49Z"/></svg>
+                <svg id="eye-open-2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5m0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Z"/></svg>
+            </span>
+        </div>
         <button type="submit">Reset Password</button>
     </form>
 </div>
+
+<script>
+    function togglePassword(inputId, closedId, openId) {
+        const input = document.getElementById(inputId);
+        const eyeClosed = document.getElementById(closedId);
+        const eyeOpen = document.getElementById(openId);
+        if (!input || !eyeClosed || !eyeOpen) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeClosed.style.display = 'none';
+            eyeOpen.style.display = 'inline';
+        } else {
+            input.type = 'password';
+            eyeOpen.style.display = 'none';
+            eyeClosed.style.display = 'inline';
+        }
+    }
+</script>
 
 </body>
 </html>
