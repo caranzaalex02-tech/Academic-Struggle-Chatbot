@@ -109,6 +109,11 @@
             transform: translateY(-50%) scale(1.05);
         }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <style>
+        .auth-box button[type="submit"] { background: linear-gradient(135deg, #f87171, #ef4444); box-shadow: 0 12px 28px -10px rgba(239, 68, 68, 0.5); }
+        .auth-box button[type="submit"]:hover { box-shadow: 0 16px 34px -10px rgba(239, 68, 68, 0.6); }
+    </style>
 </head>
 <body>
 

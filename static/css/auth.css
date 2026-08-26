@@ -1,0 +1,322 @@
+/* ============================================================
+   Academic Struggle Chatbot — Professional Auth Design System
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+:root {
+    --bg-0: #0b1220;
+    --bg-1: #131c31;
+    --bg-2: #1e1b4b;
+    --card-bg: rgba(255, 255, 255, 0.055);
+    --card-border: rgba(255, 255, 255, 0.12);
+    --accent-1: #38bdf8;
+    --accent-2: #8b5cf6;
+    --accent-3: #34d399;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --danger: #f87171;
+    --success: #34d399;
+    --input-bg: rgba(255, 255, 255, 0.06);
+    --input-border: rgba(255, 255, 255, 0.12);
+    --shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--bg-0), var(--bg-1) 45%, var(--bg-2));
+    position: relative;
+    padding: 32px 16px;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(600px 400px at 15% 20%, rgba(56, 189, 248, 0.18), transparent 60%),
+        radial-gradient(700px 500px at 85% 75%, rgba(139, 92, 246, 0.20), transparent 60%),
+        radial-gradient(500px 400px at 70% 15%, rgba(52, 211, 153, 0.10), transparent 55%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.auth-box {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 40px 36px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    margin: auto; /* centers short forms, allows scrolling for tall forms */
+    animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-box h2 {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.auth-box .subtitle,
+.auth-box .info-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+    line-height: 1.55;
+}
+
+.auth-box .logo {
+    width: 74px;
+    height: 74px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.auth-box form {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.auth-box input:not([type="checkbox"]):not([type="radio"]),
+.auth-box select,
+.auth-box textarea {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--input-border);
+    outline: none;
+    font-size: 0.92rem;
+    font-family: inherit;
+    background: var(--input-bg);
+    color: #fff;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-box input::placeholder {
+    color: rgba(148, 163, 184, 0.65);
+}
+
+.auth-box input:focus,
+.auth-box select:focus,
+.auth-box textarea:focus {
+    border-color: var(--accent-1);
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+}
+
+.auth-box select {
+    appearance: none;
+    cursor: pointer;
+}
+.auth-box select option {
+    color: #0f172a;
+    background: #fff;
+}
+
+.password-wrapper,
+.password-container {
+    position: relative;
+}
+
+.password-wrapper input,
+.password-container input {
+    padding-right: 52px;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    user-select: none;
+}
+.toggle-password:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--accent-1);
+    border-color: rgba(56, 189, 248, 0.4);
+    transform: translateY(-50%) scale(1.06);
+}
+.toggle-password svg {
+    width: 17px;
+    height: 17px;
+}
+
+.auth-box button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: #fff;
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 12px 28px -10px rgba(139, 92, 246, 0.55);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+.auth-box button[type="submit"]:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+    box-shadow: 0 16px 34px -10px rgba(139, 92, 246, 0.65);
+}
+.auth-box button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+
+.flash-message {
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    text-align: left;
+    line-height: 1.5;
+    word-break: break-word;
+}
+.flash-success { background: rgba(52, 211, 153, 0.16); color: #6ee7b7; border: 1px solid rgba(52, 211, 153, 0.3); }
+.flash-error   { background: rgba(248, 113, 113, 0.16); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.3); }
+.flash-info    { background: rgba(56, 189, 248, 0.14); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.3); }
+
+.error {
+    color: var(--danger);
+    background: rgba(248, 113, 113, 0.12);
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+    text-align: left;
+}
+
+.switch {
+    margin-top: 18px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+.switch a {
+    color: var(--accent-1);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+.switch a:hover { color: #7dd3fc; text-decoration: underline; }
+
+.password-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+}
+.password-footer p {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+.password-footer button {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 0.76rem;
+    border-radius: 999px;
+    border: 1px solid var(--input-border);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--accent-1);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+.password-footer button:hover { background: rgba(56, 189, 248, 0.15); }
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.form-check-input {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    accent-color: var(--accent-2);
+}
+.form-check-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+    text-align: left;
+}
+.form-check-label a { color: var(--accent-1); text-decoration: none; font-weight: 600; }
+.form-check-label a:hover { text-decoration: underline; }
+
+@media (max-width: 560px) {
+    .auth-box { padding: 30px 22px; }
+    .form-row { flex-direction: column; gap: 0; }
+}
