@@ -13,19 +13,83 @@ except ImportError:
     pass
 
 def _get_email_backend():
+    # API keys take priority over a stale "smtp" default, because SMTP is
+    # blocked on Render and won't work there anyway. Setting SENDGRID_API_KEY
+    # (or RESEND_API_KEY) is enough to switch to the HTTP backend.
+    if os.environ.get("SENDGRID_API_KEY"):
+        return "sendgrid"
+    if os.environ.get("RESEND_API_KEY"):
+        return "resend"
     backend = os.environ.get("EMAIL_BACKEND", "").strip().lower()
     if backend:
         return backend
-    # Prefer the Resend HTTP API when a key is present (works on Render,
-    # which blocks direct SMTP connections).
-    if os.environ.get("RESEND_API_KEY"):
-        return "resend"
     # If SMTP credentials exist, use SMTP by default so password reset works without forcing console mode.
     if os.environ.get("EMAIL_SENDER") and os.environ.get("EMAIL_PASSWORD"):
         return "smtp"
     return "console"
 
 EMAIL_BACKEND = _get_email_backend()
+
+
+def _send_via_sendgrid(to_email, subject, plain_body, html_body):
+    """Send email through the SendGrid Web API v3.
+
+    SendGrid's free tier (100 emails/day) allows "Single Sender
+    Verification", which means you can verify a single email address
+    (e.g. your Gmail) as the sender WITHOUT owning a domain. This is the
+    easiest free option that works from Render (which blocks SMTP).
+    """
+    api_key = os.environ.get("SENDGRID_API_KEY")
+    if not api_key:
+        logging.warning("SENDGRID_API_KEY is not set; cannot send via SendGrid.")
+        return False
+
+    sender_email = os.environ.get("EMAIL_SENDER")
+    if not sender_email:
+        logging.warning("EMAIL_SENDER is not set; cannot send via SendGrid.")
+        return False
+
+    display_name = os.environ.get("EMAIL_DISPLAY_NAME", "Academic Struggle Chatbot").strip()
+
+    payload = {
+        "personalizations": [
+            {
+                "to": [{"email": to_email}],
+                "subject": subject,
+            }
+        ],
+        "from": {"email": sender_email, "name": display_name},
+        "content": [
+            {"type": "text/plain", "value": plain_body},
+            {"type": "text/html", "value": html_body},
+        ],
+    }
+
+    req = urllib.request.Request(
+        "https://api.sendgrid.com/v3/mail/send",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            logging.info("SendGrid email sent to %s (status %s)", to_email, resp.status)
+            return True
+    except urllib.error.HTTPError as e:
+        # SendGrid returns a useful error body on failure.
+        try:
+            detail = e.read().decode("utf-8")
+        except Exception:
+            detail = ""
+        logging.error("SendGrid API error %s for %s: %s", e.code, to_email, detail)
+        return False
+    except Exception as e:
+        logging.error("Failed to send email via SendGrid to %s: %s", to_email, e)
+        return False
 
 
 def _send_via_resend(to_email, subject, plain_body, html_body):
@@ -170,7 +234,9 @@ def send_registration_email(username, user_email):
         print("="*55 + "\n")
         return True
 
-    if not all([config['sender'], config['password'], config['user']]):
+    # SMTP requires sender + password + user; HTTP backends (SendGrid/Resend)
+    # only need their API key + sender, which is checked inside each helper.
+    if EMAIL_BACKEND not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
         logging.warning("Registration email not sent. Email credentials are not configured in environment variables.")
         return False
 
@@ -205,6 +271,8 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Welcome to Academic Struggle Chatbot", plain_body, html_body)
+    if EMAIL_BACKEND == 'sendgrid':
+        return _send_via_sendgrid(user_email, "Welcome to Academic Struggle Chatbot", plain_body, html_body)
     if EMAIL_BACKEND == 'resend':
         return _send_via_resend(user_email, "Welcome to Academic Struggle Chatbot", plain_body, html_body)
     msg["From"] = formatted_sender
@@ -246,7 +314,7 @@ def send_password_reset_email(user_email, reset_link):
         print("="*55 + "\n")
         return True
 
-    if not all([config['sender'], config['password'], config['user']]):
+    if EMAIL_BACKEND not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
         logging.warning("Password reset email not sent. Email credentials are not fully configured.")
         return False
 
@@ -283,6 +351,8 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Reset Your Password", plain_body, html_body)
+    if EMAIL_BACKEND == 'sendgrid':
+        return _send_via_sendgrid(user_email, "Reset Your Password", plain_body, html_body)
     if EMAIL_BACKEND == 'resend':
         return _send_via_resend(user_email, "Reset Your Password", plain_body, html_body)
     msg["From"] = formatted_sender

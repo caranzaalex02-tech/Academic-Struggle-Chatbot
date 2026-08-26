@@ -58,6 +58,10 @@ services:
       # actually deliver emails from production.
       - key: RESEND_API_KEY
         sync: false
+      # SendGrid API key (free tier, no domain needed). Set this + EMAIL_SENDER
+      # (your verified single sender) to deliver email without a domain.
+      - key: SENDGRID_API_KEY
+        sync: false
       - key: EMAIL_DISPLAY_NAME
         value: Academic Struggle Chatbot
       - key: EMAIL_LOGO_URL
