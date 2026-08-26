@@ -7,22 +7,50 @@ import sqlite3
 import logging
 from pathlib import Path
 
-try:
-    import openai
-except ImportError:
-    openai = None
+# Heavy AI SDKs are imported lazily (inside the _call_*_api functions) so that
+# the web worker does NOT load google.generativeai / openai / groq at startup.
+# Loading them eagerly was causing "Worker was sent SIGKILL! Perhaps out of
+# memory?" on small (512 MB) Render/Heroku dynos.
+openai = None
+genai = None
+groq = None
 
-# Import Google Gemini
-try:
-    import google.generativeai as genai
-except ImportError:
-    genai = None
+# Sentinel used to remember that a module failed to import, so we don't retry.
+_IMPORT_FAILED = object()
 
-# Import Groq
-try:
-    import groq
-except ImportError:
-    groq = None
+
+def _import_openai():
+    global openai
+    if openai is None:
+        try:
+            import openai as _openai
+            openai = _openai
+        except ImportError:
+            openai = _IMPORT_FAILED
+    return None if openai is _IMPORT_FAILED else openai
+
+
+def _import_genai():
+    global genai
+    if genai is None:
+        try:
+            import google.generativeai as _genai
+            genai = _genai
+        except ImportError:
+            genai = _IMPORT_FAILED
+    return None if genai is _IMPORT_FAILED else genai
+
+
+def _import_groq():
+    global groq
+    if groq is None:
+        try:
+            import groq as _groq
+            groq = _groq
+        except ImportError:
+            groq = _IMPORT_FAILED
+    return None if groq is _IMPORT_FAILED else groq
+
 
 try:
     from dotenv import load_dotenv
@@ -872,11 +900,11 @@ def _get_gemini_api_key():
 
 def _gemini_available():
     """Checks if the Gemini library is installed and an API key is available."""
-    return genai is not None and _get_gemini_api_key() is not None
+    return _import_genai() is not None and _get_gemini_api_key() is not None
 
 
 def _openai_available():
-    return openai is not None and _get_openai_api_key() is not None
+    return _import_openai() is not None and _get_openai_api_key() is not None
 
 
 def _get_groq_api_key():
@@ -887,7 +915,7 @@ def _get_groq_api_key():
 
 def _groq_available():
     """Checks if the Groq library is installed and an API key is available."""
-    return groq is not None and _get_groq_api_key() is not None
+    return _import_groq() is not None and _get_groq_api_key() is not None
 
 
 def _call_groq_api(user_input, language='tagalog'):
@@ -905,7 +933,7 @@ def _call_groq_api(user_input, language='tagalog'):
         key_preview = f"{api_key[:5]}...{api_key[-4:]}" if len(api_key) > 9 else "Invalid Key"
         logging.info(f"Attempting to use Groq API key: {key_preview}")
 
-        client = groq.Groq(api_key=api_key)
+        client = _import_groq().Groq(api_key=api_key)
         model = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
 
         system_prompt = _build_openai_system_prompt(language)
@@ -956,7 +984,8 @@ def _call_gemini_api(user_input, language='tagalog'):
         key_preview = f"{api_key[:5]}...{api_key[-4:]}" if len(api_key) > 9 else "Invalid Key"
         logging.info(f"Attempting to use Gemini API key: {key_preview}")
 
-        genai.configure(api_key=api_key)
+        genai_module = _import_genai()
+        genai_module.configure(api_key=api_key)
 
         preferred_models = [
             os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
@@ -971,7 +1000,7 @@ def _call_gemini_api(user_input, language='tagalog'):
                 continue
             seen_models.add(model_name)
             try:
-                model = genai.GenerativeModel(model_name)
+                model = genai_module.GenerativeModel(model_name)
                 system_prompt = _build_openai_system_prompt(language)
                 full_prompt = f"{system_prompt}\n\nUser: {user_input}\nAssistant:"
                 response = model.generate_content(contents=full_prompt)
@@ -1065,7 +1094,8 @@ def _call_openai_api(user_input, intent=None, language='tagalog'):
         key_preview = f"{api_key[:5]}...{api_key[-4:]}" if len(api_key) > 9 else "Invalid Key"
         logging.warning(f"Attempting to use OpenAI API key: {key_preview}")
             
-        client = openai.OpenAI(api_key=api_key)
+        openai_module = _import_openai()
+        client = openai_module.OpenAI(api_key=api_key)
         model = os.environ.get("MENTALHEALTHWEB_OPENAI_MODEL", "gpt-3.5-turbo")
 
         messages = [
@@ -1088,7 +1118,7 @@ def _call_openai_api(user_input, intent=None, language='tagalog'):
         logging.warning("OpenAI response was empty or malformed.")
         return None
 
-    except openai.RateLimitError as e:
+    except openai_module.RateLimitError as e:
         logging.error("OpenAI quota/rate limit error: %s", e)
         # Check if the error is specifically about quota
         if 'insufficient_quota' in str(e).lower():

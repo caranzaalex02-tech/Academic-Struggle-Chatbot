@@ -264,6 +264,11 @@ def init_db():
 
     add_column("users", "first_name", "TEXT")
     add_column("users", "last_name", "TEXT")
+    add_column("users", "phone", "TEXT")
+    add_column("users", "age", "INTEGER")
+    add_column("users", "gender", "TEXT")
+    add_column("users", "course", "TEXT")
+    add_column("users", "role", "TEXT DEFAULT 'user'")
     add_column("users", "profile_pic", "TEXT DEFAULT '/static/images/default_avatar.svg'")
     add_column("users", "ban_expires_at", f"{ban_expires_type} DEFAULT NULL")
     add_column("users", "abuse_offense_count", "INTEGER DEFAULT 0")
@@ -483,6 +488,10 @@ def register():
         gender = request.form.get("gender")
         course = request.form.get("course")
         accept_terms = request.form.get("accept_terms")
+        app.logger.info(
+            "Register attempt: email=%r gender=%r course=%r phone=%r age=%r terms=%r",
+            email, gender, course, phone, age, accept_terms,
+        )
 
         # --- Validation ---
         if not first_name:
@@ -557,6 +566,10 @@ def register():
                     app.logger.error("Failed to send registration email to %s: %s", email, e)
                 flash("Registration successful! Please log in.", "success")
                 return redirect(url_for("login"))
+
+        # Log the reason the form was re-rendered so it can be diagnosed.
+        if request.method == "POST":
+            app.logger.info("Register re-rendered with error: %r", error)
 
     return render_template("register.html", error=error)
 
