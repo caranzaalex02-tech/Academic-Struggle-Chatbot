@@ -275,6 +275,15 @@ def init_db():
     add_column("messages", "is_abusive", "INTEGER DEFAULT 0")
     add_column("peer_messages", "is_read", "INTEGER DEFAULT 0")
 
+    # --- Normalize existing emails to lowercase ---
+    # Login/register now lowercase emails, so migrate older rows so they match.
+    try:
+        c.execute("UPDATE users SET email = LOWER(email)")
+        conn.commit()
+    except Exception as e:
+        conn.rollback()
+        app.logger.warning("Email normalization skipped: %s", e)
+
     # --- Seed Data ---
     # Seed FAQs if table is empty
     c.execute("SELECT COUNT(*) FROM faq_dataset")
@@ -376,8 +385,9 @@ def home():
 def login():
     error = None
     if request.method=="POST":
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         password = request.form["password"]
+        app.logger.info("Login attempt for email=%r", email)
         db = get_db()
         c = db.cursor()
         # Use %s for PostgreSQL compatibility
@@ -395,6 +405,10 @@ def login():
                 session["role"] = user['role']
                 return redirect(url_for("chatbot"))
         else:
+            if not user:
+                app.logger.warning("Login failed for %r: no user found", email)
+            else:
+                app.logger.warning("Login failed for %r: password mismatch", email)
             error = "Invalid credentials."
     return render_template("login.html", error=error)
 
@@ -404,7 +418,7 @@ def login():
 def admin_login():
     error = None
     if request.method=="POST":
-        username = request.form.get("username", "").strip()
+        username = request.form.get("username", "").strip().lower()
         password = request.form["password"]
         db = get_db()
         c = db.cursor()
@@ -444,7 +458,7 @@ def admin_register():
 
     error = None
     if request.method == "POST":
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
 
@@ -482,7 +496,7 @@ def register():
         first_name = request.form.get("first_name", "").strip()
         last_name = request.form.get("last_name", "").strip()
         password = request.form.get("password", "")
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         phone = request.form.get("phone", "").strip()
         age = request.form.get("age")
         gender = request.form.get("gender")
@@ -578,7 +592,7 @@ def register():
 @limiter.limit("5 per hour")
 def forgot_password():
     if request.method == "POST":
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         db = get_db()
         c = db.cursor()
         if 'DATABASE_URL' in os.environ:
@@ -656,7 +670,7 @@ def reset_with_token(token):
 @limiter.limit("5 per hour")
 def admin_forgot_password():
     if request.method == "POST":
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         db = get_db()
         c = db.cursor()
         # Ensure the user is an admin
