@@ -1,6 +1,7 @@
 # Python Standard Library
 import base64
 import os
+import re
 import sqlite3
 import urllib.parse
 from datetime import datetime, timedelta, timezone
@@ -493,18 +494,18 @@ def admin_register():
 def register():
     error = None
     if request.method=="POST":
-        first_name = request.form.get("first_name", "").strip()
-        last_name = request.form.get("last_name", "").strip()
+        first_name = request.form.get("first_name", "").strip().title()
+        last_name = request.form.get("last_name", "").strip().title()
         password = request.form.get("password", "")
         email = request.form.get("email", "").strip().lower()
-        phone = request.form.get("phone", "").strip()
+        student_id = request.form.get("student_id", "").strip()
         age = request.form.get("age")
         gender = request.form.get("gender")
         course = request.form.get("course")
         accept_terms = request.form.get("accept_terms")
         app.logger.info(
-            "Register attempt: email=%r gender=%r course=%r phone=%r age=%r terms=%r",
-            email, gender, course, phone, age, accept_terms,
+            "Register attempt: email=%r gender=%r course=%r student_id=%r age=%r terms=%r",
+            email, gender, course, student_id, age, accept_terms,
         )
 
         # --- Validation ---
@@ -518,8 +519,10 @@ def register():
             error = "Password must be at least 6 characters long."
         elif not email:
             error = "Email address is required."
-        elif not phone:
-            error = "Phone number is required."
+        elif not student_id:
+            error = "Student ID is required."
+        elif not re.match(r'^\d{2}-\d{4}$', student_id):
+            error = "Student ID must be in the format 23-0768 (2 digits, dash, 4 digits)."
         elif not age:
             error = "Age is required."
         elif not gender:
@@ -554,10 +557,10 @@ def register():
                 hashed_password = hash_password(password)
                 if 'DATABASE_URL' in os.environ:
                     c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                              (first_name, last_name, hashed_password, email, phone, int(age), gender, course))
+                              (first_name, last_name, hashed_password, email, student_id, int(age), gender, course))
                 else:
                     c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                              (first_name, last_name, hashed_password, email, phone, int(age), gender, course))
+                              (first_name, last_name, hashed_password, email, student_id, int(age), gender, course))
                 # Commit BEFORE sending the welcome email so an email failure can never
                 # block or break registration.
                 db.commit()
