@@ -303,7 +303,7 @@
             </div>
             <div class="form-group" style="flex: 1;">
                 <label for="student_id">Student ID</label>
-                <input type="text" id="student_id" name="student_id" placeholder="e.g., 23-0768" required pattern="\d{2}-\d{4}" maxlength="7" autocomplete="off" oninput="let v=this.value.replace(/[^0-9-]/g,'');if(v.length===2&&!v.includes('-'))v+='-';this.value=v.slice(0,7)" title="Format: 2 digits, dash, 4 digits (e.g., 23-0768)">
+                <input type="text" id="student_id" name="student_id" placeholder="e.g., 23-0768" required pattern="\d{2}-\d{4}" maxlength="7" autocomplete="off" inputmode="numeric" oninput="let v=this.value.replace(/[^0-9]/g,'');if(v.length>2)v=v.slice(0,2)+'-'+v.slice(2,4);this.value=v.slice(0,7)" onkeydown="if(this.value.length===3&&event.key==='Backspace'){this.value=this.value.slice(0,2);event.preventDefault()}" title="Format: 2 digits, dash, 4 digits (e.g., 23-0768)">
             </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; text-align: left;">
