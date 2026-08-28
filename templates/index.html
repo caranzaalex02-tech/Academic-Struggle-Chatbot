@@ -21,32 +21,13 @@ body{
 overflow-x:hidden;
 overflow-y:auto;
 min-height:100vh;
-padding-top:120px;
+padding-top:0;
 /* Natural vibe background - Pili ka dito ng gusto mo (Uncomment to use): */
-
 /* Option 1: Light Coastal Calm (Beach & Sea Vibe) */
 background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
-
 background-size: cover;
 -webkit-tap-highlight-color:transparent;
-}
-
-/* ---- MOBILE-PILL NAV (replaces .nav-bar on small screens) ---- */
-.mobile-nav-trigger{
-display:none;
-position:fixed;
-top:10px;
-right:10px;
-z-index:55;
-width:44px;
-height:44px;
-border-radius:50%;
-background:rgba(255,255,255,0.95);
-border:1px solid #e5e7eb;
-color:#0f172a;
-font-size:1.2rem;
-cursor:pointer;
-box-shadow:0 4px 14px rgba(0,0,0,0.15);
+display:flex;
 }
 
 /* Dark overlay */
@@ -56,6 +37,80 @@ position:fixed;
 inset:0;
 background:rgba(0,0,0,0.4);
 z-index:-1;
+}
+
+/* ============================================================
+   SIDEBAR — dark, same style as admin dashboard
+   ============================================================ */
+.sidebar{
+position:fixed;
+top:0;
+left:0;
+bottom:0;
+width:260px;
+background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);
+color:#fff;
+display:flex;
+flex-direction:column;
+padding:30px 18px;
+z-index:50;
+box-shadow:2px 0 10px rgba(0,0,0,0.15);
+}
+.sidebar-header{
+text-align:center;
+margin-bottom:30px;
+padding-bottom:18px;
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.sidebar-header h3{
+font-size:1rem;
+font-weight:700;
+letter-spacing:0.5px;
+color:#fff;
+line-height:1.4;
+}
+.sidebar nav{flex:1;}
+.sidebar a{
+display:flex;
+align-items:center;
+gap:12px;
+color:#cbd5e1;
+text-decoration:none;
+padding:12px 14px;
+border-radius:0.625rem;
+margin-bottom:4px;
+transition:all 0.3s ease;
+font-weight:500;
+font-size:0.9rem;
+}
+.sidebar a:hover{
+background-color:rgba(59,130,246,0.2);
+color:#fff;
+transform:translateX(4px);
+}
+.sidebar a.active{
+background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);
+color:#fff;
+box-shadow:0 4px 12px rgba(59,130,246,0.3);
+}
+.sidebar a i{width:18px;text-align:center;font-size:0.95rem;}
+.sidebar .logout-section{
+margin-top:auto;
+border-top:1px solid rgba(255,255,255,0.1);
+padding-top:16px;
+}
+
+/* ============================================================
+   MAIN CONTENT AREA — chat on the right
+   ============================================================ */
+.main-content{
+margin-left:260px;
+flex:1;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px;
 }
 
 /* ============================================================
@@ -204,65 +259,6 @@ color:#1a1a1a;
 }
 .dropdown a:hover i{
 color:#b08968;
-}
-
-/* Professional Top Navigation */
-.nav-bar {
-position:fixed;
-top:18px;
-left:50%;
-transform:translateX(-50%);
-display:flex;
-gap:6px;
-background:rgba(255,255,255,0.14);
-backdrop-filter:blur(22px);
-border:1px solid rgba(255,255,255,0.2);
-border-radius:999px;
-padding:8px 10px;
-box-shadow:0 18px 40px rgba(0,0,0,0.25);
-z-index:50;
-flex-wrap:wrap;
-justify-content:center;
-max-width:95vw;
-}
-
-/* Ensure chat container starts below the top nav */
-.chat-container {
-  margin-top: 30px;
-}
-.nav-item {
-  display: flex;
-  align-items: center;
-}
-.nav-link {
-color:#f8fafc;
-text-decoration:none;
-font-size:0.82rem;
-font-weight:700;
-font-family:'Poppins','Inter','Segoe UI',sans-serif;
-text-transform:uppercase;
-letter-spacing:0.04em;
-padding:10px 12px;
-border-radius:999px;
-white-space:nowrap;
-background: rgba(255, 255, 255, 0.08);
-border: 1px solid rgba(255, 255, 255, 0.2);
-transition:transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-.nav-link i{
-  margin-right:6px;
-  font-size:0.85rem;
-}
-.nav-link:hover {
-background: rgba(255, 255, 255, 0.18);
-color: #fff;
-transform: translateY(-2px);
-box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-border-color: rgba(255, 255, 255, 0.3);
-}
-.nav-link:active {
-transform:translateY(0);
-background:rgba(255,255,255,0.12);
 }
 
 /* Daily quote strip — Claude warm */
@@ -544,26 +540,56 @@ transform:translateY(-1px);
    ====================================================== */
 @media (max-width: 768px) {
 
-  /* ---- body – less top space ---- */
-  body {
-    padding-top: 90px;
+  /* ---- sidebar – collapse to top bar ---- */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px;
+    z-index: 55;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .sidebar-header { display: none; }
+  .sidebar nav {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    flex: 1;
+  }
+  .sidebar a {
+    padding: 8px 12px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    margin-bottom: 0;
+    border-radius: 8px;
+  }
+  .sidebar a:hover { transform: none; }
+  .sidebar .logout-section {
+    margin-top: 0;
+    border-top: none;
+    border-left: 1px solid rgba(255,255,255,0.15);
+    padding-top: 0;
+    padding-left: 8px;
+    margin-left: 4px;
   }
 
-  /* ---- nav-bar – compact pill, wrap links ---- */
-  .nav-bar {
-    top: 8px;
-    gap: 4px;
-    padding: 6px 8px;
-    border-radius: 50px;
-    max-width: 97vw;
+  /* ---- body – no extra padding ---- */
+  body {
+    padding-top: 52px;
+    flex-direction: column;
   }
-  .nav-link {
-    font-size: 0.7rem;
-    padding: 8px 10px;
-    letter-spacing: 0.02em;
-  }
-  .nav-link i {
-    margin-right: 4px !important;
+
+  /* ---- main content – full width ---- */
+  .main-content {
+    margin-left: 0;
+    padding: 10px 6px 6px;
+    align-items: flex-start;
   }
 
   /* ---- chat container – full width, full height ---- */
@@ -571,10 +597,10 @@ transform:translateY(-1px);
     width: 100% !important;
     max-width: 100% !important;
     min-height: auto;
-    height: calc(100vh - 100px);
-    max-height: calc(100vh - 100px);
-    margin: 0 auto 12px;
-    border-radius: 0;
+    height: calc(100vh - 62px);
+    max-height: calc(100vh - 62px);
+    margin: 0 auto 6px;
+    border-radius: 12px 12px 0 0;
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   }
 
@@ -625,7 +651,7 @@ transform:translateY(-1px);
     gap: 6px;
   }
 
-  /* ---- input – sticky but fits inside footer ---- */
+  /* ---- input ---- */
   .chat-footer {
     padding: 8px 12px 10px;
   }
@@ -660,7 +686,7 @@ transform:translateY(-1px);
     font-size: 18px;
   }
 
-  /* ---- modals – fill more of screen ---- */
+  /* ---- modals ---- */
   .modal-content {
     margin: 15% auto;
     width: 90%;
@@ -675,36 +701,26 @@ transform:translateY(-1px);
 @media (max-width: 400px) {
 
   body {
-    padding-top: 76px;
+    padding-top: 46px;
   }
 
-  .nav-bar {
-    top: 4px;
-    gap: 2px;
+  .sidebar {
     padding: 4px 6px;
   }
-  .nav-link {
+  .sidebar a {
+    padding: 5px 8px;
     font-size: 0.65rem;
-    padding: 6px 8px;
-    letter-spacing: 0;
+    gap: 6px;
   }
-  .nav-link i {
-    margin-right: 2px !important;
-    font-size: 0.7rem;
-  }
-  .nav-label {
-    display: none;
-  }
-  .nav-link {
-    padding: 7px;
-  }
-  .nav-link i {
-    margin-right: 0 !important;
+  .sidebar a i { font-size: 0.7rem; width: 14px; }
+  .sidebar .logout-section {
+    padding-left: 4px;
+    margin-left: 2px;
   }
 
   .chat-container {
-    height: calc(100vh - 84px);
-    max-height: calc(100vh - 84px);
+    height: calc(100vh - 56px);
+    max-height: calc(100vh - 56px);
   }
 
   .chat-header {
@@ -742,27 +758,27 @@ transform:translateY(-1px);
 
 <body>
 
-<!-- Professional Navigation Bar -->
-<div class="nav-bar">
-  {% if session.get('role') == 'admin' %}
-  <a href="/admin_dashboard" class="nav-link"><i class="fas fa-shield-alt"></i><span class="nav-label"> Admin</span></a>
-  {% endif %}
-  <div class="nav-item">
-    <a href="{{ url_for('community') }}" class="nav-link" title="Chat with other users"><i class="fas fa-users"></i><span class="nav-label"> Group Study</span></a>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3>Academic<br>Support Hub</h3>
   </div>
-  <div class="nav-item">
-    <a href="{{ url_for('user_settings') }}" class="nav-link" title="Settings"><i class="fas fa-cog"></i><span class="nav-label"> Settings</span></a>
+  <nav>
+    {% if session.get('role') == 'admin' %}
+    <a href="/admin_dashboard"><i class="fas fa-shield-alt"></i> Admin Dashboard</a>
+    {% endif %}
+    <a href="{{ url_for('community') }}"><i class="fas fa-users"></i> Group Study</a>
+    <a href="{{ url_for('user_settings') }}"><i class="fas fa-cog"></i> Settings</a>
+    <a href="{{ url_for('archived_room') }}"><i class="fas fa-box-archive"></i> Archived</a>
+    <a href="{{ url_for('restart_chat') }}" onclick="return confirm('Are you sure you want to clear and archive this chat?');"><i class="fas fa-power-off"></i> Restart Chat</a>
+  </nav>
+  <div class="logout-section">
+    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
   </div>
-  <div class="nav-item">
-    <a href="{{ url_for('archived_room') }}" class="nav-link" title="View past conversations"><i class="fas fa-box-archive"></i><span class="nav-label"> Archived</span></a>
-  </div>
-  <div class="nav-item">
-    <a href="{{ url_for('restart_chat') }}" class="nav-link" title="Clear this conversation" onclick="return confirm('Are you sure you want to clear and archive this chat?');"><i class="fas fa-power-off"></i><span class="nav-label"> Restart</span></a>
-  </div>
-  <div class="nav-item">
-    <a href="/logout" class="nav-link" title="Logout from your account"><i class="fas fa-sign-out-alt"></i><span class="nav-label"> Logout</span></a>
-  </div>
-</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
 
 <div class="chat-container">
 
@@ -826,6 +842,8 @@ transform:translateY(-1px);
   </div>
 
 </div>
+
+</div><!-- end .main-content -->
 
 <!-- Crisis Hotline Modal -->
 <div id="hotlineModal" class="modal">
