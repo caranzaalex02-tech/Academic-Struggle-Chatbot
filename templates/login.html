@@ -124,6 +124,12 @@
         .error { color: #ff6b6b; margin-bottom: 10px; font-size: 14px; }
         .switch { margin-top: 15px; font-size: 14px; }
         .switch a { color: #00c6ff; text-decoration: none; font-weight: 500; }
+        @media (max-width: 480px) {
+            .auth-box { padding: 28px 20px; width: 95%; max-width: 100%; }
+            .auth-box h2 { font-size: 1rem; }
+            .auth-box input { padding: 11px; font-size: 13px; }
+            .auth-box button { padding: 11px; font-size: 14px; }
+        }
     </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>

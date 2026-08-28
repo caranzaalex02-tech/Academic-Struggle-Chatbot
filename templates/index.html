@@ -21,22 +21,32 @@ body{
 overflow-x:hidden;
 overflow-y:auto;
 min-height:100vh;
-padding-top:140px;
+padding-top:120px;
 /* Natural vibe background - Pili ka dito ng gusto mo (Uncomment to use): */
 
 /* Option 1: Light Coastal Calm (Beach & Sea Vibe) */
 background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
 
-/* Option 2: Misty Green Forest (Calm & Cool) */
-/* background: url('https://images.unsplash.com/photo-1448375240586-dfd8d3f1d894?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed; */
-
-/* Option 3: Peaceful Lake & Mountains (Serene & Vast) */
-/* background: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed; */
-
-/* Option 4: Starry Night Sky (Deep & Quiet) */
-/* background: url('https://images.unsplash.com/photo-1519681393792-98eaaf542911?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed; */
-
 background-size: cover;
+-webkit-tap-highlight-color:transparent;
+}
+
+/* ---- MOBILE-PILL NAV (replaces .nav-bar on small screens) ---- */
+.mobile-nav-trigger{
+display:none;
+position:fixed;
+top:10px;
+right:10px;
+z-index:55;
+width:44px;
+height:44px;
+border-radius:50%;
+background:rgba(255,255,255,0.95);
+border:1px solid #e5e7eb;
+color:#0f172a;
+font-size:1.2rem;
+cursor:pointer;
+box-shadow:0 4px 14px rgba(0,0,0,0.15);
 }
 
 /* Dark overlay */
@@ -201,19 +211,22 @@ top:18px;
 left:50%;
 transform:translateX(-50%);
 display:flex;
-gap:10px;
+gap:6px;
 background:rgba(255,255,255,0.14);
 backdrop-filter:blur(22px);
 border:1px solid rgba(255,255,255,0.2);
 border-radius:999px;
-padding:12px 18px;
+padding:8px 10px;
 box-shadow:0 18px 40px rgba(0,0,0,0.25);
 z-index:50;
+flex-wrap:wrap;
+justify-content:center;
+max-width:95vw;
 }
 
 /* Ensure chat container starts below the top nav */
 .chat-container {
-  margin-top: 40px;
+  margin-top: 30px;
 }
 .nav-item {
   display: flex;
@@ -222,16 +235,21 @@ z-index:50;
 .nav-link {
 color:#f8fafc;
 text-decoration:none;
-font-size:0.98rem;
+font-size:0.82rem;
 font-weight:700;
 font-family:'Poppins','Inter','Segoe UI',sans-serif;
 text-transform:uppercase;
-letter-spacing:0.08em;
-padding:12px 18px;
+letter-spacing:0.04em;
+padding:10px 12px;
 border-radius:999px;
+white-space:nowrap;
 background: rgba(255, 255, 255, 0.08);
 border: 1px solid rgba(255, 255, 255, 0.2);
 transition:transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+.nav-link i{
+  margin-right:6px;
+  font-size:0.85rem;
 }
 .nav-link:hover {
 background: rgba(0, 255, 255, 0.1);
@@ -509,6 +527,205 @@ transform:translateY(-1px);
     50% { transform: scale(2); opacity: 1; }
 }
 .breath-text { font-size: 20px; font-weight: bold; margin-top: 10px; color: #00ffff; min-height: 30px; }
+
+/* ======================================================
+   RESPONSIVE – MOBILE & TABLET (≤768px)
+   ====================================================== */
+@media (max-width: 768px) {
+
+  /* ---- body – less top space ---- */
+  body {
+    padding-top: 90px;
+  }
+
+  /* ---- nav-bar – compact pill, wrap links ---- */
+  .nav-bar {
+    top: 8px;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: 50px;
+    max-width: 97vw;
+  }
+  .nav-link {
+    font-size: 0.7rem;
+    padding: 8px 10px;
+    letter-spacing: 0.02em;
+  }
+  .nav-link i {
+    margin-right: 4px !important;
+  }
+
+  /* ---- chat container – full width, full height ---- */
+  .chat-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto;
+    height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
+    margin: 0 auto 12px;
+    border-radius: 0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+
+  /* ---- chat header – compact ---- */
+  .chat-header {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .chat-header-title {
+    font-size: 0.9rem;
+  }
+  .bot-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+  }
+  .menu-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  /* ---- quote strip ---- */
+  .quote {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  /* ---- chat body – more compact ---- */
+  #chat-box {
+    padding: 14px 12px;
+    gap: 8px;
+  }
+
+  /* ---- messages – wider bubbles on small screens ---- */
+  .message {
+    max-width: 85%;
+    font-size: 13px;
+    padding: 9px 13px;
+    border-radius: 16px;
+  }
+  .bot-avatar.sm {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+  .message-row {
+    gap: 6px;
+  }
+
+  /* ---- input – sticky but fits inside footer ---- */
+  .chat-footer {
+    padding: 8px 12px 10px;
+  }
+  .input-area {
+    gap: 6px;
+  }
+  .input-area input {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .input-area button {
+    width: 42px;
+    height: 42px;
+    font-size: 14px;
+  }
+
+  /* ---- mood & rating ---- */
+  .mood-section {
+    font-size: 11px;
+    margin-top: 10px;
+  }
+  .mood-btn {
+    font-size: 11px;
+    padding: 6px 11px;
+    margin: 3px 2px 0;
+  }
+  .rating-section {
+    font-size: 11px;
+    margin-top: 10px;
+  }
+  .rating-stars .star {
+    font-size: 18px;
+  }
+
+  /* ---- modals – fill more of screen ---- */
+  .modal-content {
+    margin: 15% auto;
+    width: 90%;
+    max-width: 340px;
+    padding: 20px;
+  }
+}
+
+/* ======================================================
+   RESPONSIVE – TINY PHONES (≤400px)
+   ====================================================== */
+@media (max-width: 400px) {
+
+  body {
+    padding-top: 76px;
+  }
+
+  .nav-bar {
+    top: 4px;
+    gap: 2px;
+    padding: 4px 6px;
+  }
+  .nav-link {
+    font-size: 0.65rem;
+    padding: 6px 8px;
+    letter-spacing: 0;
+  }
+  .nav-link i {
+    margin-right: 2px !important;
+    font-size: 0.7rem;
+  }
+  .nav-label {
+    display: none;
+  }
+  .nav-link {
+    padding: 7px;
+  }
+  .nav-link i {
+    margin-right: 0 !important;
+  }
+
+  .chat-container {
+    height: calc(100vh - 84px);
+    max-height: calc(100vh - 84px);
+  }
+
+  .chat-header {
+    padding: 8px 10px;
+  }
+  .chat-header-title {
+    font-size: 0.8rem;
+  }
+  .chat-header-status {
+    font-size: 0.68rem;
+  }
+
+  #chat-box {
+    padding: 10px 8px;
+  }
+
+  .message {
+    max-width: 92%;
+    font-size: 12px;
+    padding: 8px 11px;
+  }
+
+  .input-area input {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+  .input-area button {
+    width: 38px;
+    height: 38px;
+    font-size: 13px;
+  }
+}
 </style>
 </head>
 
@@ -517,22 +734,22 @@ transform:translateY(-1px);
 <!-- Professional Navigation Bar -->
 <div class="nav-bar">
   {% if session.get('role') == 'admin' %}
-  <a href="/admin_dashboard" class="nav-link">🛡️ Admin</a>
+  <a href="/admin_dashboard" class="nav-link"><i class="fas fa-shield-alt"></i><span class="nav-label"> Admin</span></a>
   {% endif %}
   <div class="nav-item">
-    <a href="{{ url_for('community') }}" class="nav-link" title="Chat with other users"><i class="fas fa-users-cog" style="margin-right: 8px;"></i> Group Study</a>
+    <a href="{{ url_for('community') }}" class="nav-link" title="Chat with other users"><i class="fas fa-users"></i><span class="nav-label"> Group Study</span></a>
   </div>
   <div class="nav-item">
-    <a href="{{ url_for('user_settings') }}" class="nav-link" title="Settings"><i class="fas fa-cog" style="margin-right: 8px;"></i> Settings</a>
+    <a href="{{ url_for('user_settings') }}" class="nav-link" title="Settings"><i class="fas fa-cog"></i><span class="nav-label"> Settings</span></a>
   </div>
   <div class="nav-item">
-    <a href="{{ url_for('archived_room') }}" class="nav-link" title="View past conversations"><i class="fas fa-box-archive" style="margin-right: 8px;"></i> Archived</a>
+    <a href="{{ url_for('archived_room') }}" class="nav-link" title="View past conversations"><i class="fas fa-box-archive"></i><span class="nav-label"> Archived</span></a>
   </div>
   <div class="nav-item">
-    <a href="{{ url_for('restart_chat') }}" class="nav-link" title="Clear this conversation" onclick="return confirm('Are you sure you want to clear and archive this chat?');"><i class="fas fa-power-off" style="margin-right: 8px;"></i> Restart</a>
+    <a href="{{ url_for('restart_chat') }}" class="nav-link" title="Clear this conversation" onclick="return confirm('Are you sure you want to clear and archive this chat?');"><i class="fas fa-power-off"></i><span class="nav-label"> Restart</span></a>
   </div>
   <div class="nav-item">
-    <a href="/logout" class="nav-link" title="Logout from your account"><i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Logout</a>
+    <a href="/logout" class="nav-link" title="Logout from your account"><i class="fas fa-sign-out-alt"></i><span class="nav-label"> Logout</span></a>
   </div>
 </div>
 
