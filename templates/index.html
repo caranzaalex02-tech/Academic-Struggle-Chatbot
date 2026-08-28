@@ -48,7 +48,7 @@ background:rgba(0,0,0,0.4);
 z-index:-1;
 }
 
-/* Adaptive Chat Container */
+/* Adaptive Chat Container - clean, professional card */
 .chat-container{
 position:relative;
 margin:0 auto 40px;
@@ -57,83 +57,141 @@ max-width:920px;
 min-height:620px;
 height:min(85vh, 760px);
 max-height:85vh;
-background:rgba(255,255,255,0.10);
-backdrop-filter:blur(25px);
-border-radius:30px;
-padding:28px;
+background:#ffffff;
+border-radius:24px;
 display:flex;
 flex-direction:column;
-color:white;
-box-shadow:
-0 0 20px rgba(0,255,255,0.3),
-0 0 40px rgba(0,255,255,0.2),
-0 20px 60px rgba(0,0,0,0.5);
-border:1px solid rgba(0,255,255,0.4);
+color:#0f172a;
+box-shadow:0 24px 60px rgba(0,0,0,0.28), 0 4px 16px rgba(0,0,0,0.12);
 overflow:hidden;
 }
 
-/* Floating effect */
-@keyframes float{
-0%{transform:translate(-50%,-50%) translateY(0px);}
-50%{transform:translate(-50%,-50%) translateY(-8px);}
-100%{transform:translate(-50%,-50%) translateY(0px);}
+/* Chat header */
+.chat-header{
+flex-shrink:0;
+display:flex;
+align-items:center;
+gap:12px;
+padding:14px 18px;
+background:#ffffff;
+border-bottom:1px solid #eef0f2;
+}
+.chat-header-info{
+display:flex;
+flex-direction:column;
+gap:2px;
+min-width:0;
+}
+.chat-header-title{
+font-family:'Poppins','Inter','Segoe UI',sans-serif;
+font-weight:700;
+font-size:1rem;
+color:#0f172a;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+.chat-header-status{
+display:flex;
+align-items:center;
+gap:6px;
+font-size:0.75rem;
+color:#64748b;
+}
+.status-dot{
+width:8px;
+height:8px;
+border-radius:50%;
+background:#22c55e;
+box-shadow:0 0 0 3px rgba(34,197,94,0.18);
 }
 
-/* Menu Icon */
-.menu-container{
-position:absolute;
-top:20px;
-right:20px;
-z-index:10;
-}
-.menu-icon{
-width:40px;
-height:40px;
-background:rgba(0,255,255,0.3);
-backdrop-filter:blur(10px);
+/* Bot avatar */
+.bot-avatar{
+flex-shrink:0;
+width:42px;
+height:42px;
 border-radius:50%;
+background:linear-gradient(135deg,#4f46e5,#7c3aed);
+color:#fff;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+box-shadow:0 6px 14px rgba(79,70,229,0.35);
+}
+.bot-avatar.sm{
+width:30px;
+height:30px;
+font-size:13px;
+box-shadow:0 3px 8px rgba(79,70,229,0.28);
+}
+
+/* Header menu */
+.chat-header-menu{
+position:relative;
+margin-left:auto;
+}
+.menu-btn{
+width:38px;
+height:38px;
+border-radius:50%;
+border:1px solid #e5e7eb;
+background:#f8fafc;
+color:#334155;
 display:flex;
 align-items:center;
 justify-content:center;
 cursor:pointer;
-box-shadow:0 0 15px rgba(0,255,255,0.5);
-transition:0.3s;
+font-size:16px;
+transition:background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
-.menu-icon:hover{
-background:rgba(0,255,255,0.5);
+.menu-btn:hover{
+background:#eef2ff;
+color:#4f46e5;
+border-color:#c7d2fe;
 }
-.menu-icon:after{
-content:"≡";
-font-size:20px;
-color:white;
-}
-
-/* Dropdown Menu */
 .dropdown{
 position:absolute;
-top:50px;
+top:46px;
 right:0;
-background:rgba(0,0,0,0.8);
-border-radius:12px;
+background:#ffffff;
+border:1px solid #e5e7eb;
+border-radius:14px;
 overflow:hidden;
 display:none;
 flex-direction:column;
-box-shadow:0 0 15px rgba(0,255,255,0.5);
+min-width:210px;
+box-shadow:0 16px 40px rgba(15,23,42,0.16);
+z-index:60;
+padding:6px;
+}
+.dropdown.open{
+display:flex;
 }
 .dropdown a{
-padding:10px 15px;
+display:flex;
+align-items:center;
+gap:10px;
+padding:11px 12px;
 text-decoration:none;
-color:white;
+color:#334155;
 font-size:14px;
-border-bottom:1px solid rgba(255,255,255,0.2);
-transition:0.3s;
+font-weight:600;
+border-radius:10px;
+transition:background 0.15s ease, color 0.15s ease;
 }
-.dropdown a:last-child{
-border-bottom:none;
+.dropdown a i{
+width:18px;
+text-align:center;
+color:#64748b;
 }
 .dropdown a:hover{
-background:#00ffff;
-color:black;
+background:#f1f5f9;
+color:#4f46e5;
+}
+.dropdown a:hover i{
+color:#4f46e5;
 }
 
 /* Professional Top Navigation */
@@ -187,53 +245,54 @@ transform:translateY(0);
 background:linear-gradient(145deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.1));
 }
 
-/* Quote */
+/* Daily quote strip */
 .quote{
-font-size:13px;
-margin-bottom:10px;
-opacity:0.9;
+flex-shrink:0;
+font-size:12px;
+color:#64748b;
+background:#f1f5f9;
+padding:8px 16px;
+text-align:center;
+border-bottom:1px solid #eef0f2;
 }
 
-/* Messenger Layout Chat */
+/* Chat body */
 #chat-box{
 flex:1 1 auto;
 min-height:0;
-max-height:100%;
 overflow-y:auto;
 display:flex;
 flex-direction:column;
 gap:10px;
-padding-right:5px;
-}
-
-.input-area {
-  flex-shrink:0;
-}
-
-/* Keep messages within a fixed height and allow chat scroll */
-.chat-container {
-  overflow: hidden;
+padding:20px 18px;
+background:#f7f8fa;
 }
 
 /* Scrollbar style */
 #chat-box::-webkit-scrollbar{
 width:6px;
 }
+#chat-box::-webkit-scrollbar-track{
+background:transparent;
+}
 #chat-box::-webkit-scrollbar-thumb{
-background:#00ffff;
+background:#cbd5e1;
 border-radius:10px;
 }
+#chat-box::-webkit-scrollbar-thumb:hover{
+background:#94a3b8;
+}
 
-/* Message */
-.message{
-max-width:75%;
-padding:10px 14px;
-border-radius:20px;
-font-size:14px;
-animation:fadeIn 0.3s ease;
-word-break: break-word;
-overflow-wrap: anywhere;
-white-space: pre-wrap;
+/* Message rows */
+.message-row{
+display:flex;
+align-items:flex-end;
+gap:8px;
+max-width:100%;
+animation:fadeIn 0.25s ease;
+}
+.message-row.user-row{
+justify-content:flex-end;
 }
 
 @keyframes fadeIn{
@@ -241,98 +300,145 @@ from{opacity:0; transform:translateY(8px);}
 to{opacity:1; transform:translateY(0);}
 }
 
-/* Gradient bubbles */
-.user{
-align-self:flex-end;
-background:linear-gradient(135deg,#667eea,#764ba2);
-color:white;
-border-bottom-right-radius:5px;
-box-shadow:0 0 10px rgba(118,75,162,0.6);
+/* Message bubbles */
+.message{
+max-width:78%;
+padding:11px 15px;
+border-radius:18px;
+font-size:14px;
+line-height:1.5;
+word-break: break-word;
+overflow-wrap: anywhere;
+white-space: pre-wrap;
 }
-
-.bot{
-align-self:flex-start;
-background:linear-gradient(135deg,#43e97b,#38f9d7);
-color:black;
-border-bottom-left-radius:5px;
-box-shadow:0 0 10px rgba(56,249,215,0.6);
+.user-row .message{
+background:linear-gradient(135deg,#4f46e5,#6366f1);
+color:#fff;
+border-bottom-right-radius:6px;
+box-shadow:0 6px 16px rgba(79,70,229,0.25);
+}
+.bot-row .message{
+background:#ffffff;
+color:#0f172a;
+border:1px solid #e8eaee;
+border-bottom-left-radius:6px;
+box-shadow:0 2px 8px rgba(15,23,42,0.06);
 }
 
 /* Typing indicator */
 .typing{
-font-size:12px;
-opacity:0.7;
+display:inline-flex;
+align-items:center;
+gap:4px;
+padding:14px 16px;
+}
+.typing-dots span{
+width:7px;
+height:7px;
+border-radius:50%;
+background:#94a3b8;
+display:inline-block;
+animation:typingBounce 1.2s infinite ease-in-out;
+}
+.typing-dots span:nth-child(2){animation-delay:0.15s;}
+.typing-dots span:nth-child(3){animation-delay:0.3s;}
+@keyframes typingBounce{
+0%,60%,100%{transform:translateY(0);opacity:0.5;}
+30%{transform:translateY(-5px);opacity:1;}
+}
+
+/* Chat footer */
+.chat-footer{
+flex-shrink:0;
+background:#ffffff;
+border-top:1px solid #eef0f2;
+padding:12px 16px 14px;
 }
 
 /* Input */
 .input-area{
 display:flex;
 gap:8px;
-margin-top:10px;
+align-items:center;
 }
-
 .input-area input{
 flex:1;
-padding:10px;
-border-radius:25px;
-border:none;
+padding:12px 18px;
+border-radius:999px;
+border:1px solid #e2e8f0;
 outline:none;
 font-size:14px;
+color:#0f172a;
+background:#f8fafc;
+transition:border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
-
+.input-area input::placeholder{
+color:#94a3b8;
+}
+.input-area input:focus{
+border-color:#6366f1;
+background:#ffffff;
+box-shadow:0 0 0 4px rgba(99,102,241,0.12);
+}
 .input-area button{
-padding:12px 20px;
+flex-shrink:0;
+width:46px;
+height:46px;
 border:none;
-border-radius:28px;
-background:linear-gradient(135deg,#4fc3ff,#3b82f6);
-color:white;
+border-radius:50%;
+background:linear-gradient(135deg,#4f46e5,#6366f1);
+color:#fff;
 cursor:pointer;
-box-shadow:0 18px 35px rgba(0,0,0,0.22);
-font-family:'Poppins','Inter','Segoe UI',sans-serif;
-font-weight:700;
-letter-spacing:0.1em;
-text-transform:uppercase;
-transition:transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:16px;
+box-shadow:0 8px 18px rgba(79,70,229,0.3);
+transition:transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
-
 .input-area button:hover{
 transform:translateY(-2px);
-box-shadow:0 22px 42px rgba(0,0,0,0.24);
+box-shadow:0 12px 24px rgba(79,70,229,0.38);
 filter:brightness(1.05);
+}
+.input-area button:active{
+transform:translateY(0);
 }
 
 /* Mood section */
 .mood-section{
 text-align:center;
-margin-top:8px;
-font-size:13px;
+margin-top:12px;
+font-size:12.5px;
+color:#64748b;
 }
 .mood-btn{
-margin:3px;
-padding:8px 12px;
+margin:4px 3px 0;
+padding:7px 13px;
 border:none;
-border-radius:16px;
+border-radius:999px;
 cursor:pointer;
-background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.12));
-color:white;
+background:#f1f5f9;
+color:#334155;
 font-family:'Poppins','Inter','Segoe UI',sans-serif;
-font-weight:700;
-letter-spacing:0.06em;
-text-transform:uppercase;
-border:1px solid rgba(255,255,255,0.22);
-transition:transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+font-weight:600;
+font-size:12px;
+border:1px solid #e2e8f0;
+transition:transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 .mood-btn:hover{
-background:rgba(255,255,255,0.35);
-color:#020617;
+background:#eef2ff;
+border-color:#c7d2fe;
+color:#4f46e5;
 transform:translateY(-1px);
 }
 
 /* Rating section */
 .rating-section {
     text-align: center;
-    margin-top: 8px;
-    font-size: 13px;
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: #64748b;
 }
 .rating-stars {
     display: inline-block;
@@ -340,14 +446,17 @@ transform:translateY(-1px);
 }
 .rating-stars .star {
     font-size: 20px;
-    color: #555;
+    color: #cbd5e1;
     cursor: pointer;
-    transition: color 0.2s;
+    transition: color 0.15s, transform 0.15s;
+}
+.rating-stars .star:hover {
+    transform: scale(1.15);
 }
 .rating-stars:hover .star,
 .rating-stars .star:hover,
 .rating-stars .star:hover ~ .star {
-    color: #ffdd59;
+    color: #f59e0b;
 }
 
 /* Modal Styles for Hotlines */
@@ -429,44 +538,64 @@ transform:translateY(-1px);
 
 <div class="chat-container">
 
-<div class="quote">
-<b>Daily Quote:</b> {{ daily_quote }}
-</div>
-
-<div id="chat-box">
-{% for u,b in messages %}
-<div class="message user">{{u}}</div>
-<div class="message bot">{{b}}</div>
-{% endfor %}
-</div>
-
-<div class="input-area">
-<input type="text" id="user-input" placeholder="Type message..." onkeydown="handleEnter(event)">
-<button onclick="sendMessage()">Send</button>
-</div>
-
-{% if not mood_logged_today %}
-<div class="mood-section">
-How are you feeling?
-<button class="mood-btn" onclick="logMood('Happy')">😊</button>
-<button class="mood-btn" onclick="logMood('Neutral')">😐</button>
-<button class="mood-btn" onclick="logMood('Sad')">😢</button>
-</div>
-{% else %}
-<div class="mood-section" style="opacity: 0.7; padding-top: 5px;">
-    Thank you for logging your mood today! 💙
-</div>
-{% endif %}
-<div class="rating-section">
-    Rate your experience:
-    <div class="rating-stars">
-        <span class="star" onclick="rateSession(5)">★</span>
-        <span class="star" onclick="rateSession(4)">★</span>
-        <span class="star" onclick="rateSession(3)">★</span>
-        <span class="star" onclick="rateSession(2)">★</span>
-        <span class="star" onclick="rateSession(1)">★</span>
+  <!-- Chat header -->
+  <div class="chat-header">
+    <div class="bot-avatar"><i class="fas fa-robot"></i></div>
+    <div class="chat-header-info">
+      <div class="chat-header-title">Academic Support Assistant</div>
+      <div class="chat-header-status"><span class="status-dot"></span> Online &middot; Here to help</div>
     </div>
-</div>
+    <div class="chat-header-menu">
+      <button class="menu-btn" onclick="toggleDropdown()" aria-label="Chat menu"><i class="fas fa-ellipsis-v"></i></button>
+      <div class="dropdown" id="chatMenu">
+        <a href="#" onclick="event.preventDefault(); closeDropdown(); showHotlines();"><i class="fas fa-phone-alt"></i> Emergency Hotlines</a>
+        <a href="#" onclick="event.preventDefault(); closeDropdown(); showBreathing();"><i class="fas fa-spa"></i> Breathing Exercise</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote">
+  <b>Daily Quote:</b> {{ daily_quote }}
+  </div>
+
+  <div id="chat-box">
+  {% for u,b in messages %}
+  <div class="message-row user-row"><div class="message user">{{u}}</div></div>
+  <div class="message-row bot-row"><div class="bot-avatar sm"><i class="fas fa-robot"></i></div><div class="message bot">{{b}}</div></div>
+  {% endfor %}
+  </div>
+
+  <div class="chat-footer">
+    <div class="input-area">
+      <input type="text" id="user-input" placeholder="Type a message&hellip;" onkeydown="handleEnter(event)">
+      <button onclick="sendMessage()" aria-label="Send message"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    {% if not mood_logged_today %}
+    <div class="mood-section">
+      How are you feeling today?
+      <br>
+      <button class="mood-btn" onclick="logMood('Happy')">😊 Happy</button>
+      <button class="mood-btn" onclick="logMood('Neutral')">😐 Neutral</button>
+      <button class="mood-btn" onclick="logMood('Sad')">😢 Sad</button>
+    </div>
+    {% else %}
+    <div class="mood-section" style="opacity: 0.7; padding-top: 5px;">
+        Thank you for logging your mood today! 💙
+    </div>
+    {% endif %}
+
+    <div class="rating-section">
+        Rate your experience:
+        <div class="rating-stars">
+            <span class="star" onclick="rateSession(5)">★</span>
+            <span class="star" onclick="rateSession(4)">★</span>
+            <span class="star" onclick="rateSession(3)">★</span>
+            <span class="star" onclick="rateSession(2)">★</span>
+            <span class="star" onclick="rateSession(1)">★</span>
+        </div>
+    </div>
+  </div>
 
 </div>
 
@@ -507,6 +636,12 @@ function showHotlines(){
 function closeHotlines(){
     document.getElementById("hotlineModal").style.display = "none";
 }
+function toggleDropdown(){
+    document.getElementById("chatMenu").classList.toggle("open");
+}
+function closeDropdown(){
+    document.getElementById("chatMenu").classList.remove("open");
+}
 window.onclick = function(event) {
     if (event.target == document.getElementById("hotlineModal")) {
         closeHotlines();
@@ -514,13 +649,15 @@ window.onclick = function(event) {
     if (event.target == document.getElementById("breathingModal")) {
         closeBreathing();
     }
+    if (event.target && event.target.closest && !event.target.closest(".chat-header-menu")) {
+        closeDropdown();
+    }
 }
 
 /* Breathing Modal Functions */
 let breathInterval;
 function showBreathing(){
     document.getElementById("breathingModal").style.display = "block";
-    toggleDropdown();
     
     const circle = document.querySelector(".breath-circle");
     const text = document.getElementById("breathInstruction");
@@ -563,17 +700,21 @@ if(!msg) return;
 let box=document.getElementById("chat-box");
 
 // User message
+let userRow=document.createElement("div");
+userRow.className="message-row user-row";
 let userDiv=document.createElement("div");
 userDiv.className="message user";
 userDiv.textContent=msg;
-box.appendChild(userDiv);
+userRow.appendChild(userDiv);
+box.appendChild(userRow);
 scrollBottom();
 
 // Typing indicator
-let typingDiv=document.createElement("div");
-typingDiv.className="message bot typing";
-typingDiv.textContent="Typing...";
-box.appendChild(typingDiv);
+let typingRow=document.createElement("div");
+typingRow.className="message-row bot-row";
+typingRow.id="typing-row";
+typingRow.innerHTML='<div class="bot-avatar sm"><i class="fas fa-robot"></i></div><div class="message bot typing"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
+box.appendChild(typingRow);
 scrollBottom();
 
 fetch("/chat",{
@@ -583,11 +724,15 @@ body:JSON.stringify({message:msg})
 })
 .then(res=>res.json())
 .then(data=>{
-box.removeChild(typingDiv);
+if(typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
+let botRow=document.createElement("div");
+botRow.className="message-row bot-row";
+botRow.innerHTML='<div class="bot-avatar sm"><i class="fas fa-robot"></i></div>';
 let botDiv=document.createElement("div");
 botDiv.className="message bot";
 botDiv.textContent=data.response;
-box.appendChild(botDiv);
+botRow.appendChild(botDiv);
+box.appendChild(botRow);
 scrollBottom();
 });
 
