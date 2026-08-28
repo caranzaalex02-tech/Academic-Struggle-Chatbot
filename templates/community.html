@@ -31,8 +31,16 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
 .search-container input:focus { border-color:#0ea5b9; background:rgba(255,255,255,0.65); box-shadow:0 0 0 4px rgba(14,165,185,0.12); }
 .user-list { display:flex; flex-direction:column; gap:8px; }
 .user-card { background:rgba(255,255,255,0.45); backdrop-filter:blur(8px); padding:14px 16px; border-radius:14px; display:flex; justify-content:space-between; align-items:center; transition:0.2s ease; border:1px solid rgba(255,255,255,0.4); }
-.current-user-profile { background:rgba(255,255,255,0.45); backdrop-filter:blur(10px); padding:18px; border-radius:16px; display:flex; align-items:center; gap:14px; margin-bottom:24px; border:1px solid rgba(255,255,255,0.5); }
-.large-pic { width:64px; height:64px; border-radius:16px; object-fit:cover; border:2px solid rgba(255,255,255,0.5); box-shadow:0 6px 16px rgba(0,40,60,0.1); }
+.profile-pic {
+        width:44px; height:44px; min-width:44px; min-height:44px; max-width:44px; max-height:44px;
+        border-radius:14px; object-fit:cover; flex-shrink:0;
+        border:2px solid rgba(255,255,255,0.5); box-shadow:0 4px 12px rgba(0,40,60,0.1);
+    }
+    .large-pic {
+        width:48px !important; height:48px !important;
+        min-width:48px; min-height:48px; max-width:48px; max-height:48px;
+    }
+    .current-user-profile { background:rgba(255,255,255,0.45); backdrop-filter:blur(10px); padding:18px; border-radius:16px; display:flex; align-items:center; gap:14px; margin-bottom:24px; border:1px solid rgba(255,255,255,0.5); }
 .current-user-info h3 { font-size:1rem; color:#1a4a5a; margin-bottom:2px; }
 .current-user-info p { font-size:0.75rem; color:#5a8a9a; }
 .change-pic-btn { background:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.45); color:#1a4a5a; padding:6px 12px; border-radius:999px; cursor:pointer; font-size:11px; font-weight:600; margin-top:6px; transition:background 0.15s,border-color 0.15s,color 0.15s; }
