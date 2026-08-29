@@ -59,10 +59,29 @@ def _send_via_sendgrid(to_email, subject, plain_body, html_body):
             }
         ],
         "from": {"email": sender_email, "name": display_name},
+        "reply_to": {"email": sender_email, "name": display_name},
         "content": [
             {"type": "text/plain", "value": plain_body},
             {"type": "text/html", "value": html_body},
         ],
+        "mail_settings": {
+            "bypass_list_management": {
+                "enable": True
+            },
+        },
+        "tracking_settings": {
+            "click_tracking": {
+                "enable": False,
+                "enable_text": False
+            },
+            "open_tracking": {
+                "enable": False
+            },
+            "subscription_tracking": {
+                "enable": False
+            }
+        },
+        "categories": ["transactional", "academic-struggle-chatbot"],
     }
 
     req = urllib.request.Request(
@@ -257,16 +276,52 @@ Academic Struggle Chatbot Team
     if config['logo_url']:
         logo_html = f"<div style='margin-bottom:18px;'><img src=\"{config['logo_url']}\" alt=\"Academic Struggle Chatbot\" style=\"max-width:180px;height:auto;display:block;margin:0 auto;\"></div>"
 
-    html_body = f"""
-<html>
-  <body style=\"font-family:Arial, sans-serif; color:#111; line-height:1.6;\">
-    {logo_html}
-    <p>Hi {username},</p>
-    <p>Welcome to <strong>Academic Struggle Chatbot</strong>!</p>
-    <p>Your account has been successfully created. You can now log in and start using the chatbot for support with your academic challenges.</p>
-    <p>We're here to help you navigate the stresses of student life.</p>
-    <p>Best,<br><strong>Academic Struggle Chatbot Team</strong></p>
-  </body>
+    html_body = f"""\\<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body style="margin:0;padding:0;background-color:#f7f9fc;font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f7f9fc;">
+    <tr>
+      <td align="center" style="padding:30px 16px 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;background:#ffffff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#00c6ff,#0072ff);padding:28px 24px;border-radius:12px 12px 0 0;text-align:center;">
+              {logo_html}
+              <h1 style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">Welcome to Academic Struggle Chatbot!</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 24px 8px;color:#334155;font-size:15px;line-height:1.65;">
+              <p style="margin:0 0 14px;">Hi {username},</p>
+              <p style="margin:0 0 14px;">Your account has been <strong>successfully created</strong>. You can now log in and start using the chatbot for support with your academic challenges.</p>
+              <p style="margin:0 0 14px;">We're here to help you navigate the stresses of student life — whenever you need someone to talk to.</p>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:22px 0 10px;">
+                <tr>
+                  <td align="center">
+                    <a href="https://academic-struggle-support-essu-guiuan.onrender.com/login" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#00c6ff,#0072ff);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:8px;">Log In Now</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 24px 24px;border-top:1px solid #e9eef3;margin-top:12px;">
+              <p style="margin:10px 0 0;font-size:12px;color:#94a3b8;text-align:center;">
+                Academic Struggle Support ESSU-Guiuan<br />
+                This is an automated message — please do not reply directly.<br />
+                Need help? Contact your campus counselor.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
 </html>
 """
 
@@ -336,17 +391,51 @@ Academic Struggle Chatbot Team
     if config['logo_url']:
         logo_html = f"<div style='margin-bottom:18px;'><img src=\"{config['logo_url']}\" alt=\"Academic Struggle Chatbot\" style=\"max-width:180px;height:auto;display:block;margin:0 auto;\"></div>"
 
-    html_body = f"""
-<html>
-  <body style=\"font-family:Arial, sans-serif; color:#111; line-height:1.6;\">
-    {logo_html}
-    <p>Hi,</p>
-    <p>A password reset was requested for your account.</p>
-    <p>Please click the link below to reset your password. This link is valid for 1 hour.</p>
-    <p><a href=\"{reset_link}\" style=\"color:#1a73e8;\">Reset your password</a></p>
-    <p>If you did not request this, please ignore this email.</p>
-    <p>Best,<br><strong>Academic Struggle Chatbot Team</strong></p>
-  </body>
+    html_body = f"""\\<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body style="margin:0;padding:0;background-color:#f7f9fc;font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f7f9fc;">
+    <tr>
+      <td align="center" style="padding:30px 16px 20px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:560px;background:#ffffff;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.06);">
+          <tr>
+            <td style="background:linear-gradient(135deg,#00c6ff,#0072ff);padding:28px 24px;border-radius:12px 12px 0 0;text-align:center;">
+              {logo_html}
+              <h1 style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">Reset Your Password</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:28px 24px 8px;color:#334155;font-size:15px;line-height:1.65;">
+              <p style="margin:0 0 14px;">Hi,</p>
+              <p style="margin:0 0 14px;">A password reset was requested for your account. This link is valid for <strong>1 hour</strong>.</p>
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:22px 0 10px;">
+                <tr>
+                  <td align="center">
+                    <a href="{reset_link}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#00c6ff,#0072ff);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:8px;">Reset Your Password</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 14px;font-size:13px;color:#64748b;">If you did not request this password reset, please ignore this email or contact support.</p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:8px 24px 24px;border-top:1px solid #e9eef3;margin-top:12px;">
+              <p style="margin:10px 0 0;font-size:12px;color:#94a3b8;text-align:center;">
+                Academic Struggle Support ESSU-Guiuan<br />
+                This is an automated message — please do not reply directly.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
 </html>
 """
 
