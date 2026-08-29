@@ -14,6 +14,11 @@ services:
       - key: RENDER
         value: true
 
+      # --- Admin Registration Code ---
+      # Proteksyon para sa admin registration. Ilagay ang aktwal na code sa Render dashboard.
+      - key: ADMIN_REGISTRATION_CODE
+        sync: false
+
       # --- AI Services ---
       # Primary AI (libre): Groq. Ilagay ang aktwal na key sa Render dashboard.
       - key: GROQ_API_KEY
