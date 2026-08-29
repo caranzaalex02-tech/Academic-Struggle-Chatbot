@@ -5,6 +5,7 @@ import re
 import sqlite3
 import urllib.parse
 from datetime import datetime, timedelta, timezone
+from functools import wraps
 from threading import Timer
 
 # Third-Party Libraries
@@ -39,6 +40,11 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY") or os.environ.get("SECRET_KEY") or "dev-secret-key-change-in-production"
 if os.environ.get("FLASK_SECRET_KEY") is None and os.environ.get("SECRET_KEY") is None:
     app.logger.warning("FLASK_SECRET_KEY is not set; using a temporary fallback secret.")
+ADMIN_REGISTRATION_CODE = os.environ.get("ADMIN_REGISTRATION_CODE")
+if not ADMIN_REGISTRATION_CODE:
+    app.logger.warning("ADMIN_REGISTRATION_CODE is not set! Admin registration is UNPROTECTED.")
+else:
+    app.logger.info("ADMIN_REGISTRATION_CODE is configured. Admin registration is protected.")
 DATABASE = os.environ.get("MENTALHEALTHWEB_DB", "database.db")
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -74,6 +80,56 @@ def hash_password(password):
     return generate_password_hash(password, method="pbkdf2:sha256")
 
 typing_users = {}
+
+# --- Admin-required decorator ---
+def admin_required(f):
+    """Decorator to protect routes that require admin authentication.
+    
+    Checks that:
+    1. The user is logged in (session has 'user')
+    2. The user's role is 'admin'
+    
+    If either check fails, redirects to admin_login page.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user" not in session or session.get("role") != "admin":
+            return redirect(url_for("admin_login"))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# --- Before-request middleware: Protect ALL admin routes ---
+@app.before_request
+def protect_admin_routes():
+    """Globally protect all /admin* and /admin_* routes.
+    
+    This middleware runs BEFORE every request. If the path starts with
+    /admin (including /admin_login, /admin_dashboard, /admin/register, etc.),
+    and the user is NOT logged in as admin, they are redirected.
+    
+    Exceptions:
+    - /admin_login      (login page - anyone can access)
+    - /admin/register   (registration page - protected by registration code)
+    - Static files      (not affected)
+    """
+    path = request.path
+    # Only apply to admin-related routes
+    if path.startswith("/admin"):
+        # Allow access to login, registration, forgot password, and reset pages
+        if path in ("/admin_login", "/admin/register", "/admin/forgot_password") or path.startswith("/admin/reset/"):
+            return None  # Let the route handler deal with it
+        
+        # For all other admin routes (/admin_dashboard, /admin/user/*, etc.),
+        # require admin authentication
+        if "user" not in session or session.get("role") != "admin":
+            app.logger.warning(
+                "Unauthorized admin access attempt to %r from IP %s",
+                path,
+                request.remote_addr
+            )
+            return redirect(url_for("admin_login"))
+    
+    return None  # Continue normally for non-admin routes
 
 # --- Security Headers ---
 @app.after_request
@@ -418,11 +474,19 @@ def login():
 @limiter.limit("5 per minute")
 def admin_login():
     error = None
+    
+    # Check if admin account exists (for template display)
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT id FROM users WHERE role = 'admin'")
+    else:
+        c.execute("SELECT id FROM users WHERE role = 'admin'")
+    admin_exists = c.fetchone() is not None
+    
     if request.method=="POST":
         username = request.form.get("username", "").strip().lower()
         password = request.form["password"]
-        db = get_db()
-        c = db.cursor()
         # Use %s for PostgreSQL compatibility
         if 'DATABASE_URL' in os.environ:
             c.execute("SELECT email, password, role FROM users WHERE email=%s", (username,))
@@ -434,15 +498,19 @@ def admin_login():
                 # 2FA has been removed. Log in directly.
                 session["user"] = user['email']
                 session["role"] = 'admin'
+                app.logger.info("Admin login successful for %r from IP %s", username, request.remote_addr)
                 return redirect(url_for("admin_dashboard"))
             else:
+                app.logger.warning("Admin login denied (non-admin) for %r from IP %s", username, request.remote_addr)
                 error = "Access Denied. You are not an admin."
         else:
+            app.logger.warning("Admin login failed for %r from IP %s", username, request.remote_addr)
             error = "Invalid admin credentials."
-    return render_template("admin_login.html", error=error)
+    return render_template("admin_login.html", error=error, admin_exists=admin_exists)
 
 # ---- ADMIN REGISTER (First-time setup) ----
 @app.route("/admin/register", methods=["GET", "POST"])
+@limiter.limit("3 per minute")
 def admin_register():
     db = get_db()
     c = db.cursor()
@@ -462,13 +530,25 @@ def admin_register():
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         confirm_password = request.form.get("confirm_password", "")
+        registration_code = request.form.get("registration_code", "").strip()
+
+        # --- Validate Registration Code ---
+        if not ADMIN_REGISTRATION_CODE:
+            error = "Admin registration is not available. ADMIN_REGISTRATION_CODE is not configured on the server."
+        elif registration_code != ADMIN_REGISTRATION_CODE:
+            app.logger.warning(
+                "Admin registration attempt with INVALID code from IP %s (email=%r)",
+                request.remote_addr,
+                email,
+            )
+            error = "Invalid registration code. Access denied."
 
         if not email:
-            error = "Email is required."
+            error = error or "Email is required."
         elif not password or len(password) < 8:
-            error = "Password must be at least 8 characters long."
+            error = error or "Password must be at least 8 characters long."
         elif password != confirm_password:
-            error = "Passwords do not match."
+            error = error or "Passwords do not match."
         
         if error is None:
             hashed_password = hash_password(password)
@@ -480,6 +560,11 @@ def admin_register():
                     c.execute("INSERT INTO users (email, password, first_name, last_name, role) VALUES (?, ?, ?, ?, ?)",
                               (email, hashed_password, "Admin", "User", "admin"))
                 db.commit() # type: ignore
+                app.logger.info(
+                    "Admin account created successfully from IP %s (email=%r)",
+                    request.remote_addr,
+                    email,
+                )
                 flash("Admin account created successfully! You can now log in.", "success")
                 return redirect(url_for('admin_login'))
             except Exception:
@@ -487,6 +572,7 @@ def admin_register():
                 error = "An unexpected error occurred. Please try again."
 
     # If we are here, it's a GET request or there was a POST error
+    # Pass whether admin exists to the template so we can conditionally show the link
     return render_template("admin_register.html", error=error)
 
 # ---- REGISTER ----
@@ -1250,9 +1336,8 @@ def upload_profile_pic():
 
 # ================= ADMIN DASHBOARD =================
 @app.route("/admin_dashboard")
+@admin_required
 def admin_dashboard():
-    if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("login"))
     
     db = get_db()
     c = db.cursor()
@@ -1317,10 +1402,8 @@ def admin_dashboard():
     return render_template("admin_dashboard.html", users=users_data)
 
 @app.route("/admin/user/<username>")
+@admin_required
 def admin_user_details(username):
-    if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("login"))
-
     db = get_db()
     c = db.cursor()
     
@@ -1412,9 +1495,8 @@ def admin_user_details(username):
                            days=days, trend_data=trend_data)
 
 @app.route("/admin/delete_user/<username>", methods=["POST"])
+@admin_required
 def admin_delete_user(username):
-    if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("login"))
 
     if username == "admin@system.local": # Prevent admin from deleting itself
         return redirect(url_for("admin_dashboard"))
@@ -1445,9 +1527,8 @@ def admin_delete_user(username):
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/ban_user/<username>", methods=["POST"])
+@admin_required
 def admin_ban_user(username):
-    if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("login"))
 
     if username == "admin@system.local": # Prevent admin from banning itself
         return redirect(url_for("admin_dashboard"))
@@ -1468,9 +1549,8 @@ def admin_ban_user(username):
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/unban_user/<username>", methods=["POST"])
+@admin_required
 def admin_unban_user(username):
-    if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("login"))
 
     db = get_db()
     c = db.cursor()
@@ -1484,9 +1564,8 @@ def admin_unban_user(username):
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/logs")
+@admin_required
 def admin_logs():
-    if "user" not in session or session.get("role") != "admin":
-        return redirect(url_for("admin_login"))
     # This route is disabled as per user request. Redirect to the main dashboard.
     return redirect(url_for("admin_dashboard"))
 

@@ -171,9 +171,11 @@
     <p class="switch" style="margin-top: 5px; font-size: 12px;">
         <a href="{{ url_for('admin_forgot_password') }}">Forgot Password?</a>
     </p>
+    {% if not admin_exists %}
     <p class="switch" style="margin-top: 5px; font-size: 12px;">
         <a href="{{ url_for('admin_register') }}">Create First Admin Account</a>
     </p>
+    {% endif %}
     <p class="switch">
         Not an admin? <a href="{{ url_for('login') }}">Go to User Login</a>
     </p>
