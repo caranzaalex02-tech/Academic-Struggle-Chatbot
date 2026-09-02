@@ -231,9 +231,12 @@
            Terms & Conditions Modal – Dark Glassmorphism
            Matches registration page design
         ----------------------------------------------- */
-        /* Ensure modal is above everything */
+        /* Ensure modal is above everything & vertically centered */
         #termsModal {
             z-index: 9999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
         .modal-backdrop {
             z-index: 9998 !important;
@@ -243,7 +246,8 @@
         }
         #termsModal .modal-dialog {
             max-width: 700px;
-            margin-top: 8vh;
+            margin: 0 auto;
+            width: 100%;
         }
         #termsModal .modal-content {
             background: linear-gradient(145deg, rgba(20, 30, 48, 0.98), rgba(15, 23, 42, 0.98));
@@ -376,7 +380,7 @@
         /* Responsive */
         @media (max-width: 600px) {
             #termsModal .modal-dialog {
-                margin: 4vh 12px;
+                margin: 0 12px;
             }
             #termsModal .modal-body {
                 padding: 16px 18px;
