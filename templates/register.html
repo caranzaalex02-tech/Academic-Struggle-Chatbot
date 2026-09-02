@@ -226,7 +226,170 @@
                 opacity: 1;
             }
         }
-    </style>
+
+        /* -----------------------------------------------
+           Terms & Conditions Modal – Dark Glassmorphism
+           Matches registration page design
+        ----------------------------------------------- */
+        /* Ensure modal is above everything */
+        #termsModal {
+            z-index: 9999 !important;
+        }
+        .modal-backdrop {
+            z-index: 9998 !important;
+            background: rgba(0, 0, 0, 0.75) !important;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        #termsModal .modal-dialog {
+            max-width: 700px;
+            margin-top: 8vh;
+        }
+        #termsModal .modal-content {
+            background: linear-gradient(145deg, rgba(20, 30, 48, 0.98), rgba(15, 23, 42, 0.98));
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(0, 198, 255, 0.35);
+            border-radius: 16px;
+            box-shadow: 0 0 50px rgba(0, 198, 255, 0.25), 0 20px 60px rgba(0, 0, 0, 0.6);
+            color: #e2e8f0;
+            overflow: hidden;
+        }
+        #termsModal .modal-header {
+            background: linear-gradient(135deg, rgba(0, 198, 255, 0.15), rgba(0, 114, 255, 0.1));
+            border-bottom: 1px solid rgba(0, 198, 255, 0.25);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #termsModal .modal-title {
+            color: #fff !important;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.25rem;
+            letter-spacing: 0.01em;
+        }
+        #termsModal .modal-header .close {
+            padding: 0;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #ccc;
+            font-size: 20px;
+            font-weight: 300;
+            line-height: 1;
+            text-shadow: none;
+            opacity: 0.85;
+            transition: all 0.25s ease;
+            outline: none;
+        }
+        #termsModal .modal-header .close:hover {
+            background: rgba(255, 100, 100, 0.2);
+            border-color: rgba(255, 100, 100, 0.5);
+            color: #ff6b6b;
+            opacity: 1;
+            transform: rotate(90deg);
+        }
+        #termsModal .modal-header .close span {
+            display: block;
+            line-height: 1;
+        }
+        #termsModal .modal-body {
+            padding: 22px 28px;
+            color: #cbd5e1;
+            font-size: 0.93rem;
+            line-height: 1.7;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        #termsModal .modal-body p {
+            margin-bottom: 14px;
+        }
+        #termsModal .modal-body ul {
+            padding-left: 20px;
+            margin-bottom: 14px;
+        }
+        #termsModal .modal-body ul li {
+            margin-bottom: 10px;
+            color: #b0bec5;
+        }
+        #termsModal .modal-body ul li strong {
+            color: #00c6ff;
+            font-weight: 600;
+        }
+        /* Scrollbar for modal body */
+        #termsModal .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        #termsModal .modal-body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 3px;
+        }
+        #termsModal .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 198, 255, 0.35);
+            border-radius: 3px;
+        }
+        #termsModal .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 198, 255, 0.55);
+        }
+        #termsModal .modal-footer {
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(0, 198, 255, 0.2);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        #termsModal .modal-footer .btn-secondary {
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
+        }
+        #termsModal .modal-footer .btn-secondary:hover {
+            background: linear-gradient(135deg, #33d4ff, #1a8cff);
+            box-shadow: 0 6px 22px rgba(0, 198, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        /* Fade animation for modal */
+        #termsModal.fade .modal-dialog {
+            transform: translateY(-30px);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+        }
+        #termsModal.show .modal-dialog {
+            transform: translateY(0);
+        }
+        /* Responsive */
+        @media (max-width: 600px) {
+            #termsModal .modal-dialog {
+                margin: 4vh 12px;
+            }
+            #termsModal .modal-body {
+                padding: 16px 18px;
+                max-height: 50vh;
+            }
+            #termsModal .modal-header {
+                padding: 14px 18px;
+            }
+            #termsModal .modal-footer {
+                padding: 12px 18px;
+            }
+        }
+</style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 
@@ -325,12 +488,12 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="termsModalLabel" style="color: #333;">Terms and Conditions</h5>
+        <h5 class="modal-title" id="termsModalLabel">📋 Terms and Conditions</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body" style="color: #555;">
+      <div class="modal-body">
         <p>Welcome to Academic Struggle Support! By using this service, you agree to the following terms:</p>
         <ul>
             <li><strong>Not a Substitute for Professional Help:</strong> This chatbot is designed for emotional support and is NOT a substitute for professional medical advice, diagnosis, or treatment from a licensed therapist, psychologist, or psychiatrist.</li>
