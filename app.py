@@ -716,7 +716,7 @@ def _store_reset_code(email, code):
     else:
         c.execute("UPDATE password_reset_codes SET used = 1 WHERE email = ? AND used = 0", (email,))
     # Insert new code
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=30)
     if 'DATABASE_URL' in os.environ:
         c.execute(
             "INSERT INTO password_reset_codes (email, code, expires_at) VALUES (%s, %s, %s)",
@@ -799,7 +799,7 @@ def forgot_password():
                 return redirect(url_for('forgot_password'))
 
         # Generic success message (even for non-existent emails — security)
-        flash("If an account with that email exists, a 6-digit verification code has been sent. It is valid for 10 minutes.", "success")
+        flash("If an account with that email exists, a 6-digit verification code has been sent. It is valid for 30 minutes.", "success")
         # Store email in session so the verify page knows which email
         session['reset_email'] = email
         return redirect(url_for('verify_reset_code'))
@@ -844,7 +844,7 @@ def verify_reset_code():
 def reset_with_token(token):
     # Validate the signed token from code verification
     try:
-        email = s.loads(token, salt='password-reset-salt', max_age=600)  # 10 min after code verification
+        email = s.loads(token, salt='password-reset-salt', max_age=1800)  # 30 min after code verification
     except SignatureExpired:
         flash("Your verification session has expired. Please request a new code.", "error")
         return redirect(url_for('forgot_password'))
@@ -943,7 +943,7 @@ def admin_forgot_password():
         else:
             app.logger.info("Admin password reset requested for non-existent admin email: %s", email)
 
-        flash("If an admin account with that email exists, a 6-digit verification code has been sent. It is valid for 10 minutes.", "success")
+        flash("If an admin account with that email exists, a 6-digit verification code has been sent. It is valid for 30 minutes.", "success")
         session['admin_reset_email'] = email
         return redirect(url_for('admin_verify_reset_code'))
 
@@ -980,7 +980,7 @@ def admin_verify_reset_code():
 @limiter.limit("5 per hour")
 def admin_reset_with_token(token):
     try:
-        email = s.loads(token, salt='admin-password-reset-salt', max_age=600)
+        email = s.loads(token, salt='admin-password-reset-salt', max_age=1800)
     except SignatureExpired:
         flash("Your verification session has expired. Please request a new code.", "error")
         return redirect(url_for('admin_forgot_password'))
