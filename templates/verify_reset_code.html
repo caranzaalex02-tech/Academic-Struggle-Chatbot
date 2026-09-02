@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Forgot Password</title>
+    <title>Verify Reset Code</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,11 +23,8 @@
         body::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 32, 39, 0.7); /* Dark overlay */
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 32, 39, 0.7);
             z-index: 1;
         }
         .auth-box {
@@ -43,6 +40,7 @@
             text-align: center;
             color: white;
         }
+        .auth-box .icon { font-size: 48px; margin-bottom: 10px; }
         .auth-box h2 { margin-bottom: 5px; font-weight: 600; }
         .info-text { font-size: 13px; color: #ccc; margin-bottom: 20px; line-height: 1.5; }
         .form-group {
@@ -70,34 +68,45 @@
         }
         .auth-box input::placeholder { color: rgba(255, 255, 255, 0.6); }
         .auth-box input:focus { background-color: rgba(255, 255, 255, 0.2); }
+        .code-input {
+            letter-spacing: 8px;
+            font-size: 24px !important;
+            font-weight: 600;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
         .auth-box button {
             width: 100%;
             padding: 12px;
-            background: #00c6ff;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
             border: none;
             border-radius: 8px;
             color: white;
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
         }
-        .auth-box button:hover { background: #0072ff; }
+        .auth-box button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 198, 255, 0.5); }
         .flash-message { padding: 12px; margin-bottom: 15px; border-radius: 10px; font-size: 14px; text-align: left; }
         .flash-success { background-color: rgba(46, 213, 115, 0.18); color: #2ed573; }
         .flash-error { background-color: rgba(255, 107, 107, 0.18); color: #ff6b6b; }
         .flash-info { background-color: rgba(0, 198, 255, 0.15); color: #7fd9ff; word-break: break-all; }
         .switch { margin-top: 15px; font-size: 14px; }
         .switch a { color: #00c6ff; text-decoration: none; font-weight: 500; }
+        .switch a:hover { text-decoration: underline; }
     </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 <body>
 
 <div class="auth-box">
-    <img src="{{ url_for('static', filename='images/essu_logo.png') }}" alt="ESSU Logo" style="width: 80px; margin-bottom: 15px; border-radius: 50%;">
-    <h2>Forgot Password</h2>
-    <p class="info-text">Enter your email address and we'll send you a 6-digit verification code to reset your password.</p>
+    <div class="icon">📧</div>
+    <h2>Verify Your Email</h2>
+    <p class="info-text">
+        A 6-digit verification code has been sent to your email.
+        Enter it below to confirm your identity.
+    </p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -110,15 +119,30 @@
     <form method="POST" autocomplete="off">
         <div class="form-group">
             <label for="email">Email Address</label>
-            <input type="email" name="email" id="email" placeholder="you@example.com" required>
+            <input type="email" name="email" id="email" value="{{ email }}" placeholder="you@example.com" required>
         </div>
-        <button type="submit">Send Verification Code</button>
+        <div class="form-group">
+            <label for="code">Verification Code</label>
+            <input type="text" name="code" id="code" class="code-input" placeholder="000000" maxlength="6" inputmode="numeric" pattern="\d{6}" required autofocus>
+        </div>
+        <button type="submit">Verify & Continue</button>
     </form>
 
     <p class="switch">
-        Remembered your password? <a href="{{ url_for('login') }}">Back to Login</a>
+        Didn't receive a code? <a href="{{ url_for('forgot_password') }}">Resend Code</a>
+    </p>
+    <p class="switch" style="margin-top: 5px;">
+        <a href="{{ url_for('login') }}">Back to Login</a>
     </p>
 </div>
+
+<script>
+    // Auto-focus and restrict code input to digits only
+    const codeInput = document.getElementById('code');
+    codeInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+    });
+</script>
 
 </body>
 </html>

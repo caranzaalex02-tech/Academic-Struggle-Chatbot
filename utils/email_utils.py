@@ -352,8 +352,14 @@ Academic Struggle Chatbot Team
         logging.error(f"Failed to send registration email to {user_email}: {e}")
         return False
 
-def send_password_reset_email(user_email, reset_link):
-    """Sends a password reset email to the user."""
+def send_password_reset_email(user_email, reset_code=None, reset_link=None):
+    """Sends a password reset email with a 6-digit verification code.
+    
+    Args:
+        user_email: Recipient email address
+        reset_code: 6-digit verification code (primary method)
+        reset_link: Fallback reset link (backward compatibility)
+    """
     config = _get_email_config()
 
     formatted_sender = _format_sender(config)
@@ -361,11 +367,17 @@ def send_password_reset_email(user_email, reset_link):
         print("\n" + "="*20 + " CONSOLE EMAIL " + "="*20)
         print(f"TO: {user_email}")
         print(f"FROM: {formatted_sender}")
-        print(f"SUBJECT: Reset Your Password")
+        print(f"SUBJECT: Your Password Reset Code")
         print("-" * 55)
-        print("A password reset was requested for your account.")
-        print("Please use the link below to reset your password:")
-        print(f"\n>>> {reset_link} <<<\n")
+        if reset_code:
+            print("A password reset was requested for your account.")
+            print(f"\nYour 6-digit verification code is: >>> {reset_code} <<<")
+            print("\nThis code is valid for 10 minutes.")
+            print("Go to the verify code page and enter this code to reset your password.")
+        elif reset_link:
+            print("A password reset was requested for your account.")
+            print("Please use the link below to reset your password:")
+            print(f"\n>>> {reset_link} <<<\n")
         print("="*55 + "\n")
         return True
 
@@ -378,8 +390,12 @@ Hi,
 
 A password reset was requested for your account.
 
-Please click the link below to reset your password. This link is valid for 1 hour.
-{reset_link}
+Your 6-digit verification code is:
+
+    {reset_code if reset_code else "N/A"}
+
+This code is valid for 10 minutes.
+Enter this code on the verification page to reset your password.
 
 If you did not request this, please ignore this email.
 
@@ -406,20 +422,18 @@ Academic Struggle Chatbot Team
           <tr>
             <td style="background:linear-gradient(135deg,#00c6ff,#0072ff);padding:28px 24px;border-radius:12px 12px 0 0;text-align:center;">
               {logo_html}
-              <h1 style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">Reset Your Password</h1>
+              <h1 style="margin:6px 0 0;font-size:20px;font-weight:700;color:#ffffff;letter-spacing:-0.2px;">Your Password Reset Code</h1>
             </td>
           </tr>
           <tr>
             <td style="padding:28px 24px 8px;color:#334155;font-size:15px;line-height:1.65;">
               <p style="margin:0 0 14px;">Hi,</p>
-              <p style="margin:0 0 14px;">A password reset was requested for your account. This link is valid for <strong>1 hour</strong>.</p>
-              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:22px 0 10px;">
-                <tr>
-                  <td align="center">
-                    <a href="{reset_link}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#00c6ff,#0072ff);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:8px;">Reset Your Password</a>
-                  </td>
-                </tr>
-              </table>
+              <p style="margin:0 0 14px;">A password reset was requested for your account. Your verification code is valid for <strong>10 minutes</strong>.</p>
+              <div style="background:#f0f9ff;border:2px dashed #00c6ff;border-radius:12px;padding:20px;margin:22px 0 10px;text-align:center;">
+                <p style="margin:0 0 6px;font-size:13px;color:#64748b;">Your verification code:</p>
+                <p style="margin:0;font-size:32px;font-weight:800;letter-spacing:8px;color:#0072ff;font-family:'Courier New',monospace;">{reset_code if reset_code else reset_link}</p>
+                <p style="margin:8px 0 0;font-size:12px;color:#94a3b8;">Expires in 10 minutes</p>
+              </div>
               <p style="margin:0 0 14px;font-size:13px;color:#64748b;">If you did not request this password reset, please ignore this email or contact support.</p>
             </td>
           </tr>

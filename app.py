@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import os
+import random
 import re
 import sqlite3
 import urllib.parse
@@ -117,7 +118,7 @@ def protect_admin_routes():
     # Only apply to admin-related routes
     if path.startswith("/admin"):
         # Allow access to login, registration, forgot password, and reset pages
-        if path in ("/admin_login", "/admin/register", "/admin/forgot_password") or path.startswith("/admin/reset/"):
+        if path in ("/admin_login", "/admin/register", "/admin/forgot_password", "/admin/verify_reset_code") or path.startswith("/admin/reset/"):
             return None  # Let the route handler deal with it
         
         # For all other admin routes (/admin_dashboard, /admin/user/*, etc.),
@@ -309,6 +310,19 @@ def init_db():
     )
     """)
     c.execute("CREATE INDEX IF NOT EXISTS idx_used_reset_token_hash ON used_reset_tokens (token_hash)")
+
+    # 6-digit verification codes for password reset (OTP)
+    c.execute(f"""
+    CREATE TABLE IF NOT EXISTS password_reset_codes (
+        id {autoincrement_pk},
+        email TEXT NOT NULL,
+        code TEXT NOT NULL,
+        expires_at {datetime_default} NOT NULL,
+        used INTEGER DEFAULT 0,
+        created_at {datetime_default}
+    )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_reset_code_email ON password_reset_codes (email, code)")
 
     # --- Commit table creation before running migrations ---
     conn.commit()
@@ -687,7 +701,67 @@ def register():
 
     return render_template("register.html", error=error)
 
-# ---- FORGOT PASSWORD ----
+# ---- PASSWORD RESET HELPERS ----
+def _generate_reset_code():
+    """Generate a 6-digit verification code."""
+    return ''.join([str(random.randint(0, 9)) for _ in range(6)])
+
+def _store_reset_code(email, code):
+    """Store a verification code with 10-minute expiry. Invalidate previous codes."""
+    db = get_db()
+    c = db.cursor()
+    # Invalidate all previous unused codes for this email
+    if 'DATABASE_URL' in os.environ:
+        c.execute("UPDATE password_reset_codes SET used = 1 WHERE email = %s AND used = 0", (email,))
+    else:
+        c.execute("UPDATE password_reset_codes SET used = 1 WHERE email = ? AND used = 0", (email,))
+    # Insert new code
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
+    if 'DATABASE_URL' in os.environ:
+        c.execute(
+            "INSERT INTO password_reset_codes (email, code, expires_at) VALUES (%s, %s, %s)",
+            (email, code, expires_at)
+        )
+    else:
+        c.execute(
+            "INSERT INTO password_reset_codes (email, code, expires_at) VALUES (?, ?, ?)",
+            (email, code, expires_at)
+        )
+    db.commit()
+
+def _verify_reset_code(email, code):
+    """Check if the code is valid for the given email. Returns True/False."""
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute(
+            "SELECT id FROM password_reset_codes WHERE email = %s AND code = %s AND used = 0 AND expires_at > %s ORDER BY created_at DESC LIMIT 1",
+            (email, code, datetime.now(timezone.utc))
+        )
+    else:
+        c.execute(
+            "SELECT id FROM password_reset_codes WHERE email = ? AND code = ? AND used = 0 AND expires_at > ? ORDER BY created_at DESC LIMIT 1",
+            (email, code, datetime.now(timezone.utc))
+        )
+    return c.fetchone() is not None
+
+def _consume_reset_code(email, code):
+    """Mark a verification code as used after successful verification."""
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute(
+            "UPDATE password_reset_codes SET used = 1 WHERE email = %s AND code = %s AND used = 0",
+            (email, code)
+        )
+    else:
+        c.execute(
+            "UPDATE password_reset_codes SET used = 1 WHERE email = ? AND code = ? AND used = 0",
+            (email, code)
+        )
+    db.commit()
+
+# ---- FORGOT PASSWORD (User) ----
 @app.route("/forgot_password", methods=["GET", "POST"])
 @limiter.limit("5 per hour")
 def forgot_password():
@@ -696,65 +770,90 @@ def forgot_password():
         db = get_db()
         c = db.cursor()
         if 'DATABASE_URL' in os.environ:
-            c.execute("SELECT email FROM users WHERE email = %s", (email,))
+            c.execute("SELECT email FROM users WHERE email = %s AND role != 'admin'", (email,))
         else:
-            c.execute("SELECT email FROM users WHERE email = ?", (email,))
+            c.execute("SELECT email FROM users WHERE email = ? AND role != 'admin'", (email,))
         user = c.fetchone()
 
         if user:
-            # User found, generate and send reset link
-            token = s.dumps(email, salt='password-reset-salt')
-            reset_link = url_for('reset_with_token', token=token, _external=True)
-            app.logger.info(f"User password reset link generated: {reset_link}")
+            # Generate 6-digit verification code
+            code = _generate_reset_code()
+            _store_reset_code(email, code)
+
+            app.logger.info("Password reset OTP generated for user: %s", email)
             try:
-                email_sent = send_password_reset_email(email, reset_link)
+                email_sent = send_password_reset_email(email, reset_code=code)
             except Exception as e:
                 app.logger.error("Unexpected error sending password reset email to %s: %s", email, e)
                 email_sent = False
-            # For development convenience, optionally show the reset link when emails are printed to console
+
+            # Dev convenience: show code in console
             if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
-                flash(f"Password reset link (dev): {reset_link}", "success")
+                flash(f"Dev: Reset code for {email}: {code}", "info")
+
             if not email_sent:
-                # In dev mode (console backend), show the fallback link so the developer can still test.
-                # In production, NEVER expose the token — just show a generic error.
                 if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
-                    flash("Could not send the reset email. Use this link to reset your password:", "error")
-                    flash(f"{reset_link}", "info")
+                    flash(f"Dev: Reset code for {email}: {code}", "info")
                 else:
                     flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
                 return redirect(url_for('forgot_password'))
 
-        # For better UX and security, always show a generic success message.
-        flash(f"An email has been sent to {email} with instructions to reset your password, if that account exists.", "success")
-        return redirect(url_for('forgot_password'))
+        # Generic success message (even for non-existent emails — security)
+        flash("If an account with that email exists, a 6-digit verification code has been sent. It is valid for 10 minutes.", "success")
+        # Store email in session so the verify page knows which email
+        session['reset_email'] = email
+        return redirect(url_for('verify_reset_code'))
 
     return render_template("forgot_password.html")
 
-# ---- RESET PASSWORD with TOKEN ----
+# ---- VERIFY RESET CODE (User) ----
+@app.route("/verify_reset_code", methods=["GET", "POST"])
+@limiter.limit("10 per hour")
+def verify_reset_code():
+    """User enters their email + 6-digit code to prove email ownership."""
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        code = request.form.get("code", "").strip()
+
+        if not email or not code:
+            flash("Please enter your email and the verification code.", "error")
+            return render_template("verify_reset_code.html", email=email)
+
+        # Verify the code
+        if not _verify_reset_code(email, code):
+            app.logger.warning("Invalid/expired reset code attempt for: %s", email)
+            flash("Invalid or expired verification code. Please request a new one.", "error")
+            return render_template("verify_reset_code.html", email=email)
+
+        # Code is valid — consume it and allow password reset
+        _consume_reset_code(email, code)
+        app.logger.info("Reset code verified for user: %s", email)
+
+        # Generate a signed token for the password reset phase
+        token = s.dumps(email, salt='password-reset-salt')
+        session['reset_verified'] = True
+        return redirect(url_for('reset_with_token', token=token))
+
+    # GET: pre-fill email from session
+    email = session.pop('reset_email', '')
+    return render_template("verify_reset_code.html", email=email)
+
+# ---- RESET PASSWORD (User - after code verified) ----
 @app.route('/reset/<token>', methods=["GET", "POST"])
-@limiter.limit("5 per hour")  # Rate limit: prevent brute-force / token guessing
+@limiter.limit("5 per hour")
 def reset_with_token(token):
-    # ------------------------------------------------------------------
-    # One-time-use token tracking via hashed token nonce.
-    # Store a hash of the token (SHA-256) so we can quickly check
-    # whether this exact token has already been consumed.
-    # ------------------------------------------------------------------
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
-
+    # Validate the signed token from code verification
     try:
-        # Check token validity (max_age in seconds, 3600s = 1 hour)
-        email = s.loads(token, salt='password-reset-salt', max_age=3600)
+        email = s.loads(token, salt='password-reset-salt', max_age=600)  # 10 min after code verification
     except SignatureExpired:
-        flash("The password reset link has expired. Please request a new one.", "error")
+        flash("Your verification session has expired. Please request a new code.", "error")
         return redirect(url_for('forgot_password'))
-    except BadTimeSignature:
-        flash("Invalid password reset link.", "error")
-        return redirect(url_for('forgot_password'))
-    except BadSignature:
-        flash("Invalid password reset link. Please request a new one.", "error")
+    except (BadTimeSignature, BadSignature):
+        flash("Invalid verification session. Please request a new code.", "error")
         return redirect(url_for('forgot_password'))
 
-    # --- Check if this token has already been used ---
+    # Check this token hasn't been used (one-time use for the reset phase too)
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
     db = get_db()
     c = db.cursor()
     if 'DATABASE_URL' in os.environ:
@@ -762,7 +861,7 @@ def reset_with_token(token):
     else:
         c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = ?", (token_hash,))
     if c.fetchone():
-        flash("This password reset link has already been used. Please request a new one.", "error")
+        flash("This password reset has already been completed. Please request a new one.", "error")
         return redirect(url_for('forgot_password'))
 
     if request.method == "POST":
@@ -785,7 +884,6 @@ def reset_with_token(token):
         elif password != confirm_password:
             flash("Passwords do not match.", "error")
         else:
-            # --- Mark token as used BEFORE updating password (atomic) ---
             hashed_password = hash_password(password)
             if 'DATABASE_URL' in os.environ:
                 c.execute(
@@ -801,7 +899,7 @@ def reset_with_token(token):
                 c.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password, email))
             db.commit()
 
-            app.logger.info("Password reset successful for user: %s (token consumed)", email)
+            app.logger.info("Password reset successful for user: %s (OTP verified)", email)
             flash("Your password has been updated! You can now log in.", "success")
             return redirect(url_for('login'))
 
@@ -815,65 +913,82 @@ def admin_forgot_password():
         email = request.form.get("email", "").strip().lower()
         db = get_db()
         c = db.cursor()
-        # Ensure the user is an admin
         if 'DATABASE_URL' in os.environ:
             c.execute("SELECT email FROM users WHERE email = %s AND role = 'admin'", (email,))
         else:
             c.execute("SELECT email FROM users WHERE email = ? AND role = 'admin'", (email,))
         user = c.fetchone()
 
-        app.logger.info(f"Admin password reset requested for {email}")
+        app.logger.info("Admin password reset requested for %s", email)
 
         if user:
-            # User is an admin, generate and send reset link
-            token = s.dumps(email, salt='admin-password-reset-salt')
-            reset_link = url_for('admin_reset_with_token', token=token, _external=True)
-            app.logger.info(f"Admin password reset link generated: {reset_link}")
+            code = _generate_reset_code()
+            _store_reset_code(email, code)
+            app.logger.info("Admin password reset OTP generated for: %s", email)
             try:
-                email_sent = send_password_reset_email(email, reset_link)
+                email_sent = send_password_reset_email(email, reset_code=code)
             except Exception as e:
                 app.logger.error("Unexpected error sending admin password reset email to %s: %s", email, e)
                 email_sent = False
-            # For development convenience, optionally show the reset link when emails are printed to console
+
             if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
-                flash(f"Admin password reset link (dev): {reset_link}", "success")
+                flash(f"Dev: Admin reset code for {email}: {code}", "info")
+
             if not email_sent:
-                app.logger.warning("Admin password reset email could not be sent for %s", email)
-                # In dev mode (console backend), show the fallback link so the developer can still test.
-                # In production, NEVER expose the token — just show a generic error.
                 if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
-                    flash("Could not send the reset email. Use this link to reset your admin password:", "error")
-                    flash(f"{reset_link}", "info")
+                    flash(f"Dev: Admin reset code for {email}: {code}", "info")
                 else:
                     flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
                 return redirect(url_for('admin_forgot_password'))
         else:
             app.logger.info("Admin password reset requested for non-existent admin email: %s", email)
 
-        # Always show a generic success message for security
-        flash(f"If an admin account with the email {email} exists, a password reset link has been sent.", "success")
-        return redirect(url_for('admin_forgot_password'))
+        flash("If an admin account with that email exists, a 6-digit verification code has been sent. It is valid for 10 minutes.", "success")
+        session['admin_reset_email'] = email
+        return redirect(url_for('admin_verify_reset_code'))
 
     return render_template("admin_forgot_password.html")
 
-@app.route('/admin/reset/<token>', methods=["GET", "POST"]) # Changed function name
-@limiter.limit("5 per hour")  # Rate limit: prevent brute-force / token guessing
+@app.route("/admin/verify_reset_code", methods=["GET", "POST"])
+@limiter.limit("10 per hour")
+def admin_verify_reset_code():
+    """Admin enters email + 6-digit code to prove email ownership."""
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        code = request.form.get("code", "").strip()
+
+        if not email or not code:
+            flash("Please enter your admin email and the verification code.", "error")
+            return render_template("admin_verify_reset_code.html", email=email)
+
+        if not _verify_reset_code(email, code):
+            app.logger.warning("Invalid/expired admin reset code attempt for: %s", email)
+            flash("Invalid or expired verification code. Please request a new one.", "error")
+            return render_template("admin_verify_reset_code.html", email=email)
+
+        _consume_reset_code(email, code)
+        app.logger.info("Admin reset code verified for: %s", email)
+
+        token = s.dumps(email, salt='admin-password-reset-salt')
+        session['admin_reset_verified'] = True
+        return redirect(url_for('admin_reset_with_token', token=token))
+
+    email = session.pop('admin_reset_email', '')
+    return render_template("admin_verify_reset_code.html", email=email)
+
+@app.route('/admin/reset/<token>', methods=["GET", "POST"])
+@limiter.limit("5 per hour")
 def admin_reset_with_token(token):
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
-
     try:
-        email = s.loads(token, salt='admin-password-reset-salt', max_age=3600)
+        email = s.loads(token, salt='admin-password-reset-salt', max_age=600)
     except SignatureExpired:
-        flash("The password reset link has expired. Please request a new one.", "error")
+        flash("Your verification session has expired. Please request a new code.", "error")
         return redirect(url_for('admin_forgot_password'))
-    except BadTimeSignature:
-        flash("Invalid password reset link.", "error")
-        return redirect(url_for('admin_forgot_password'))
-    except BadSignature:
-        flash("Invalid password reset link. Please request a new one.", "error")
+    except (BadTimeSignature, BadSignature):
+        flash("Invalid verification session. Please request a new code.", "error")
         return redirect(url_for('admin_forgot_password'))
 
-    # --- Check if this token has already been used ---
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
     db = get_db()
     c = db.cursor()
     if 'DATABASE_URL' in os.environ:
@@ -881,7 +996,7 @@ def admin_reset_with_token(token):
     else:
         c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = ?", (token_hash,))
     if c.fetchone():
-        flash("This password reset link has already been used. Please request a new one.", "error")
+        flash("This password reset has already been completed. Please request a new one.", "error")
         return redirect(url_for('admin_forgot_password'))
 
     if request.method == "POST":
@@ -920,7 +1035,7 @@ def admin_reset_with_token(token):
                 c.execute("UPDATE users SET password = ? WHERE email = ? AND role = 'admin'", (hashed_password, email))
             db.commit()
 
-            app.logger.info("Admin password reset successful for: %s (token consumed)", email)
+            app.logger.info("Admin password reset successful for: %s (OTP verified)", email)
             flash("Admin password has been updated! You can now log in.", "success")
             return redirect(url_for('admin_login'))
 
