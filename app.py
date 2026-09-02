@@ -1,5 +1,6 @@
 # Python Standard Library
 import base64
+import hashlib
 import os
 import re
 import sqlite3
@@ -298,6 +299,16 @@ def init_db():
         language TEXT DEFAULT 'tagalog'
     )
     """)
+
+    # One-time-use token tracking for password reset security
+    c.execute(f"""
+    CREATE TABLE IF NOT EXISTS used_reset_tokens (
+        id {autoincrement_pk},
+        token_hash TEXT NOT NULL,
+        used_at {datetime_default}
+    )
+    """)
+    c.execute("CREATE INDEX IF NOT EXISTS idx_used_reset_token_hash ON used_reset_tokens (token_hash)")
 
     # --- Commit table creation before running migrations ---
     conn.commit()
@@ -704,10 +715,13 @@ def forgot_password():
             if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                 flash(f"Password reset link (dev): {reset_link}", "success")
             if not email_sent:
-                # Render blocks outbound SMTP, so fall back to showing the link
-                # so the user can still reset their password.
-                flash("Could not send the reset email. Use this link to reset your password:", "error")
-                flash(f"{reset_link}", "info")
+                # In dev mode (console backend), show the fallback link so the developer can still test.
+                # In production, NEVER expose the token — just show a generic error.
+                if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+                    flash("Could not send the reset email. Use this link to reset your password:", "error")
+                    flash(f"{reset_link}", "info")
+                else:
+                    flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
                 return redirect(url_for('forgot_password'))
 
         # For better UX and security, always show a generic success message.
@@ -718,7 +732,15 @@ def forgot_password():
 
 # ---- RESET PASSWORD with TOKEN ----
 @app.route('/reset/<token>', methods=["GET", "POST"])
+@limiter.limit("5 per hour")  # Rate limit: prevent brute-force / token guessing
 def reset_with_token(token):
+    # ------------------------------------------------------------------
+    # One-time-use token tracking via hashed token nonce.
+    # Store a hash of the token (SHA-256) so we can quickly check
+    # whether this exact token has already been consumed.
+    # ------------------------------------------------------------------
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+
     try:
         # Check token validity (max_age in seconds, 3600s = 1 hour)
         email = s.loads(token, salt='password-reset-salt', max_age=3600)
@@ -732,23 +754,54 @@ def reset_with_token(token):
         flash("Invalid password reset link. Please request a new one.", "error")
         return redirect(url_for('forgot_password'))
 
+    # --- Check if this token has already been used ---
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = %s", (token_hash,))
+    else:
+        c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = ?", (token_hash,))
+    if c.fetchone():
+        flash("This password reset link has already been used. Please request a new one.", "error")
+        return redirect(url_for('forgot_password'))
+
     if request.method == "POST":
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
 
-        if not password or len(password) < 6:
-            flash("Password must be at least 6 characters long.", "error")
+        # --- Consistent password policy matching registration ---
+        if not password:
+            flash("Password is required.", "error")
+        elif len(password) < 8:
+            flash("Password must be at least 8 characters long.", "error")
+        elif not re.search(r'[A-Z]', password):
+            flash("Password must contain at least one uppercase letter.", "error")
+        elif not re.search(r'[a-z]', password):
+            flash("Password must contain at least one lowercase letter.", "error")
+        elif not re.search(r'[0-9]', password):
+            flash("Password must contain at least one number.", "error")
+        elif not re.search(r'[^A-Za-z0-9]', password):
+            flash("Password must contain at least one special character.", "error")
         elif password != confirm_password:
             flash("Passwords do not match.", "error")
         else:
+            # --- Mark token as used BEFORE updating password (atomic) ---
             hashed_password = hash_password(password)
-            db = get_db()
-            c = db.cursor()
             if 'DATABASE_URL' in os.environ:
+                c.execute(
+                    "INSERT INTO used_reset_tokens (token_hash, used_at) VALUES (%s, %s)",
+                    (token_hash, datetime.now(timezone.utc))
+                )
                 c.execute("UPDATE users SET password = %s WHERE email = %s", (hashed_password, email))
             else:
+                c.execute(
+                    "INSERT INTO used_reset_tokens (token_hash, used_at) VALUES (?, ?)",
+                    (token_hash, datetime.now(timezone.utc))
+                )
                 c.execute("UPDATE users SET password = ? WHERE email = ?", (hashed_password, email))
             db.commit()
+
+            app.logger.info("Password reset successful for user: %s (token consumed)", email)
             flash("Your password has been updated! You can now log in.", "success")
             return redirect(url_for('login'))
 
@@ -786,8 +839,13 @@ def admin_forgot_password():
                 flash(f"Admin password reset link (dev): {reset_link}", "success")
             if not email_sent:
                 app.logger.warning("Admin password reset email could not be sent for %s", email)
-                flash("Could not send the reset email. Use this link to reset your admin password:", "error")
-                flash(f"{reset_link}", "info")
+                # In dev mode (console backend), show the fallback link so the developer can still test.
+                # In production, NEVER expose the token — just show a generic error.
+                if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+                    flash("Could not send the reset email. Use this link to reset your admin password:", "error")
+                    flash(f"{reset_link}", "info")
+                else:
+                    flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
                 return redirect(url_for('admin_forgot_password'))
         else:
             app.logger.info("Admin password reset requested for non-existent admin email: %s", email)
@@ -799,7 +857,10 @@ def admin_forgot_password():
     return render_template("admin_forgot_password.html")
 
 @app.route('/admin/reset/<token>', methods=["GET", "POST"]) # Changed function name
+@limiter.limit("5 per hour")  # Rate limit: prevent brute-force / token guessing
 def admin_reset_with_token(token):
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+
     try:
         email = s.loads(token, salt='admin-password-reset-salt', max_age=3600)
     except SignatureExpired:
@@ -812,23 +873,54 @@ def admin_reset_with_token(token):
         flash("Invalid password reset link. Please request a new one.", "error")
         return redirect(url_for('admin_forgot_password'))
 
+    # --- Check if this token has already been used ---
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = %s", (token_hash,))
+    else:
+        c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = ?", (token_hash,))
+    if c.fetchone():
+        flash("This password reset link has already been used. Please request a new one.", "error")
+        return redirect(url_for('admin_forgot_password'))
+
     if request.method == "POST":
         password = request.form.get("password")
         confirm_password = request.form.get("confirm_password")
 
-        if not password or len(password) < 6:
-            flash("Password must be at least 6 characters long.", "error")
+        # --- Consistent password policy matching registration ---
+        if not password:
+            flash("Password is required.", "error")
+        elif len(password) < 8:
+            flash("Password must be at least 8 characters long.", "error")
+        elif not re.search(r'[A-Z]', password):
+            flash("Password must contain at least one uppercase letter.", "error")
+        elif not re.search(r'[a-z]', password):
+            flash("Password must contain at least one lowercase letter.", "error")
+        elif not re.search(r'[0-9]', password):
+            flash("Password must contain at least one number.", "error")
+        elif not re.search(r'[^A-Za-z0-9]', password):
+            flash("Password must contain at least one special character.", "error")
         elif password != confirm_password:
             flash("Passwords do not match.", "error")
         else:
+            # --- Mark token as used BEFORE updating password (atomic) ---
             hashed_password = hash_password(password)
-            db = get_db()
-            c = db.cursor()
             if 'DATABASE_URL' in os.environ:
+                c.execute(
+                    "INSERT INTO used_reset_tokens (token_hash, used_at) VALUES (%s, %s)",
+                    (token_hash, datetime.now(timezone.utc))
+                )
                 c.execute("UPDATE users SET password = %s WHERE email = %s AND role = 'admin'", (hashed_password, email))
             else:
+                c.execute(
+                    "INSERT INTO used_reset_tokens (token_hash, used_at) VALUES (?, ?)",
+                    (token_hash, datetime.now(timezone.utc))
+                )
                 c.execute("UPDATE users SET password = ? WHERE email = ? AND role = 'admin'", (hashed_password, email))
             db.commit()
+
+            app.logger.info("Admin password reset successful for: %s (token consumed)", email)
             flash("Admin password has been updated! You can now log in.", "success")
             return redirect(url_for('admin_login'))
 
