@@ -372,7 +372,7 @@ def send_password_reset_email(user_email, reset_code=None, reset_link=None):
         if reset_code:
             print("A password reset was requested for your account.")
             print(f"\nYour 6-digit verification code is: >>> {reset_code} <<<")
-            print("\nThis code is valid for 30 minutes.")
+            print("\nThis code is valid for 1 hour.")
             print("Go to the verify code page and enter this code to reset your password.")
         elif reset_link:
             print("A password reset was requested for your account.")
@@ -394,7 +394,7 @@ Your 6-digit verification code is:
 
     {reset_code if reset_code else "N/A"}
 
-This code is valid for 30 minutes.
+This code is valid for 1 hour.
 Enter this code on the verification page to reset your password.
 
 If you did not request this, please ignore this email.
@@ -428,11 +428,11 @@ Academic Struggle Chatbot Team
           <tr>
             <td style="padding:28px 24px 8px;color:#334155;font-size:15px;line-height:1.65;">
               <p style="margin:0 0 14px;">Hi,</p>
-              <p style="margin:0 0 14px;">A password reset was requested for your account. Your verification code is valid for <strong>30 minutes</strong>.</p>
+              <p style="margin:0 0 14px;">A password reset was requested for your account. Your verification code is valid for <strong>1 hour</strong>.</p>
               <div style="background:#f0f9ff;border:2px dashed #00c6ff;border-radius:12px;padding:20px;margin:22px 0 10px;text-align:center;">
                 <p style="margin:0 0 6px;font-size:13px;color:#64748b;">Your verification code:</p>
                 <p style="margin:0;font-size:32px;font-weight:800;letter-spacing:8px;color:#0072ff;font-family:'Courier New',monospace;">{reset_code if reset_code else reset_link}</p>
-                <p style="margin:8px 0 0;font-size:12px;color:#94a3b8;">Expires in 30 minutes</p>
+                <p style="margin:8px 0 0;font-size:12px;color:#94a3b8;">Expires in 1 hour</p>
               </div>
               <p style="margin:0 0 14px;font-size:13px;color:#64748b;">If you did not request this password reset, please ignore this email or contact support.</p>
             </td>
