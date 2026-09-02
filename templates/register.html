@@ -234,9 +234,11 @@
         /* Ensure modal is above everything & vertically centered */
         #termsModal {
             z-index: 9999 !important;
+        }
+        /* Center modal vertically only when visible */
+        #termsModal.show {
             display: flex !important;
             align-items: center !important;
-            justify-content: center !important;
         }
         .modal-backdrop {
             z-index: 9998 !important;
@@ -489,7 +491,7 @@
 
 <!-- Modal for Terms and Conditions -->
 <div class="modal fade" id="termsModal" tabindex="-1" role="dialog" aria-labelledby="termsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="termsModalLabel">📋 Terms and Conditions</h5>
