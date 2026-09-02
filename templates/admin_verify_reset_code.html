@@ -23,7 +23,10 @@
         body::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(15, 32, 39, 0.7);
             z-index: 1;
         }
@@ -40,7 +43,6 @@
             text-align: center;
             color: white;
         }
-        .auth-box .icon { font-size: 48px; margin-bottom: 10px; }
         .auth-box h2 { margin-bottom: 5px; font-weight: 600; }
         .info-text { font-size: 13px; color: #ccc; margin-bottom: 20px; line-height: 1.5; }
         .form-group { text-align: left; margin-bottom: 15px; }
@@ -49,21 +51,24 @@
         .auth-box input::placeholder { color: rgba(255, 255, 255, 0.6); }
         .auth-box input:focus { background-color: rgba(255, 255, 255, 0.2); }
         .code-input { letter-spacing: 8px; font-size: 24px !important; font-weight: 600; text-align: center; font-family: 'Courier New', monospace; }
-        .auth-box button { width: 100%; padding: 12px; background: linear-gradient(135deg, #f87171, #ef4444); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: transform 0.2s; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
-        .auth-box button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5); }
+        .auth-box button { width: 100%; padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background-color 0.3s; }
         .flash-message { padding: 12px; margin-bottom: 15px; border-radius: 10px; font-size: 14px; text-align: left; }
         .flash-success { background-color: rgba(46, 213, 115, 0.18); color: #2ed573; }
         .flash-error { background-color: rgba(255, 107, 107, 0.18); color: #ff6b6b; }
         .flash-info { background-color: rgba(255, 69, 58, 0.15); color: #fca5a5; word-break: break-all; }
         .switch { margin-top: 15px; font-size: 14px; }
         .switch a { color: #ff6b6b; text-decoration: none; font-weight: 500; }
-        .switch a:hover { text-decoration: underline; }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <style>
+        .auth-box button[type="submit"] { background: linear-gradient(135deg, #f87171, #ef4444); box-shadow: 0 12px 28px -10px rgba(239, 68, 68, 0.5); }
+        .auth-box button[type="submit"]:hover { box-shadow: 0 16px 34px -10px rgba(239, 68, 68, 0.6); }
     </style>
 </head>
 <body>
 
 <div class="auth-box">
-    <div class="icon">🔐</div>
+    <img src="{{ url_for('static', filename='images/essu_logo.png') }}" alt="ESSU Logo" style="width: 80px; margin-bottom: 15px; border-radius: 50%;">
     <h2>Verify Admin Email</h2>
     <p class="info-text">
         A 6-digit verification code has been sent to your admin email.
@@ -94,7 +99,7 @@
         Didn't receive a code? <a href="{{ url_for('admin_forgot_password') }}">Resend Code</a>
     </p>
     <p class="switch" style="margin-top: 5px;">
-        <a href="{{ url_for('admin_login') }}">Back to Admin Login</a>
+        Remembered your password? <a href="{{ url_for('admin_login') }}">Back to Admin Login</a>
     </p>
 </div>
 

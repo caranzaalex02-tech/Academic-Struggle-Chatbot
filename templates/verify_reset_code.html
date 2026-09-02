@@ -23,8 +23,11 @@
         body::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(15, 32, 39, 0.7);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 32, 39, 0.7); /* Dark overlay */
             z-index: 1;
         }
         .auth-box {
@@ -40,7 +43,6 @@
             text-align: center;
             color: white;
         }
-        .auth-box .icon { font-size: 48px; margin-bottom: 10px; }
         .auth-box h2 { margin-bottom: 5px; font-weight: 600; }
         .info-text { font-size: 13px; color: #ccc; margin-bottom: 20px; line-height: 1.5; }
         .form-group {
@@ -78,30 +80,29 @@
         .auth-box button {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            background: #00c6ff;
             border: none;
             border-radius: 8px;
             color: white;
             font-weight: bold;
             cursor: pointer;
             margin-top: 10px;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
+            transition: background-color 0.3s;
         }
-        .auth-box button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 198, 255, 0.5); }
+        .auth-box button:hover { background: #0072ff; }
         .flash-message { padding: 12px; margin-bottom: 15px; border-radius: 10px; font-size: 14px; text-align: left; }
         .flash-success { background-color: rgba(46, 213, 115, 0.18); color: #2ed573; }
         .flash-error { background-color: rgba(255, 107, 107, 0.18); color: #ff6b6b; }
         .flash-info { background-color: rgba(0, 198, 255, 0.15); color: #7fd9ff; word-break: break-all; }
         .switch { margin-top: 15px; font-size: 14px; }
         .switch a { color: #00c6ff; text-decoration: none; font-weight: 500; }
-        .switch a:hover { text-decoration: underline; }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 <body>
 
 <div class="auth-box">
-    <div class="icon">📧</div>
+    <img src="{{ url_for('static', filename='images/essu_logo.png') }}" alt="ESSU Logo" style="width: 80px; margin-bottom: 15px; border-radius: 50%;">
     <h2>Verify Your Email</h2>
     <p class="info-text">
         A 6-digit verification code has been sent to your email.
@@ -132,12 +133,11 @@
         Didn't receive a code? <a href="{{ url_for('forgot_password') }}">Resend Code</a>
     </p>
     <p class="switch" style="margin-top: 5px;">
-        <a href="{{ url_for('login') }}">Back to Login</a>
+        Remembered your password? <a href="{{ url_for('login') }}">Back to Login</a>
     </p>
 </div>
 
 <script>
-    // Auto-focus and restrict code input to digits only
     const codeInput = document.getElementById('code');
     codeInput.addEventListener('input', function(e) {
         this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
