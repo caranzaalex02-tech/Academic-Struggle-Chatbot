@@ -78,19 +78,22 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
     <h1>👥 Group Study</h1>
     <p class="subtitle">Connect with fellow students. You are not alone.</p>
     <div class="rooms-section" style="margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <h2 style="font-size:1rem; color:#1a4a5a;">💬 Group Chat Rooms</h2>
-            <a href="/create_room" style="background:linear-gradient(135deg,#0ea5b9,#0e6b7a); color:#fff; padding:8px 14px; border-radius:999px; text-decoration:none; font-weight:700; font-size:0.85rem; box-shadow:0 4px 12px rgba(14,165,185,0.25);"><i class="fas fa-plus"></i> Create Room</a>
+        <button class="rooms-toggle" onclick="toggleRooms()" style="display:flex; align-items:center; gap:8px; width:100%; background:rgba(255,255,255,0.45); border:1px solid rgba(255,255,255,0.4); color:#1a4a5a; font-weight:700; font-size:0.9rem; padding:12px 16px; border-radius:12px; cursor:pointer;">
+            <span>💬 Group Chat Rooms ({{ rooms|length }})</span>
+            <i class="fas fa-chevron-down" id="rooms-chevron" style="margin-left:auto;"></i>
+        </button>
+        <div class="rooms-list" id="rooms-list" style="display:none; margin-top:8px;">
+            <a href="/create_room" style="display:block; background:linear-gradient(135deg,#0ea5b9,#0e6b7a); color:#fff; padding:10px 14px; border-radius:12px; text-decoration:none; font-weight:700; font-size:0.85rem; text-align:center; margin-bottom:8px; box-shadow:0 4px 12px rgba(14,165,185,0.25);"><i class="fas fa-plus"></i> Create Room</a>
+            {% if rooms %}
+                {% for room in rooms %}
+                <a href="/group_chat/{{ room.id }}" style="display:block; background:rgba(255,255,255,0.45); padding:12px 16px; border-radius:12px; text-decoration:none; color:#1a4a5a; font-weight:600; margin-bottom:8px; border:1px solid rgba(255,255,255,0.4);">
+                    <i class="fas fa-comments"></i> {{ room.name }}
+                </a>
+                {% endfor %}
+            {% else %}
+                <p style="font-size:0.85rem; color:#5a8a9a; text-align:center; padding:10px;">You have no group chat rooms yet. Create one!</p>
+            {% endif %}
         </div>
-        {% if rooms %}
-            {% for room in rooms %}
-            <a href="/group_chat/{{ room.id }}" style="display:block; background:rgba(255,255,255,0.45); padding:12px 16px; border-radius:12px; text-decoration:none; color:#1a4a5a; font-weight:600; margin-bottom:8px; border:1px solid rgba(255,255,255,0.4);">
-                <i class="fas fa-comments"></i> {{ room.name }}
-            </a>
-            {% endfor %}
-        {% else %}
-            <p style="font-size:0.85rem; color:#5a8a9a; text-align:center; padding:10px;">You have no group chat rooms yet. Create one!</p>
-        {% endif %}
     </div>
     <div class="disclaimer-box"><strong>Disclaimer:</strong> You are chatting with fellow users, not licensed professionals. Please be respectful and kind. For crisis support, use the hotlines in the main menu.</div>
     <div class="search-container"><input type="text" id="userSearch" onkeyup="filterUsers()" placeholder="🔍 Search user by email or name..."></div>
@@ -131,6 +134,17 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
 </div>
 
 <script>
+function toggleRooms(){
+    var list = document.getElementById('rooms-list');
+    var chevron = document.getElementById('rooms-chevron');
+    if(list.style.display === 'none' || list.style.display === ''){
+        list.style.display = 'block';
+        chevron.className = 'fas fa-chevron-up';
+    } else {
+        list.style.display = 'none';
+        chevron.className = 'fas fa-chevron-down';
+    }
+}
 function filterUsers(){var f=document.getElementById('userSearch').value.toLowerCase();document.querySelectorAll('.user-card').forEach(function(c){var n=c.getAttribute('data-name'),e=c.getAttribute('data-email');c.style.display=(n.includes(f)||e.includes(f))?'flex':'none';});}
 var m=document.getElementById('uploadModal'),fi=document.getElementById('pfp-upload-input'),ub=document.getElementById('upload-btn'),us=document.getElementById('upload-status');
 function openUploadModal(){m.style.display='block';}
