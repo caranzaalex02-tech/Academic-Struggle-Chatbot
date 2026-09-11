@@ -27,6 +27,11 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
 }
 .back-btn { text-decoration: none; color: #0e6b7a; font-size: 22px; font-weight: bold; line-height: 1; }
 .header-title { font-weight: 700; font-size: 1rem; }
+.rename-btn { background: none; border: none; color: #0e6b7a; font-size: 15px; cursor: pointer; padding: 6px; border-radius: 50%; margin-left: auto; }
+.rename-btn:hover { background: rgba(0,0,0,0.08); }
+.members-bar { padding: 8px 16px; background: rgba(255,255,255,0.15); border-bottom: 1px solid rgba(255,255,255,0.25); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex-shrink: 0; }
+.members-label { font-size: 12px; font-weight: 700; color: #1a4a5a; }
+.member-chip { background: rgba(255,255,255,0.5); color: #1a4a5a; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.4); }
 .chat-box {
     flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;
 }
@@ -47,7 +52,18 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
 <body>
 <div class="header">
     <a href="/community" class="back-btn"><i class="fas fa-arrow-left"></i></a>
-    <div class="header-title">💬 {{ room_name }}</div>
+    <div class="header-title">💬 <span id="room-name-text">{{ room_name }}</span></div>
+    {% if is_creator %}
+    <button class="rename-btn" onclick="renameRoom()" title="Rename room"><i class="fas fa-pen"></i></button>
+    {% endif %}
+</div>
+<div class="members-bar">
+    <span class="members-label"><i class="fas fa-users"></i> Members ({{ members|length }}):</span>
+    <span class="members-list">
+        {% for member in members %}
+        <span class="member-chip">{{ member.split('@')[0] }}</span>
+        {% endfor %}
+    </span>
 </div>
 <div class="chat-box" id="chat-box">
     <!-- Messages load here -->
@@ -63,6 +79,25 @@ const currentUser = "{{ username }}";
 const chatBox = document.getElementById('chat-box');
 
 function scrollToBottom(){ chatBox.scrollTop = chatBox.scrollHeight; }
+
+function renameRoom(){
+    const current = document.getElementById('room-name-text').textContent.trim();
+    const newName = prompt('Enter new room name:', current);
+    if(!newName || !newName.trim()) return;
+    fetch('/api/rename_room', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ room_id: roomId, name: newName.trim() })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'ok'){
+            document.getElementById('room-name-text').textContent = newName.trim();
+        } else {
+            alert('Error renaming room.');
+        }
+    });
+}
 
 function senderName(email){
     if(!email) return "User";

@@ -1618,12 +1618,21 @@ def group_chat(room_id):
     db = get_db()
     c = db.cursor()
     if 'DATABASE_URL' in os.environ:
-        c.execute("SELECT name FROM group_rooms WHERE id=%s", (room_id,))
+        c.execute("SELECT name, created_by FROM group_rooms WHERE id=%s", (room_id,))
     else:
-        c.execute("SELECT name FROM group_rooms WHERE id=?", (room_id,))
+        c.execute("SELECT name, created_by FROM group_rooms WHERE id=?", (room_id,))
     row = c.fetchone()
     room_name = row[0] if row else "Group Chat"
-    return render_template("group_chat.html", room_id=room_id, room_name=room_name, username=session["user"])
+    created_by = row[1] if row else None
+    is_creator = (created_by == session["user"])
+
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT user_email FROM group_room_members WHERE room_id=%s ORDER BY id ASC", (room_id,))
+    else:
+        c.execute("SELECT user_email FROM group_room_members WHERE room_id=? ORDER BY id ASC", (room_id,))
+    members = [r[0] for r in c.fetchall()]
+
+    return render_template("group_chat.html", room_id=room_id, room_name=room_name, username=session["user"], members=members, is_creator=is_creator)
 
 @app.route("/api/send_group", methods=["POST"])
 def send_group():
@@ -1663,6 +1672,26 @@ def get_group(room_id):
         c.execute("SELECT sender, message, timestamp FROM group_messages WHERE room_id=? ORDER BY id ASC", (room_id,))
     messages = [{"sender": r[0], "message": r[1], "timestamp": format_time_for_chat(r[2])} for r in c.fetchall()]
     return jsonify({"messages": messages})
+
+@app.route("/api/rename_room", methods=["POST"])
+def rename_room():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    room_id = data.get("room_id")
+    name = (data.get("name") or "").strip()
+    if not room_id or not name:
+        return jsonify({"error": "Missing data"}), 400
+    if not is_room_member(room_id, session["user"]):
+        return jsonify({"error": "Not a member"}), 403
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("UPDATE group_rooms SET name=%s WHERE id=%s", (name, room_id))
+    else:
+        c.execute("UPDATE group_rooms SET name=? WHERE id=?", (name, room_id))
+    db.commit()
+    return jsonify({"status": "ok"})
 
 @app.route('/api/typing', methods=['POST'])
 def set_typing_status():

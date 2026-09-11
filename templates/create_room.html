@@ -53,10 +53,12 @@ label.room-label { display:block; font-size:0.8rem; font-weight:700; color:#1a4a
     <label class="room-label" for="room-name">Room Name</label>
     <input type="text" id="room-name" placeholder="e.g. Group 1 - Thesis Discussion">
 
+    <input type="text" id="member-search" onkeyup="filterMembers()" placeholder="🔍 Search users..." style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.5); font-size:0.9rem; background:rgba(255,255,255,0.55); color:#1a4a5a; outline:none; margin-bottom:10px;">
+
     <div class="user-list" id="user-list">
         {% if users %}
             {% for user in users %}
-            <label class="user-card">
+            <label class="user-card" data-search="{{ user.name|lower }} {{ user.email|lower }}">
                 <input type="checkbox" class="member-checkbox" value="{{ user.email }}">
                 <span>{{ user.name }} ({{ user.email }})</span>
             </label>
@@ -70,6 +72,13 @@ label.room-label { display:block; font-size:0.8rem; font-weight:700; color:#1a4a
 </div>
 
 <script>
+function filterMembers(){
+    const q = document.getElementById('member-search').value.toLowerCase();
+    document.querySelectorAll('.user-card').forEach(function(card){
+        card.style.display = card.getAttribute('data-search').includes(q) ? 'flex' : 'none';
+    });
+}
+
 function createRoom(){
     const name = document.getElementById('room-name').value.trim();
     if(!name){
