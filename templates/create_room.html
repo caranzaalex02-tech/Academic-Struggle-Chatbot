@@ -47,11 +47,11 @@ label.room-label { display:block; font-size:0.8rem; font-weight:700; color:#1a4a
 <body>
 <div class="container">
     <a href="/community" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Group Study</a>
-    <h1>💬 Gumawa ng Group Chat Room</h1>
-    <p class="subtitle">Pumili ng mga user na gusto mong isama sa room.</p>
+    <h1>💬 Create Group Chat Room</h1>
+    <p class="subtitle">Select the users you want to add to the room.</p>
 
     <label class="room-label" for="room-name">Room Name</label>
-    <input type="text" id="room-name" placeholder="hal. Group 1 - Thesis Discussion">
+    <input type="text" id="room-name" placeholder="e.g. Group 1 - Thesis Discussion">
 
     <div class="user-list" id="user-list">
         {% if users %}
@@ -62,7 +62,7 @@ label.room-label { display:block; font-size:0.8rem; font-weight:700; color:#1a4a
             </label>
             {% endfor %}
         {% else %}
-            <p class="no-users">Walang ibang user na pwedeng i-add.</p>
+            <p class="no-users">No other users available to add.</p>
         {% endif %}
     </div>
 
@@ -73,7 +73,7 @@ label.room-label { display:block; font-size:0.8rem; font-weight:700; color:#1a4a
 function createRoom(){
     const name = document.getElementById('room-name').value.trim();
     if(!name){
-        alert('Ilagay ang pangalan ng room.');
+        alert('Please enter a room name.');
         return;
     }
     const members = Array.from(document.querySelectorAll('.member-checkbox:checked')).map(cb => cb.value);
