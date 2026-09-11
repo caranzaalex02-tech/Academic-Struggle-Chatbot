@@ -211,7 +211,7 @@ Immediate attention required.
         print("\n" + "="*20 + " CONSOLE EMAIL " + "="*20)
         print(f"TO: Crisis Team <{receiver}>")
         print(f"FROM: {config['sender']}")
-        print(f"SUBJECT: CRISIS ALERT - Mental Health Chatbot")
+        print(f"SUBJECT: CRISIS ALERT - Academic Struggle Chatbot")
         print("-" * 55)
         print(body)
         print("="*55 + "\n")
@@ -222,7 +222,7 @@ Immediate attention required.
         return
 
     msg = MIMEText(body)
-    msg["Subject"] = "CRISIS ALERT - Mental Health Chatbot"
+    msg["Subject"] = "CRISIS ALERT - Academic Struggle Chatbot"
     msg["From"] = config['sender']
     msg["To"] = receiver
 

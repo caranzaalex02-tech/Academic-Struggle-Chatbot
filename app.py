@@ -371,8 +371,8 @@ def init_db():
     c.execute("SELECT COUNT(*) FROM faq_dataset")
     if c.fetchone()[0] == 0:
         sample_faqs = [
-            ("what is this app for", "This app is a student-friendly mental health chatbot that offers emotional support, grounding exercises, and guidance for school stress."),
-            ("how can i use this chatbot", "You can type your concerns here and the chatbot will respond with support, coping tips, and crisis guidance when needed."),
+            ("what is this app for", "This app is a student-friendly academic struggle support chatbot that offers study guidance, motivation, and practical help for school stress."),
+            ("how can i use this chatbot", "You can type your academic concerns here and the chatbot will respond with support, study tips, and practical guidance when needed."),
             ("what should i do if i feel like hurting myself", "Please contact emergency services or a crisis hotline immediately and tell a trusted person right away.")
         ]
         if is_postgres:

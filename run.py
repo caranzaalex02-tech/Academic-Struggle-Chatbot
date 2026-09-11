@@ -28,7 +28,7 @@ with app.app_context():
 port = int(os.environ.get("PORT", 8000))
 
 print("=" * 60)
-print("Mental Health Chatbot is running!")
+print("Academic Struggle Support Chatbot is running!")
 print("Local URL:      http://127.0.0.1:{}".format(port))
 try:
     # Try to show the LAN URL so it works on mobile/other devices on the same network

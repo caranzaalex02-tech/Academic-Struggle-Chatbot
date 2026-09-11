@@ -15,7 +15,7 @@ class BotLogicTests(unittest.TestCase):
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         c.execute("CREATE TABLE IF NOT EXISTS faq_dataset (id INTEGER PRIMARY KEY AUTOINCREMENT, question TEXT, answer TEXT)")
-        c.execute("INSERT INTO faq_dataset (question, answer) VALUES (?, ?)", ("what is this app for", "This app is a mental health support chatbot for students."))
+        c.execute("INSERT INTO faq_dataset (question, answer) VALUES (?, ?)", ("what is this app for", "This app is an academic struggle support chatbot for students."))
         conn.commit()
         conn.close()
 
@@ -24,7 +24,7 @@ class BotLogicTests(unittest.TestCase):
 
     def test_generate_response_returns_faq_answer(self):
         response, intent, is_crisis, is_abusive = bot_logic.generate_response("what is this app for", None, "tagalog")
-        self.assertIn("mental health support chatbot", response)
+        self.assertIn("academic struggle support chatbot", response)
         self.assertEqual(is_crisis, 0)
         self.assertEqual(is_abusive, 0)
 

@@ -236,7 +236,7 @@ INTENTS = {
     },
 
     # ------------------------
-    # EMOTIONAL / MENTAL HEALTH (Conversational)
+    # EMOTIONAL / ACADEMIC STRUGGLE (Conversational)
     # ------------------------
     "stress": {
         "signals": ["stress", "sobrang stress", "nakaka stress", "pressure", "pagod na pagod na ako"],
@@ -329,7 +329,7 @@ INTENTS = {
             "Walang anuman 🤍 Proud ako sa’yo dahil inaalagaan mo ang sarili mo. Nandito lang ako kung kailangan mo ulit.",
             "You're very welcome! I'm really glad I could help. Remember, you're stronger than you think. Keep taking care of yourself! 💙",
             "It makes me so happy to hear that! You deserve all the support in the world. Keep going—I believe in you!",
-            "Thank you for trusting me with your thoughts. You're doing amazing by reaching out and taking care of your mental health!",
+            "Thank you for trusting me with your thoughts. You're doing amazing by reaching out and taking care of yourself!",
             "Masaya akong nakatulong! Ikaw ay deserve ng lahat ng suporta. Patuloy lang at mahalaga ang iyong kalusugan!",
             "Salamat sa pagtitiwala sa akin! Proud ako sa iyo dahil nag-effort ka. Lagi kang may suporta dito! 💙",
             "Ikaw ay napakaganda ng tao dahil nag-aalaga ka sa iyong sarili. Patuloy mo lang yan!",
@@ -616,7 +616,7 @@ EVIDENCE-BASED STRESS MANAGEMENT STRATEGIES:
    - Limit stimulants (caffeine inhibits stress recovery).
    - Omega-3 supplementation shows preliminary stress-reduction efficacy.
 
-ASSESSMENT: If chronic stress impairs occupational/academic/social functioning, seek comprehensive mental health evaluation. Clinician-guided intervention may include psychotherapy and/or pharmacological support."""],
+ASSESSMENT: If chronic stress impairs occupational/academic/social functioning, seek comprehensive professional evaluation. Clinician-guided intervention may include psychotherapy and/or pharmacological support."""],
         "follow_up": []
     },
 
@@ -637,7 +637,7 @@ IMPLEMENTATION (EVIDENCE-BASED):
 
 CLINICAL PRINCIPLE: "Action precedes motivation in the neural reward circuits." Low dopamine states require BEHAVIORAL JUMP START—this is not laziness or character failure; it's neurobiology.
 
-If persistent anhedonia or lack of motivation despite behavioral efforts, assess for depression/ADHD with mental health professional.
+If persistent anhedonia or lack of motivation despite behavioral efforts, assess for depression/ADHD with a licensed professional.
 
 Start. Now. One tiny action."""],
         "follow_up": []
@@ -689,7 +689,7 @@ Subukang kausapin ang iyong propesor o isang kaklase na nakakaintindi ng topic. 
     "org_work_overload": {
         "signals": ["org work", "sobrang daming org work", "org work and acads", "nahihirapan sa org", "pagod sa org", "balancing organization"],
         "response": ["""Ang pagiging aktibo sa student organizations ay maganda, pero madali itong maging overwhelming. Mahalagang matutunan ang prioritization.
-Alin sa mga gawain ang pinaka-importante? Okay lang din na matutong tumanggi sa ibang responsibilidad para protektahan ang iyong oras at mental health.
+Alin sa mga gawain ang pinaka-importante? Okay lang din na matutong tumanggi sa ibang responsibilidad para protektahan ang iyong oras at kapayapaan ng isip.
 "You can do anything, but not everything." – David Allen"""],
         "follow_up": []
     },
@@ -786,7 +786,7 @@ WARAY_RESPONSES = {
         "Masakit gud man an hagubo nga grado o bagsak, pero diri ito an katapusan. Pwede ka pa bumawi. Pakig-istorya ha imo teacher kun paonan-o ka makakabawi. Diri ka nag-uusahan hini nga challenge."
     ],
     "burnout": [
-        "Kun waray ka na gana o kapoy ka na, pamati ha imo lawas. Bangin kinahanglan mo la hin pahuway. Diri karera an pag-eskwela. Importante an imo mental health. Pahuway anay, tapos laban utro."
+        "Kun waray ka na gana o kapoy ka na, pamati ha imo lawas. Bangin kinahanglan mo la hin pahuway. Diri karera an pag-eskwela. Importante an imo kalinaw han isip. Pahuway anay, tapos laban utro."
     ],
     "major_uncertainty": [
         "Okay la nga diri ka sigurado ha imo kurso. Damo nga estudyante an nakaka-agi hini. Pag-explore la ngan paki-istorya ha imo guidance counselor o mga sangkay."
@@ -818,9 +818,9 @@ WARAY_FALLBACKS = [
 ]
 
 DEFAULT_FAQ_ANSWERS = {
-    "what is this app for": "This app is a mental health support chatbot for students, designed to provide emotional support, grounding exercises, and guidance for school stress.",
-    "how can i use this chatbot": "You can type your concerns here and the chatbot will respond with support, coping tips, and crisis guidance when needed.",
-    "who can use this app": "This app is intended for students and anyone who wants a safe space to talk about stress, anxiety, or emotional struggles."
+    "what is this app for": "This app is an academic struggle support chatbot for students, designed to provide study guidance, motivation, and practical help for school stress.",
+    "how can i use this chatbot": "You can type your academic concerns here and the chatbot will respond with support, study tips, and practical guidance when needed.",
+    "who can use this app": "This app is intended for students who want help with academic challenges like exams, assignments, time management, and school stress."
 }
 
 
@@ -1047,7 +1047,7 @@ def _call_gemini_api(user_input, language='tagalog'):
 def _build_openai_system_prompt(language='tagalog'):
     base_guidelines = (
         "SAFETY RULES (follow strictly):\n"
-        "1. NEVER diagnose any medical or mental health condition.\n"
+        "1. NEVER diagnose any medical or psychological condition.\n"
         "2. NEVER prescribe medication or suggest stopping medication.\n"
         "3. NEVER claim to be a licensed therapist, doctor, or counselor.\n"
         "4. NEVER encourage harmful behavior, self-harm, or violence.\n"
@@ -1055,7 +1055,7 @@ def _build_openai_system_prompt(language='tagalog'):
         "6. NEVER generate hate speech, discriminatory, or offensive content.\n"
         "7. If the user is in crisis, ALWAYS direct them to professional help and hotlines.\n"
         "8. If asked about illegal activities, refuse and redirect to positive support.\n"
-        "9. Keep responses focused on academic stress, study habits, and emotional well-being.\n"
+        "9. Keep responses focused on academic struggles, study habits, and school-related concerns.\n"
         "10. If unsure or the topic is outside your scope, politely say you cannot answer and suggest talking to a trusted adult or counselor.\n"
         "\n"
         "RESPONSE STYLE:\n"
@@ -1068,12 +1068,12 @@ def _build_openai_system_prompt(language='tagalog'):
     )
     if language == 'waray':
         return (
-            "You are a compassionate Waray mental health support chatbot for students. "
+            "You are a compassionate Waray academic struggle support chatbot for students. "
             "Respond in gentle Waray whenever possible.\n\n"
             + base_guidelines
         )
     return (
-        "You are a compassionate mental health support chatbot for students. "
+        "You are a compassionate academic struggle support chatbot for students. "
         "Answer in Tagalog or Taglish based on the user's input.\n\n"
         + base_guidelines
     )
