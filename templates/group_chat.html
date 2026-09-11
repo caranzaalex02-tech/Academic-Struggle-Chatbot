@@ -29,9 +29,13 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
 .header-title { font-weight: 700; font-size: 1rem; }
 .rename-btn { background: none; border: none; color: #0e6b7a; font-size: 15px; cursor: pointer; padding: 6px; border-radius: 50%; margin-left: auto; }
 .rename-btn:hover { background: rgba(0,0,0,0.08); }
-.members-bar { padding: 8px 16px; background: rgba(255,255,255,0.15); border-bottom: 1px solid rgba(255,255,255,0.25); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex-shrink: 0; }
-.members-label { font-size: 12px; font-weight: 700; color: #1a4a5a; }
-.member-chip { background: rgba(255,255,255,0.5); color: #1a4a5a; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.4); }
+.members-bar { position: relative; padding: 8px 16px; background: rgba(255,255,255,0.15); border-bottom: 1px solid rgba(255,255,255,0.25); flex-shrink: 0; }
+.members-toggle { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.4); color: #1a4a5a; font-size: 13px; font-weight: 700; padding: 8px 14px; border-radius: 10px; cursor: pointer; width: 100%; }
+.members-toggle:hover { background: rgba(255,255,255,0.6); }
+.members-toggle .chevron { margin-left: auto; }
+.members-dropdown { display: none; margin-top: 6px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.4); border-radius: 10px; padding: 6px; max-height: 180px; overflow-y: auto; }
+.member-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-size: 13px; color: #1a4a5a; border-radius: 7px; }
+.member-item:hover { background: rgba(14,165,185,0.1); }
 .chat-box {
     flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;
 }
@@ -58,12 +62,15 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
     {% endif %}
 </div>
 <div class="members-bar">
-    <span class="members-label"><i class="fas fa-users"></i> Members ({{ members|length }}):</span>
-    <span class="members-list">
+    <button class="members-toggle" onclick="toggleMembers()">
+        <i class="fas fa-users"></i> Members ({{ members|length }})
+        <i class="fas fa-chevron-down chevron" id="members-chevron"></i>
+    </button>
+    <div class="members-dropdown" id="members-dropdown" style="display:none;">
         {% for member in members %}
-        <span class="member-chip">{{ member.split('@')[0] }}</span>
+        <div class="member-item"><i class="fas fa-user"></i> {{ member.split('@')[0] }}</div>
         {% endfor %}
-    </span>
+    </div>
 </div>
 <div class="chat-box" id="chat-box">
     <!-- Messages load here -->
@@ -79,6 +86,18 @@ const currentUser = "{{ username }}";
 const chatBox = document.getElementById('chat-box');
 
 function scrollToBottom(){ chatBox.scrollTop = chatBox.scrollHeight; }
+
+function toggleMembers(){
+    const dropdown = document.getElementById('members-dropdown');
+    const chevron = document.getElementById('members-chevron');
+    if(dropdown.style.display === 'none' || dropdown.style.display === ''){
+        dropdown.style.display = 'block';
+        chevron.className = 'fas fa-chevron-up chevron';
+    } else {
+        dropdown.style.display = 'none';
+        chevron.className = 'fas fa-chevron-down chevron';
+    }
+}
 
 function renameRoom(){
     const current = document.getElementById('room-name-text').textContent.trim();
