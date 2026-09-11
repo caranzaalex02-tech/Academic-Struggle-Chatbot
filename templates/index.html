@@ -974,10 +974,10 @@ transform:translateY(-1px);
   }
   .message-context-menu button:hover { background: #fef2f2; color: #ef4444; }
   .msg-options-btn {
-      display: none;
-      background: rgba(0,0,0,0.06);
+      display: inline-block;
+      background: rgba(0,0,0,0.1);
       border: none;
-      color: #8aa3ae;
+      color: #5a8a9a;
       cursor: pointer;
       font-size: 14px;
       line-height: 1;
@@ -986,8 +986,7 @@ transform:translateY(-1px);
       margin-left: 4px;
       flex-shrink: 0;
   }
-  .message-row.user-row:hover .msg-options-btn { display: inline-block; }
-  .msg-options-btn:hover { background: rgba(0,0,0,0.12); color: #1a4a5a; }
+  .msg-options-btn:hover { background: rgba(0,0,0,0.2); color: #1a4a5a; }
   </style>
   <div id="chat-box">
   {% for m in messages %}

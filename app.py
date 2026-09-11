@@ -1538,13 +1538,13 @@ def get_peer(partner):
     db.commit()
 
     if 'DATABASE_URL' in os.environ:
-        c.execute("""SELECT sender, message, timestamp FROM peer_messages WHERE (sender=%s AND receiver=%s) OR (sender=%s AND receiver=%s) ORDER BY id ASC""",
+        c.execute("""SELECT id, sender, message, timestamp FROM peer_messages WHERE (sender=%s AND receiver=%s) OR (sender=%s AND receiver=%s) ORDER BY id ASC""",
                   (user, partner, partner, user))
     else:
-        c.execute("""SELECT sender, message, timestamp FROM peer_messages WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?) ORDER BY id ASC""",
+        c.execute("""SELECT id, sender, message, timestamp FROM peer_messages WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?) ORDER BY id ASC""",
                   (user, partner, partner, user))
     
-    messages = [{"sender": r[0], "message": r[1], "timestamp": format_time_for_chat(r[2])} for r in c.fetchall()]
+    messages = [{"id": r[0], "sender": r[1], "message": r[2], "timestamp": format_time_for_chat(r[3])} for r in c.fetchall()]
     return jsonify({"messages": messages})
 
 def is_room_member(room_id, user_email):
@@ -1745,6 +1745,23 @@ def leave_room():
             c.execute("DELETE FROM group_messages WHERE room_id=?", (room_id,))
             c.execute("DELETE FROM group_rooms WHERE id=?", (room_id,))
         db.commit()
+    return jsonify({"status": "ok"})
+
+@app.route("/api/delete_peer_message", methods=["POST"])
+def delete_peer_message():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    message_id = data.get("message_id")
+    if not message_id:
+        return jsonify({"error": "Missing data"}), 400
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("DELETE FROM peer_messages WHERE id=%s AND sender=%s", (message_id, session["user"]))
+    else:
+        c.execute("DELETE FROM peer_messages WHERE id=? AND sender=?", (message_id, session["user"]))
+    db.commit()
     return jsonify({"status": "ok"})
 
 @app.route('/api/typing', methods=['POST'])

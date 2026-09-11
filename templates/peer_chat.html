@@ -144,6 +144,11 @@ body::after {
     color: var(--received-text); border-bottom-left-radius: 4px;
     backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.3);
 }
+.message-context-menu { position: fixed; background: #fff; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); padding: 4px; z-index: 9999; min-width: 150px; }
+.message-context-menu button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; border: none; background: none; color: #1a4a5a; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 7px; text-align: left; }
+.message-context-menu button:hover { background: #fef2f2; color: #ef4444; }
+.msg-options-btn { display: inline-block; background: rgba(0,0,0,0.18); border: none; color: #fff; cursor: pointer; font-size: 12px; line-height: 1; padding: 3px 6px; border-radius: 50%; margin-left: 6px; vertical-align: middle; }
+.msg-options-btn:hover { background: rgba(0,0,0,0.35); }
 .timestamp { font-size: 10px; opacity: 0.7; margin-top: 3px; display: block; text-align: right; }
 .typing-indicator { display: flex; align-items: center; gap: 4px; padding: 4px 0; }
 .typing-indicator span { height: 7px; width: 7px; background-color: var(--text-color); opacity: 0.5; border-radius: 50%; animation: typing-bounce 1.2s infinite ease-in-out; }
@@ -234,6 +239,9 @@ button.send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba
 
 <div class="chat-area" id="chat-box">
     <!-- Messages will load here -->
+</div>
+<div id="message-context-menu" class="message-context-menu" style="display:none;">
+    <button type="button" onclick="unsendActiveMessage()"><i class="fas fa-trash-alt"></i> Unsend</button>
 </div>
 
 <div class="input-area">
@@ -388,9 +396,14 @@ function loadMessages() {
     .then(data => {
         chatBox.innerHTML = ''; // Clear the box
         data.messages.forEach(msg => {
+            const isSent = msg.sender === currentUser;
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${msg.sender === currentUser ? 'sent' : 'received'}`;
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
             
+            if (isSent && msg.id) {
+                messageDiv.dataset.messageId = msg.id;
+            }
+
             if (msg.message.startsWith('[IMG]')) {
                 const imageUrl = msg.message.substring(5); // Remove '[IMG]'
                 messageDiv.innerHTML = `<img src="${imageUrl}" alt="User image" onclick="openImageModal('${imageUrl}')"> <span class="timestamp">${msg.timestamp}</span>`;
@@ -405,6 +418,15 @@ function loadMessages() {
                 messageDiv.appendChild(messageTextNode);
                 messageDiv.appendChild(document.createTextNode(' ')); // Add a space before the timestamp
                 messageDiv.appendChild(timestampSpanNode);
+            }
+
+            if (isSent && msg.id) {
+                const btn = document.createElement('button');
+                btn.className = 'msg-options-btn';
+                btn.textContent = '⋮';
+                btn.title = 'Options';
+                btn.onclick = function(e){ e.stopPropagation(); showMessageMenuByButton(btn); };
+                messageDiv.appendChild(btn);
             }
 
             chatBox.appendChild(messageDiv);
@@ -438,6 +460,72 @@ function sendMessage() {
 }
 
 // Poll for new messages every 2 seconds
+let activeMessageId = null;
+let longPressTimer = null;
+
+function showMessageMenu(e, messageId){
+    activeMessageId = messageId;
+    const menu = document.getElementById('message-context-menu');
+    menu.style.display = 'block';
+    const x = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const y = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    menu.style.left = Math.min(x, window.innerWidth - 170) + 'px';
+    menu.style.top = Math.min(y, window.innerHeight - 70) + 'px';
+}
+
+function showMessageMenuByButton(btn){
+    const wrapper = btn.closest('.message.sent');
+    if(!wrapper || !wrapper.dataset.messageId) return;
+    const rect = btn.getBoundingClientRect();
+    showMessageMenu({ clientX: rect.left, clientY: rect.bottom }, wrapper.dataset.messageId);
+}
+
+function hideMessageMenu(){
+    document.getElementById('message-context-menu').style.display = 'none';
+}
+
+function unsendActiveMessage(){
+    hideMessageMenu();
+    if(!activeMessageId) return;
+    unsendMessage(activeMessageId);
+}
+
+function unsendMessage(messageId){
+    if(!confirm('Unsend this message?')) return;
+    fetch('/api/delete_peer_message', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message_id: messageId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'ok'){
+            const wrapper = document.querySelector('.message.sent[data-message-id="'+messageId+'"]');
+            if(wrapper) wrapper.remove();
+        }
+    });
+}
+
+// Long-press / right-click / ⋮ button
+chatBox.addEventListener('contextmenu', function(e){
+    const wrapper = e.target.closest('.message.sent');
+    if(wrapper && wrapper.dataset.messageId){
+        e.preventDefault();
+        showMessageMenu(e, wrapper.dataset.messageId);
+    }
+});
+chatBox.addEventListener('touchstart', function(e){
+    const wrapper = e.target.closest('.message.sent');
+    if(!wrapper || !wrapper.dataset.messageId) return;
+    longPressTimer = setTimeout(function(){ showMessageMenu(e, wrapper.dataset.messageId); }, 500);
+}, {passive: false});
+chatBox.addEventListener('touchend', function(){ clearTimeout(longPressTimer); });
+chatBox.addEventListener('touchmove', function(){ clearTimeout(longPressTimer); });
+
+document.addEventListener('click', function(e){
+    if(!e.target.closest('.message-context-menu')) hideMessageMenu();
+});
+
 setInterval(loadMessages, 2500);
 setInterval(checkTypingStatus, 2000); // Check for typing status more frequently
 loadMessages(); // Initial load
