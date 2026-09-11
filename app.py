@@ -1441,15 +1441,16 @@ def community():
         else:
             c.execute("SELECT COUNT(*) FROM peer_messages WHERE sender=? AND receiver=? AND is_read=0", (u_email, session["user"]))
         count = c.fetchone()[0]
-        users_data.append({"username": u_email, "name": f"{u_row['first_name']} {u_row['last_name']}", "unread": count, "profile_pic": u_profile_pic})
+        users_data.append({"username": u_email, "email": u_email, "name": f"{u_row['first_name']} {u_row['last_name']}", "unread": count, "profile_pic": u_profile_pic})
 
-    # Get current user's profile pic to display
+    # Get current user's profile pic and name to display
     if 'DATABASE_URL' in os.environ:
-        c.execute("SELECT profile_pic FROM users WHERE email = %s", (session["user"],))
+        c.execute("SELECT profile_pic, first_name, last_name FROM users WHERE email = %s", (session["user"],))
     else:
-        c.execute("SELECT profile_pic FROM users WHERE email = ?", (session["user"],))
+        c.execute("SELECT profile_pic, first_name, last_name FROM users WHERE email = ?", (session["user"],))
     current_user_pic_row = c.fetchone()
     current_user_pic = get_profile_pic_url(current_user_pic_row[0] if current_user_pic_row else None)
+    current_user_name = f"{current_user_pic_row[1]} {current_user_pic_row[2]}".strip() if current_user_pic_row else session["user"]
 
     # Fetch rooms the user is a member of
     if 'DATABASE_URL' in os.environ:
@@ -1458,7 +1459,7 @@ def community():
         c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = ? ORDER BY r.id DESC", (session["user"],))
     rooms = [{"id": r[0], "name": r[1]} for r in c.fetchall()]
 
-    return render_template("community.html", users=users_data, current_user_pic=current_user_pic, current_username=session['user'], rooms=rooms)
+    return render_template("community.html", users=users_data, current_user_pic=current_user_pic, current_user_name=current_user_name, current_user_email=session['user'], rooms=rooms)
 
 @app.route("/peer_chat/<partner>")
 def peer_chat(partner):

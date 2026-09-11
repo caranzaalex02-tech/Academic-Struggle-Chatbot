@@ -56,6 +56,20 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
 #upload-btn:hover { box-shadow:0 6px 18px rgba(14,165,185,0.4); }
 #upload-status { margin-top:10px; font-size:13px; font-weight:600; }
 .no-users { text-align:center; color:#5a8a9a; font-size:0.9rem; padding:20px; }
+.user-info { display:flex; align-items:center; gap:12px; min-width:0; flex:1; }
+.user-meta { min-width:0; }
+.username { font-weight:700; color:#1a4a5a; font-size:0.9rem; word-break:break-word; }
+.user-sub { color:#5a8a9a; font-size:0.75rem; word-break:break-all; }
+.badge { background:#0ea5b9; color:#fff; font-size:10px; padding:2px 7px; border-radius:999px; margin-left:6px; font-weight:700; }
+.chat-btn { background:linear-gradient(135deg,#0ea5b9,#0891b2); color:#fff; text-decoration:none; font-weight:700; font-size:0.8rem; padding:8px 14px; border-radius:999px; display:inline-flex; align-items:center; gap:5px; box-shadow:0 4px 12px rgba(14,165,185,0.3); flex-shrink:0; white-space:nowrap; transition:box-shadow 0.15s, transform 0.15s; }
+.chat-btn:hover { box-shadow:0 6px 18px rgba(14,165,185,0.4); transform:translateY(-1px); }
+@media (max-width:480px){
+    .container { padding:18px 14px; }
+    .user-card { gap:10px; }
+    .chat-btn { padding:8px 12px; font-size:0.75rem; }
+    .profile-pic { width:38px; height:38px; min-width:38px; min-height:38px; max-width:38px; max-height:38px; }
+    .current-user-profile { flex-wrap:wrap; }
+}
 </style>
 </head>
 <body>
@@ -87,16 +101,16 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
     <div class="user-list">
         {% if users %}
             {% for user in users %}
-            <div class="user-card" data-name="{{ user.username|lower }}" data-email="{{ user.email|lower }}">
+            <div class="user-card" data-name="{{ user.name|lower }}" data-email="{{ user.email|lower }}">
                 <div class="user-info">
                     <img src="{{ user.profile_pic }}" alt="Avatar" class="profile-pic">
-                    <div>
-                        <span class="username">{{ user.username }}</span>
+                    <div class="user-meta">
+                        <span class="username">{{ user.name }}</span>
                         {% if user.unread > 0 %}<span class="badge">{{ user.unread }} New</span>{% endif %}
                         <div class="user-sub">{{ user.email }}</div>
                     </div>
                 </div>
-                <a href="{{ url_for('peer_chat', partner=user.username) }}" class="chat-btn">Chat</a>
+                <a href="{{ url_for('peer_chat', partner=user.email) }}" class="chat-btn"><i class="fas fa-comment-dots"></i> Chat</a>
             </div>
             {% endfor %}
         {% else %}
