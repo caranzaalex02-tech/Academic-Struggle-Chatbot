@@ -460,13 +460,17 @@ def log_admin_action(admin_username, action, target_username):
     db.commit()
 
 def format_time_for_chat(dt_string):
-    """Formats a datetime string into a more readable chat format."""
+    """Formats a datetime string or datetime object into a readable chat format."""
     try:
+        if isinstance(dt_string, datetime):
+            return dt_string.strftime('%I:%M %p')
+        if not dt_string:
+            return ""
         # Handles formats like '2024-03-08 12:05:55'
-        dt_obj = datetime.strptime(dt_string.split('.')[0], '%Y-%m-%d %H:%M:%S')
+        dt_obj = datetime.strptime(str(dt_string).split('.')[0], '%Y-%m-%d %H:%M:%S')
         return dt_obj.strftime('%I:%M %p') # e.g., 12:05 PM
-    except (ValueError, TypeError):
-        return dt_string # Return original if format is unexpected
+    except (ValueError, TypeError, AttributeError):
+        return str(dt_string) if dt_string else "" # Return original if format is unexpected
 
 def allowed_file(filename):
     return '.' in filename and \
