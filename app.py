@@ -273,8 +273,26 @@ def init_db():
     """)
 
     c.execute(f"""
+    CREATE TABLE IF NOT EXISTS group_rooms (
+        id {autoincrement_pk},
+        name TEXT,
+        created_by TEXT,
+        timestamp {datetime_default}
+    )
+    """)
+
+    c.execute(f"""
+    CREATE TABLE IF NOT EXISTS group_room_members (
+        id {autoincrement_pk},
+        room_id INTEGER,
+        user_email TEXT
+    )
+    """)
+
+    c.execute(f"""
     CREATE TABLE IF NOT EXISTS group_messages (
         id {autoincrement_pk},
+        room_id INTEGER,
         sender TEXT,
         message TEXT,
         timestamp {datetime_default}
@@ -365,6 +383,7 @@ def init_db():
     add_column("users", "abuse_offense_count", "INTEGER DEFAULT 0")
     add_column("messages", "is_abusive", "INTEGER DEFAULT 0")
     add_column("peer_messages", "is_read", "INTEGER DEFAULT 0")
+    add_column("group_messages", "room_id", "INTEGER")
 
     # --- Normalize existing emails to lowercase ---
     # Login/register now lowercase emails, so migrate older rows so they match.
@@ -1428,7 +1447,14 @@ def community():
     current_user_pic_row = c.fetchone()
     current_user_pic = get_profile_pic_url(current_user_pic_row[0] if current_user_pic_row else None)
 
-    return render_template("community.html", users=users_data, current_user_pic=current_user_pic, current_username=session['user'])
+    # Fetch rooms the user is a member of
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = %s ORDER BY r.id DESC", (session["user"],))
+    else:
+        c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = ? ORDER BY r.id DESC", (session["user"],))
+    rooms = [{"id": r[0], "name": r[1]} for r in c.fetchall()]
+
+    return render_template("community.html", users=users_data, current_user_pic=current_user_pic, current_username=session['user'], rooms=rooms)
 
 @app.route("/peer_chat/<partner>")
 def peer_chat(partner):
@@ -1517,40 +1543,124 @@ def get_peer(partner):
     messages = [{"sender": r[0], "message": r[1], "timestamp": format_time_for_chat(r[2])} for r in c.fetchall()]
     return jsonify({"messages": messages})
 
-@app.route("/group_chat")
-def group_chat():
+def is_room_member(room_id, user_email):
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=%s AND user_email=%s", (room_id, user_email))
+    else:
+        c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=? AND user_email=?", (room_id, user_email))
+    return c.fetchone()[0] > 0
+
+@app.route("/create_room")
+def create_room():
     if "user" not in session:
         return redirect(url_for("login"))
-    return render_template("group_chat.html", username=session["user"])
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT email, first_name, last_name FROM users WHERE email != %s AND role != 'admin'", (session["user"],))
+    else:
+        c.execute("SELECT email, first_name, last_name FROM users WHERE email != ? AND role != 'admin'", (session["user"],))
+    users = [{"email": r[0], "name": f"{r[1]} {r[2]}".strip() or r[0]} for r in c.fetchall()]
+    return render_template("create_room.html", users=users)
+
+@app.route("/api/create_room", methods=["POST"])
+def api_create_room():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    name = (data.get("name") or "").strip()
+    members = data.get("members") or []
+    if not name:
+        return jsonify({"error": "Room name is required"}), 400
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("INSERT INTO group_rooms (name, created_by) VALUES (%s,%s) RETURNING id", (name, session["user"]))
+        room_id = c.fetchone()[0]
+    else:
+        c.execute("INSERT INTO group_rooms (name, created_by) VALUES (?,?)", (name, session["user"]))
+        room_id = c.lastrowid
+
+    def add_member(email):
+        if 'DATABASE_URL' in os.environ:
+            c.execute("INSERT INTO group_room_members (room_id, user_email) VALUES (%s,%s)", (room_id, email))
+        else:
+            c.execute("INSERT INTO group_room_members (room_id, user_email) VALUES (?,?)", (room_id, email))
+
+    add_member(session["user"])  # creator is always a member
+    for member in members:
+        if member and member != session["user"]:
+            add_member(member)
+    db.commit()
+    return jsonify({"status": "ok", "room_id": room_id})
+
+@app.route("/api/my_rooms")
+def my_rooms():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = %s ORDER BY r.id DESC", (session["user"],))
+    else:
+        c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = ? ORDER BY r.id DESC", (session["user"],))
+    rooms = [{"id": r[0], "name": r[1]} for r in c.fetchall()]
+    return jsonify({"rooms": rooms})
+
+@app.route("/group_chat/<int:room_id>")
+def group_chat(room_id):
+    if "user" not in session:
+        return redirect(url_for("login"))
+    if not is_room_member(room_id, session["user"]):
+        return redirect(url_for("community"))
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT name FROM group_rooms WHERE id=%s", (room_id,))
+    else:
+        c.execute("SELECT name FROM group_rooms WHERE id=?", (room_id,))
+    row = c.fetchone()
+    room_name = row[0] if row else "Group Chat"
+    return render_template("group_chat.html", room_id=room_id, room_name=room_name, username=session["user"])
 
 @app.route("/api/send_group", methods=["POST"])
 def send_group():
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     data = request.get_json()
+    room_id = data.get("room_id")
     message = data.get("message")
-    if not message:
+    if not message or not room_id:
         return jsonify({"error": "Missing data"}), 400
+    if not is_room_member(room_id, session["user"]):
+        return jsonify({"error": "Not a member"}), 403
     db = get_db()
     c = db.cursor()
     ph_time = get_ph_time()
     formatted_time = format_time(ph_time)
     if 'DATABASE_URL' in os.environ:
-        c.execute("INSERT INTO group_messages (sender, message, timestamp) VALUES (%s,%s,%s)",
-                  (session["user"], message, formatted_time))
+        c.execute("INSERT INTO group_messages (room_id, sender, message, timestamp) VALUES (%s,%s,%s,%s)",
+                  (room_id, session["user"], message, formatted_time))
     else:
-        c.execute("INSERT INTO group_messages (sender, message, timestamp) VALUES (?,?,?)",
-                  (session["user"], message, formatted_time))
+        c.execute("INSERT INTO group_messages (room_id, sender, message, timestamp) VALUES (?,?,?,?)",
+                  (room_id, session["user"], message, formatted_time))
     db.commit()
     return jsonify({"status": "ok"})
 
-@app.route("/api/get_group")
-def get_group():
+@app.route("/api/get_group/<int:room_id>")
+def get_group(room_id):
     if "user" not in session:
         return jsonify({"error": "Unauthorized"}), 401
+    if not is_room_member(room_id, session["user"]):
+        return jsonify({"error": "Not a member"}), 403
     db = get_db()
     c = db.cursor()
-    c.execute("SELECT sender, message, timestamp FROM group_messages ORDER BY id ASC")
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT sender, message, timestamp FROM group_messages WHERE room_id=%s ORDER BY id ASC", (room_id,))
+    else:
+        c.execute("SELECT sender, message, timestamp FROM group_messages WHERE room_id=? ORDER BY id ASC", (room_id,))
     messages = [{"sender": r[0], "message": r[1], "timestamp": format_time_for_chat(r[2])} for r in c.fetchall()]
     return jsonify({"messages": messages})
 

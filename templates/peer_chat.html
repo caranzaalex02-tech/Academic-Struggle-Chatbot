@@ -418,13 +418,22 @@ function sendMessage() {
     const text = input.value.trim();
     if(!text) return;
 
+    // Optimistic: append the message immediately so it always appears on screen
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message sent';
+    const textNode = document.createTextNode(text);
+    messageDiv.appendChild(textNode);
+    chatBox.appendChild(messageDiv);
+    scrollToBottom();
+
+    input.value = '';
+
     fetch('/api/send_peer', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ receiver: partner, message: text })
     }).then(() => {
-        input.value = '';
-        loadMessages(true); // Force reload messages immediately for instant feedback
+        loadMessages(); // Reconcile with server
     });
 }
 

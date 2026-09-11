@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Group Chat Room</title>
+<title>{{ room_name }}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
@@ -47,7 +47,7 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
 <body>
 <div class="header">
     <a href="/community" class="back-btn"><i class="fas fa-arrow-left"></i></a>
-    <div class="header-title">👥 Group Chat Room</div>
+    <div class="header-title">💬 {{ room_name }}</div>
 </div>
 <div class="chat-box" id="chat-box">
     <!-- Messages load here -->
@@ -58,6 +58,7 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
 </div>
 
 <script>
+const roomId = {{ room_id }};
 const currentUser = "{{ username }}";
 const chatBox = document.getElementById('chat-box');
 
@@ -68,31 +69,36 @@ function senderName(email){
     return email.split('@')[0];
 }
 
+function appendMessage(sender, text, timestamp){
+    const isSent = sender === currentUser;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'message ' + (isSent ? 'sent' : 'received');
+
+    if(!isSent){
+        const label = document.createElement('div');
+        label.className = 'sender-label';
+        label.textContent = senderName(sender);
+        wrapper.appendChild(label);
+    }
+
+    const textNode = document.createTextNode(text);
+    const ts = document.createElement('span');
+    ts.className = 'timestamp';
+    ts.textContent = timestamp || '';
+    wrapper.appendChild(textNode);
+    wrapper.appendChild(ts);
+
+    chatBox.appendChild(wrapper);
+    scrollToBottom();
+}
+
 function loadMessages(){
-    fetch('/api/get_group')
+    fetch('/api/get_group/' + roomId)
     .then(res => res.json())
     .then(data => {
         chatBox.innerHTML = '';
         data.messages.forEach(msg => {
-            const isSent = msg.sender === currentUser;
-            const wrapper = document.createElement('div');
-            wrapper.className = 'message ' + (isSent ? 'sent' : 'received');
-
-            if(!isSent){
-                const label = document.createElement('div');
-                label.className = 'sender-label';
-                label.textContent = senderName(msg.sender);
-                wrapper.appendChild(label);
-            }
-
-            const textNode = document.createTextNode(msg.message);
-            const ts = document.createElement('span');
-            ts.className = 'timestamp';
-            ts.textContent = msg.timestamp;
-            wrapper.appendChild(textNode);
-            wrapper.appendChild(ts);
-
-            chatBox.appendChild(wrapper);
+            appendMessage(msg.sender, msg.message, msg.timestamp);
         });
         scrollToBottom();
     });
@@ -102,13 +108,17 @@ function sendMessage(){
     const input = document.getElementById('msg-input');
     const text = input.value.trim();
     if(!text) return;
+
+    // Optimistic: show message immediately so it always appears on screen
+    appendMessage(currentUser, text, '');
+    input.value = '';
+
     fetch('/api/send_group', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ message: text })
+        body: JSON.stringify({ room_id: roomId, message: text })
     }).then(() => {
-        input.value = '';
-        loadMessages();
+        loadMessages(); // Reconcile with server
     });
 }
 

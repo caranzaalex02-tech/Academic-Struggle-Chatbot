@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create Group Room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+body {
+    min-height:100vh;
+    background:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
+    background-size:cover; color:#1a4a5a;
+    padding:20px; display:flex; justify-content:center; align-items:flex-start;
+}
+.container {
+    width:100%; max-width:560px; background:rgba(255,255,255,0.4); backdrop-filter:blur(24px);
+    -webkit-backdrop-filter:blur(24px); border-radius:20px; padding:28px 24px;
+    box-shadow:0 8px 40px rgba(0,60,80,0.15); border:1px solid rgba(255,255,255,0.5);
+}
+.back-btn { display:inline-flex; align-items:center; gap:6px; color:#0e6b7a; text-decoration:none; font-weight:600; font-size:0.9rem; margin-bottom:10px; }
+h1 { font-size:1.3rem; color:#1a4a5a; margin-bottom:4px; }
+.subtitle { color:#5a8a9a; font-size:0.8rem; margin-bottom:18px; }
+label.room-label { display:block; font-size:0.8rem; font-weight:700; color:#1a4a5a; margin-bottom:6px; }
+#room-name {
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.5);
+    font-size:0.95rem; background:rgba(255,255,255,0.55); color:#1a4a5a; outline:none; margin-bottom:18px;
+}
+#room-name:focus { border-color:#0ea5b9; box-shadow:0 0 0 4px rgba(14,165,185,0.12); }
+.user-list { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; max-height:300px; overflow-y:auto; }
+.user-card {
+    display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.5);
+    padding:11px 14px; border-radius:12px; border:1px solid rgba(255,255,255,0.4); cursor:pointer;
+}
+.user-card input { width:18px; height:18px; accent-color:#0ea5b9; flex-shrink:0; }
+.user-card span { font-size:0.9rem; color:#1a4a5a; word-break:break-all; }
+.create-btn {
+    width:100%; padding:13px; border:none; border-radius:12px; cursor:pointer;
+    background:linear-gradient(135deg,#0ea5b9,#0e6b7a); color:#fff; font-weight:700; font-size:1rem;
+    box-shadow:0 4px 14px rgba(14,165,185,0.3);
+}
+.create-btn:hover { transform:translateY(-1px); }
+.create-btn:disabled { opacity:0.6; cursor:not-allowed; }
+.no-users { text-align:center; color:#5a8a9a; font-size:0.85rem; padding:20px; }
+</style>
+</head>
+<body>
+<div class="container">
+    <a href="/community" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Group Study</a>
+    <h1>💬 Gumawa ng Group Chat Room</h1>
+    <p class="subtitle">Pumili ng mga user na gusto mong isama sa room.</p>
+
+    <label class="room-label" for="room-name">Room Name</label>
+    <input type="text" id="room-name" placeholder="hal. Group 1 - Thesis Discussion">
+
+    <div class="user-list" id="user-list">
+        {% if users %}
+            {% for user in users %}
+            <label class="user-card">
+                <input type="checkbox" class="member-checkbox" value="{{ user.email }}">
+                <span>{{ user.name }} ({{ user.email }})</span>
+            </label>
+            {% endfor %}
+        {% else %}
+            <p class="no-users">Walang ibang user na pwedeng i-add.</p>
+        {% endif %}
+    </div>
+
+    <button class="create-btn" id="create-btn" onclick="createRoom()"><i class="fas fa-check"></i> Create Room</button>
+</div>
+
+<script>
+function createRoom(){
+    const name = document.getElementById('room-name').value.trim();
+    if(!name){
+        alert('Ilagay ang pangalan ng room.');
+        return;
+    }
+    const members = Array.from(document.querySelectorAll('.member-checkbox:checked')).map(cb => cb.value);
+    const btn = document.getElementById('create-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+
+    fetch('/api/create_room', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name: name, members: members })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'ok'){
+            window.location.href = '/group_chat/' + data.room_id;
+        } else {
+            alert('Error: ' + (data.error || 'Unable to create room.'));
+            btn.disabled = false;
+            btn.textContent = 'Create Room';
+        }
+    })
+    .catch(() => {
+        alert('An error occurred.');
+        btn.disabled = false;
+        btn.textContent = 'Create Room';
+    });
+}
+</script>
+</body>
+</html>
