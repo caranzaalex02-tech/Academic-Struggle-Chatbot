@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Group Chat Room</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body {
+    background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
+    background-size: cover;
+    color: #1a4a5a;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+}
+body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0.3); z-index: -1; pointer-events: none; }
+.header {
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.35);
+    flex-shrink: 0;
+}
+.back-btn { text-decoration: none; color: #0e6b7a; font-size: 22px; font-weight: bold; line-height: 1; }
+.header-title { font-weight: 700; font-size: 1rem; }
+.chat-box {
+    flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.message { max-width: 75%; padding: 9px 13px; border-radius: 16px; font-size: 0.9rem; word-wrap: break-word; }
+.message.sent { align-self: flex-end; background: #0ea5b9; color: #fff; border-bottom-right-radius: 4px; }
+.message.received { align-self: flex-start; background: rgba(255,255,255,0.8); color: #1a4a5a; border-bottom-left-radius: 4px; }
+.sender-label { font-size: 11px; font-weight: 700; color: #5a8a9a; margin-bottom: 2px; }
+.timestamp { font-size: 10px; opacity: 0.7; margin-left: 8px; }
+.input-area {
+    padding: 12px 16px; background: rgba(255,255,255,0.2); backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    display: flex; gap: 8px; flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.35);
+}
+.input-area input { flex: 1; padding: 12px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); font-size: 0.9rem; background: rgba(255,255,255,0.5); color: #1a4a5a; outline: none; }
+.input-area button { width: 46px; height: 46px; border-radius: 50%; border: none; background: #0ea5b9; color: #fff; font-size: 16px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="header">
+    <a href="/community" class="back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div class="header-title">👥 Group Chat Room</div>
+</div>
+<div class="chat-box" id="chat-box">
+    <!-- Messages load here -->
+</div>
+<div class="input-area">
+    <input type="text" id="msg-input" placeholder="Type a message to the group..." onkeydown="if(event.key==='Enter')sendMessage()">
+    <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+</div>
+
+<script>
+const currentUser = "{{ username }}";
+const chatBox = document.getElementById('chat-box');
+
+function scrollToBottom(){ chatBox.scrollTop = chatBox.scrollHeight; }
+
+function senderName(email){
+    if(!email) return "User";
+    return email.split('@')[0];
+}
+
+function loadMessages(){
+    fetch('/api/get_group')
+    .then(res => res.json())
+    .then(data => {
+        chatBox.innerHTML = '';
+        data.messages.forEach(msg => {
+            const isSent = msg.sender === currentUser;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'message ' + (isSent ? 'sent' : 'received');
+
+            if(!isSent){
+                const label = document.createElement('div');
+                label.className = 'sender-label';
+                label.textContent = senderName(msg.sender);
+                wrapper.appendChild(label);
+            }
+
+            const textNode = document.createTextNode(msg.message);
+            const ts = document.createElement('span');
+            ts.className = 'timestamp';
+            ts.textContent = msg.timestamp;
+            wrapper.appendChild(textNode);
+            wrapper.appendChild(ts);
+
+            chatBox.appendChild(wrapper);
+        });
+        scrollToBottom();
+    });
+}
+
+function sendMessage(){
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if(!text) return;
+    fetch('/api/send_group', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: text })
+    }).then(() => {
+        input.value = '';
+        loadMessages();
+    });
+}
+
+setInterval(loadMessages, 2500);
+loadMessages();
+</script>
+</body>
+</html>

@@ -273,6 +273,15 @@ def init_db():
     """)
 
     c.execute(f"""
+    CREATE TABLE IF NOT EXISTS group_messages (
+        id {autoincrement_pk},
+        sender TEXT,
+        message TEXT,
+        timestamp {datetime_default}
+    )
+    """)
+
+    c.execute(f"""
     CREATE TABLE IF NOT EXISTS ratings (
         id {autoincrement_pk},
         user_email TEXT,
@@ -1059,9 +1068,9 @@ def chatbot():
 
     # Load messages
     if 'DATABASE_URL' in os.environ:
-        c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=%s ORDER BY id ASC", (session["user"],))
+        c.execute("SELECT id, user_message, bot_response FROM messages WHERE user_email=%s ORDER BY id ASC", (session["user"],))
     else:
-        c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=? ORDER BY id ASC", (session["user"],))
+        c.execute("SELECT id, user_message, bot_response FROM messages WHERE user_email=? ORDER BY id ASC", (session["user"],))
     messages = c.fetchall()
 
     # Check if mood was logged today
@@ -1177,19 +1186,40 @@ def chat():
     formatted_time = format_time(ph_time)
 
     # Use correct placeholder based on DB type
+    message_id = None
     if 'DATABASE_URL' in os.environ:
-        c.execute("""INSERT INTO messages (user_email,user_message,bot_response,is_crisis,is_abusive,timestamp) VALUES (%s,%s,%s,%s,%s,%s)""",
+        c.execute("""INSERT INTO messages (user_email,user_message,bot_response,is_crisis,is_abusive,timestamp) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id""",
                   (session["user"], message, reply, is_crisis, is_abusive, formatted_time))
+        message_id = c.fetchone()[0]
     else:
         c.execute("""INSERT INTO messages (user_email,user_message,bot_response,is_crisis,is_abusive,timestamp) VALUES (?,?,?,?,?,?)""",
                   (session["user"], message, reply, is_crisis, is_abusive, formatted_time))
+        message_id = c.lastrowid
     db.commit()
     
     if is_crisis:
         # send_crisis_email(session["user"], message) # Temporarily disable to avoid email errors during setup
         pass
 
-    return jsonify({"response":reply})
+    return jsonify({"response":reply, "message_id": message_id})
+
+# ---- DELETE (UNSEND) MESSAGE ----
+@app.route("/delete_message", methods=["POST"])
+def delete_message():
+    if "user" not in session:
+        return jsonify({"status": "Unauthorized"}), 401
+    data = request.get_json()
+    message_id = data.get("message_id")
+    if not message_id:
+        return jsonify({"status": "error", "error": "Missing message_id"}), 400
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("DELETE FROM messages WHERE id=%s AND user_email=%s", (message_id, session["user"]))
+    else:
+        c.execute("DELETE FROM messages WHERE id=? AND user_email=?", (message_id, session["user"]))
+    db.commit()
+    return jsonify({"status": "ok"})
 
 # ---- MOOD LOGGING ----
 @app.route("/log_mood", methods=["POST"])
@@ -1484,6 +1514,43 @@ def get_peer(partner):
         c.execute("""SELECT sender, message, timestamp FROM peer_messages WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?) ORDER BY id ASC""",
                   (user, partner, partner, user))
     
+    messages = [{"sender": r[0], "message": r[1], "timestamp": format_time_for_chat(r[2])} for r in c.fetchall()]
+    return jsonify({"messages": messages})
+
+@app.route("/group_chat")
+def group_chat():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    return render_template("group_chat.html", username=session["user"])
+
+@app.route("/api/send_group", methods=["POST"])
+def send_group():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    message = data.get("message")
+    if not message:
+        return jsonify({"error": "Missing data"}), 400
+    db = get_db()
+    c = db.cursor()
+    ph_time = get_ph_time()
+    formatted_time = format_time(ph_time)
+    if 'DATABASE_URL' in os.environ:
+        c.execute("INSERT INTO group_messages (sender, message, timestamp) VALUES (%s,%s,%s)",
+                  (session["user"], message, formatted_time))
+    else:
+        c.execute("INSERT INTO group_messages (sender, message, timestamp) VALUES (?,?,?)",
+                  (session["user"], message, formatted_time))
+    db.commit()
+    return jsonify({"status": "ok"})
+
+@app.route("/api/get_group")
+def get_group():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    db = get_db()
+    c = db.cursor()
+    c.execute("SELECT sender, message, timestamp FROM group_messages ORDER BY id ASC")
     messages = [{"sender": r[0], "message": r[1], "timestamp": format_time_for_chat(r[2])} for r in c.fetchall()]
     return jsonify({"messages": messages})
 

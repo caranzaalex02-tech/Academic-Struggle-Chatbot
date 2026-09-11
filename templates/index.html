@@ -955,11 +955,35 @@ transform:translateY(-1px);
   <b>Daily Quote:</b> {{ daily_quote }}
   </div>
 
+  <style>
+  .message-context-menu {
+      position: fixed;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      padding: 4px;
+      z-index: 9999;
+      min-width: 150px;
+  }
+  .message-context-menu button {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 10px 12px;
+      border: none; background: none;
+      color: #1a4a5a; font-size: 13px; font-weight: 600;
+      cursor: pointer; border-radius: 7px; text-align: left;
+  }
+  .message-context-menu button:hover { background: #fef2f2; color: #ef4444; }
+  </style>
   <div id="chat-box">
-  {% for u,b in messages %}
-  <div class="message-row user-row"><div class="message user">{{u}}</div></div>
-  <div class="message-row bot-row"><div class="bot-avatar sm"><i class="fas fa-robot"></i></div><div class="message bot">{{b}}</div></div>
+  {% for m in messages %}
+  <div class="message-row user-row" data-message-id="{{ m[0] }}">
+    <div class="message user">{{ m[1] }}</div>
+  </div>
+  <div class="message-row bot-row"><div class="bot-avatar sm"><i class="fas fa-robot"></i></div><div class="message bot">{{ m[2] }}</div></div>
   {% endfor %}
+  </div>
+  <div id="message-context-menu" class="message-context-menu" style="display:none;">
+    <button type="button" onclick="unsendActiveMessage()"><i class="fas fa-trash-alt"></i> Unsend</button>
   </div>
 
   <div class="chat-footer">
@@ -1133,10 +1157,76 @@ botDiv.textContent=data.response;
 botRow.appendChild(botDiv);
 box.appendChild(botRow);
 scrollBottom();
+if(data.message_id){
+userRow.dataset.messageId=data.message_id;
+}
 });
 
 input.value="";
 }
+
+let activeMessageId=null;
+let longPressTimer=null;
+
+function showMessageMenu(e,messageId){
+activeMessageId=messageId;
+let menu=document.getElementById("message-context-menu");
+menu.style.display="block";
+let x=(e.touches&&e.touches[0])?e.touches[0].clientX:e.clientX;
+let y=(e.touches&&e.touches[0])?e.touches[0].clientY:e.clientY;
+menu.style.left=Math.min(x,window.innerWidth-170)+"px";
+menu.style.top=Math.min(y,window.innerHeight-70)+"px";
+}
+
+function hideMessageMenu(){
+document.getElementById("message-context-menu").style.display="none";
+}
+
+function unsendActiveMessage(){
+hideMessageMenu();
+if(!activeMessageId) return;
+unsendMessage(activeMessageId);
+}
+
+function unsendMessage(messageId){
+if(!confirm("I-unsend ang mensaheng ito?")) return;
+fetch("/delete_message",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message_id: messageId})
+})
+.then(res=>res.json())
+.then(data=>{
+if(data.status==="ok"){
+let userRow=document.querySelector('.message-row.user-row[data-message-id="'+messageId+'"]');
+if(userRow){
+let botRow=userRow.nextElementSibling;
+if(botRow && botRow.classList.contains("bot-row")) botRow.remove();
+userRow.remove();
+}
+}
+});
+}
+
+// Long-press (mobile) and right-click (desktop) on user messages
+(function(){
+let box=document.getElementById("chat-box");
+box.addEventListener("contextmenu",function(e){
+let userRow=e.target.closest(".message-row.user-row");
+if(userRow){e.preventDefault();showMessageMenu(e,userRow.dataset.messageId);}
+});
+box.addEventListener("touchstart",function(e){
+let userRow=e.target.closest(".message-row.user-row");
+if(!userRow) return;
+longPressTimer=setTimeout(function(){showMessageMenu(e,userRow.dataset.messageId);},500);
+},{passive:false});
+box.addEventListener("touchend",function(){clearTimeout(longPressTimer);});
+box.addEventListener("touchmove",function(){clearTimeout(longPressTimer);});
+})();
+
+document.addEventListener("click",function(e){
+if(!e.target.closest(".message-context-menu")) hideMessageMenu();
+});
 
 function logMood(mood){
 fetch("/log_mood",{

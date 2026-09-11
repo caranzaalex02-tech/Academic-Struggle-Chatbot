@@ -382,37 +382,34 @@ function scrollToBottom() {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function loadMessages(forceUpdate = false) {
+function loadMessages() {
     fetch(`/api/get_peer/${partner}`)
     .then(res => res.json())
     .then(data => {
-        const currentMessageCount = chatBox.querySelectorAll('.message').length;
-        if (forceUpdate || currentMessageCount !== data.messages.length) {
-            chatBox.innerHTML = ''; // Clear the box
-            data.messages.forEach(msg => {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${msg.sender === currentUser ? 'sent' : 'received'}`;
+        chatBox.innerHTML = ''; // Clear the box
+        data.messages.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${msg.sender === currentUser ? 'sent' : 'received'}`;
+            
+            if (msg.message.startsWith('[IMG]')) {
+                const imageUrl = msg.message.substring(5); // Remove '[IMG]'
+                messageDiv.innerHTML = `<img src="${imageUrl}" alt="User image" onclick="openImageModal('${imageUrl}')"> <span class="timestamp">${msg.timestamp}</span>`;
+            } else {
+                // CRITICAL SECURITY FIX: Use textContent to prevent Cross-Site Scripting (XSS).
+                // This ensures that any HTML/script tags sent by a user are displayed as plain text, not executed.
+                const messageTextNode = document.createTextNode(msg.message);
+                const timestampSpanNode = document.createElement('span');
+                timestampSpanNode.className = 'timestamp';
+                timestampSpanNode.textContent = msg.timestamp;
                 
-                if (msg.message.startsWith('[IMG]')) {
-                    const imageUrl = msg.message.substring(5); // Remove '[IMG]'
-                    messageDiv.innerHTML = `<img src="${imageUrl}" alt="User image" onclick="openImageModal('${imageUrl}')"> <span class="timestamp">${msg.timestamp}</span>`;
-                } else {
-                    // CRITICAL SECURITY FIX: Use textContent to prevent Cross-Site Scripting (XSS).
-                    // This ensures that any HTML/script tags sent by a user are displayed as plain text, not executed.
-                    const messageTextNode = document.createTextNode(msg.message);
-                    const timestampSpanNode = document.createElement('span');
-                    timestampSpanNode.className = 'timestamp';
-                    timestampSpanNode.textContent = msg.timestamp;
-                    
-                    messageDiv.appendChild(messageTextNode);
-                    messageDiv.appendChild(document.createTextNode(' ')); // Add a space before the timestamp
-                    messageDiv.appendChild(timestampSpanNode);
-                }
+                messageDiv.appendChild(messageTextNode);
+                messageDiv.appendChild(document.createTextNode(' ')); // Add a space before the timestamp
+                messageDiv.appendChild(timestampSpanNode);
+            }
 
-                chatBox.appendChild(messageDiv);
-            });
-            scrollToBottom(); // Automatically scroll to the latest message
-        }
+            chatBox.appendChild(messageDiv);
+        });
+        scrollToBottom(); // Automatically scroll to the latest message
     });
 }
 
