@@ -934,7 +934,7 @@ def _call_groq_api(user_input, language='tagalog'):
         logging.info(f"Attempting to use Groq API key: {key_preview}")
 
         client = _import_groq().Groq(api_key=api_key)
-        model = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+        model = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
 
         system_prompt = _build_openai_system_prompt(language)
         messages = [

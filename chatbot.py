@@ -40,7 +40,7 @@ def check_api_keys():
     if groq_key:
         preview = f"{groq_key[:5]}...{groq_key[-4:]}" if len(groq_key) > 9 else "INVALID"
         print(f"  Groq API Key   : SET ({preview})")
-        groq_model = os.environ.get("GROQ_MODEL", "llama-3.1-8b-instant")
+        groq_model = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
         print(f"  Groq Model     : {groq_model}")
     else:
         print("  Groq API Key   : NOT SET (set GROQ_API_KEY in .env)")
