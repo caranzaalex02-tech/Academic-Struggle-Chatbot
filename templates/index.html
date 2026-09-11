@@ -973,11 +973,27 @@ transform:translateY(-1px);
       cursor: pointer; border-radius: 7px; text-align: left;
   }
   .message-context-menu button:hover { background: #fef2f2; color: #ef4444; }
+  .msg-options-btn {
+      display: none;
+      background: rgba(0,0,0,0.06);
+      border: none;
+      color: #8aa3ae;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 50%;
+      margin-left: 4px;
+      flex-shrink: 0;
+  }
+  .message-row.user-row:hover .msg-options-btn { display: inline-block; }
+  .msg-options-btn:hover { background: rgba(0,0,0,0.12); color: #1a4a5a; }
   </style>
   <div id="chat-box">
   {% for m in messages %}
   <div class="message-row user-row" data-message-id="{{ m[0] }}">
     <div class="message user">{{ m[1] }}</div>
+    <button class="msg-options-btn" onclick="event.stopPropagation(); showMessageMenuByButton(this)" title="Options">⋮</button>
   </div>
   <div class="message-row bot-row"><div class="bot-avatar sm"><i class="fas fa-robot"></i></div><div class="message bot">{{ m[2] }}</div></div>
   {% endfor %}
@@ -1159,6 +1175,12 @@ box.appendChild(botRow);
 scrollBottom();
 if(data.message_id){
 userRow.dataset.messageId=data.message_id;
+let optBtn=document.createElement("button");
+optBtn.className="msg-options-btn";
+optBtn.title="Options";
+optBtn.textContent="⋮";
+optBtn.onclick=function(e){ e.stopPropagation(); showMessageMenuByButton(optBtn); };
+userRow.appendChild(optBtn);
 }
 });
 
@@ -1176,6 +1198,13 @@ let x=(e.touches&&e.touches[0])?e.touches[0].clientX:e.clientX;
 let y=(e.touches&&e.touches[0])?e.touches[0].clientY:e.clientY;
 menu.style.left=Math.min(x,window.innerWidth-170)+"px";
 menu.style.top=Math.min(y,window.innerHeight-70)+"px";
+}
+
+function showMessageMenuByButton(btn){
+let userRow=btn.closest(".message-row.user-row");
+if(!userRow) return;
+let rect=btn.getBoundingClientRect();
+showMessageMenu({clientX:rect.left, clientY:rect.bottom, touches:null}, userRow.dataset.messageId);
 }
 
 function hideMessageMenu(){

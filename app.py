@@ -1671,11 +1671,28 @@ def get_group(room_id):
     db = get_db()
     c = db.cursor()
     if 'DATABASE_URL' in os.environ:
-        c.execute("SELECT sender, message, timestamp FROM group_messages WHERE room_id=%s ORDER BY id ASC", (room_id,))
+        c.execute("SELECT id, sender, message, timestamp FROM group_messages WHERE room_id=%s ORDER BY id ASC", (room_id,))
     else:
-        c.execute("SELECT sender, message, timestamp FROM group_messages WHERE room_id=? ORDER BY id ASC", (room_id,))
-    messages = [{"sender": r[0], "message": r[1], "timestamp": format_time_for_chat(r[2])} for r in c.fetchall()]
+        c.execute("SELECT id, sender, message, timestamp FROM group_messages WHERE room_id=? ORDER BY id ASC", (room_id,))
+    messages = [{"id": r[0], "sender": r[1], "message": r[2], "timestamp": format_time_for_chat(r[3])} for r in c.fetchall()]
     return jsonify({"messages": messages})
+
+@app.route("/api/delete_group_message", methods=["POST"])
+def delete_group_message():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    message_id = data.get("message_id")
+    if not message_id:
+        return jsonify({"error": "Missing data"}), 400
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("DELETE FROM group_messages WHERE id=%s AND sender=%s", (message_id, session["user"]))
+    else:
+        c.execute("DELETE FROM group_messages WHERE id=? AND sender=?", (message_id, session["user"]))
+    db.commit()
+    return jsonify({"status": "ok"})
 
 @app.route("/api/rename_room", methods=["POST"])
 def rename_room():
