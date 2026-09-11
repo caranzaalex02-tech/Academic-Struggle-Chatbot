@@ -1693,6 +1693,39 @@ def rename_room():
     db.commit()
     return jsonify({"status": "ok"})
 
+@app.route("/api/leave_room", methods=["POST"])
+def leave_room():
+    if "user" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json()
+    room_id = data.get("room_id")
+    if not room_id:
+        return jsonify({"error": "Missing data"}), 400
+    if not is_room_member(room_id, session["user"]):
+        return jsonify({"error": "Not a member"}), 403
+    db = get_db()
+    c = db.cursor()
+    if 'DATABASE_URL' in os.environ:
+        c.execute("DELETE FROM group_room_members WHERE room_id=%s AND user_email=%s", (room_id, session["user"]))
+    else:
+        c.execute("DELETE FROM group_room_members WHERE room_id=? AND user_email=?", (room_id, session["user"]))
+    db.commit()
+
+    # If no members remain, clean up the room and its messages
+    if 'DATABASE_URL' in os.environ:
+        c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=%s", (room_id,))
+    else:
+        c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=?", (room_id,))
+    if c.fetchone()[0] == 0:
+        if 'DATABASE_URL' in os.environ:
+            c.execute("DELETE FROM group_messages WHERE room_id=%s", (room_id,))
+            c.execute("DELETE FROM group_rooms WHERE id=%s", (room_id,))
+        else:
+            c.execute("DELETE FROM group_messages WHERE room_id=?", (room_id,))
+            c.execute("DELETE FROM group_rooms WHERE id=?", (room_id,))
+        db.commit()
+    return jsonify({"status": "ok"})
+
 @app.route('/api/typing', methods=['POST'])
 def set_typing_status():
     if 'user' not in session:
