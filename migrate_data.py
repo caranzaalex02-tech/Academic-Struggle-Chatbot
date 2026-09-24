@@ -1,120 +1,139 @@
+import argparse
+import logging
 import os
 import sqlite3
+
 import psycopg2
 from dotenv import load_dotenv
-import logging
+from psycopg2 import sql
 
-# --- Configuration ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-# Load environment variables from .env file
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 load_dotenv()
 
-# --- Source and Destination Databases ---
-SQLITE_DB_PATH = os.environ.get("MENTALHEALTHWEB_DB", "database.db")
-POSTGRES_DB_URL = os.environ.get("DATABASE_URL")
-
-# --- List of tables to migrate ---
-# Order matters if you have foreign keys. Start with tables that don't depend on others.
 TABLES_TO_MIGRATE = [
-    "users",
-    "daily_quotes",
-    "faq_dataset",
-    "messages",
-    "archived_messages",
-    "mood_log",
-    "peer_messages",
-    "ratings",
-    "admin_logs",
+    "users", "daily_quotes", "faq_dataset", "messages", "archived_messages",
+    "mood_log", "peer_messages", "ratings", "admin_logs", "group_rooms",
+    "group_room_members", "group_messages", "user_settings",
+    "used_reset_tokens", "password_reset_codes",
 ]
 
-def migrate_data():
-    """
-    Extracts data from a local SQLite database and loads it into a production PostgreSQL database.
-    """
-    if not POSTGRES_DB_URL:
-        logging.error("DATABASE_URL not found in environment variables. Please add it to your .env file.")
-        return
 
-    if not os.path.exists(SQLITE_DB_PATH):
-        logging.error(f"SQLite database file not found at '{SQLITE_DB_PATH}'.")
-        return
+def _columns_sqlite(cursor, table):
+    cursor.execute(f'PRAGMA table_info("{table}")')
+    return [row[1] for row in cursor.fetchall()]
 
-    # --- Safety Check ---
-    logging.warning("!!! WARNING: This script will TRUNCATE (delete all data from) the tables in the destination database before migrating.")
-    logging.warning(f"Destination Host: {psycopg2.connect(POSTGRES_DB_URL).get_dsn_parameters()['host']}")
-    
-    confirmation = input("Are you sure you want to proceed? (yes/no): ")
-    if confirmation.lower() != 'yes':
-        logging.info("Migration cancelled by user.")
-        return
-    
-    logging.info("User confirmed. Starting migration process...")
 
+def _columns_postgres(cursor, table):
+    cursor.execute(
+        """SELECT column_name FROM information_schema.columns
+           WHERE table_schema = 'public' AND table_name = %s
+           ORDER BY ordinal_position""",
+        (table,),
+    )
+    return [row[0] for row in cursor.fetchall()]
+
+
+def _table_exists_postgres(cursor, table):
+    cursor.execute("SELECT to_regclass(%s)", (f"public.{table}",))
+    return cursor.fetchone()[0] is not None
+
+
+def _has_rows_postgres(cursor, table):
+    cursor.execute(sql.SQL("SELECT EXISTS (SELECT 1 FROM {} LIMIT 1)").format(sql.Identifier(table)))
+    return cursor.fetchone()[0]
+
+
+def _quoted_list(values):
+    return sql.SQL(", ").join(sql.Identifier(value) for value in values)
+
+
+def migrate_data(reset_destination=False, assume_yes=False):
+    """Copy local SQLite data to a new Render PostgreSQL database safely."""
+    sqlite_path = os.environ.get("MENTALHEALTHWEB_DB", "database.db")
+    postgres_url = os.environ.get("DATABASE_URL")
+    if not postgres_url:
+        logging.error("DATABASE_URL is missing. Set the new Render PostgreSQL URL first.")
+        return False
+    if not os.path.exists(sqlite_path):
+        logging.error("SQLite source not found: %s", os.path.abspath(sqlite_path))
+        return False
+
+    sqlite_conn = postgres_conn = None
     try:
-        # Connect to both databases
-        sqlite_conn = sqlite3.connect(SQLITE_DB_PATH)
+        sqlite_conn = sqlite3.connect(sqlite_path)
         sqlite_conn.row_factory = sqlite3.Row
-        sqlite_cursor = sqlite_conn.cursor()
+        source_cursor = sqlite_conn.cursor()
+        postgres_conn = psycopg2.connect(postgres_url)
+        dest_cursor = postgres_conn.cursor()
 
-        postgres_conn = psycopg2.connect(POSTGRES_DB_URL)
-        postgres_cursor = postgres_conn.cursor()
+        missing_source = [t for t in TABLES_TO_MIGRATE if not _columns_sqlite(source_cursor, t)]
+        if missing_source:
+            raise RuntimeError("SQLite is missing tables: " + ", ".join(missing_source))
+        missing_dest = [t for t in TABLES_TO_MIGRATE if not _table_exists_postgres(dest_cursor, t)]
+        if missing_dest:
+            raise RuntimeError("Deploy once to initialize PostgreSQL tables: " + ", ".join(missing_dest))
 
-        logging.info("Successfully connected to both SQLite and PostgreSQL databases.")
+        non_empty = [t for t in TABLES_TO_MIGRATE if _has_rows_postgres(dest_cursor, t)]
+        if non_empty and not reset_destination:
+            raise RuntimeError("Destination already has data in: " + ", ".join(non_empty) +
+                               ". Use --reset-destination only for a replacement database.")
 
-        for table_name in TABLES_TO_MIGRATE:
-            logging.info(f"--- Starting migration for table: {table_name} ---")
+        if not assume_yes:
+            action = "clear and copy" if reset_destination else "copy"
+            if input(f"Type YES to {action} SQLite -> PostgreSQL: ").strip().upper() != "YES":
+                logging.info("Migration cancelled.")
+                return False
 
-            # 1. Clear the table in PostgreSQL to avoid duplicates
-            logging.info(f"Truncating table '{table_name}' in PostgreSQL...")
-            # Using TRUNCATE ... RESTART IDENTITY to also reset auto-incrementing primary keys
-            postgres_cursor.execute(f'TRUNCATE TABLE "{table_name}" RESTART IDENTITY CASCADE;')
+        if reset_destination:
+            logging.warning("Deleting all rows in destination tables before migration.")
+            dest_cursor.execute(sql.SQL("TRUNCATE TABLE {} RESTART IDENTITY CASCADE").format(
+                _quoted_list(TABLES_TO_MIGRATE)))
 
-            # 2. Fetch all data from the SQLite table
-            logging.info(f"Fetching data from '{table_name}' in SQLite...")
-            sqlite_cursor.execute(f"SELECT * FROM {table_name}")
-            rows = sqlite_cursor.fetchall()
+        for table in TABLES_TO_MIGRATE:
+            source_columns = _columns_sqlite(source_cursor, table)
+            destination_columns = set(_columns_postgres(dest_cursor, table))
+            missing_columns = [c for c in source_columns if c not in destination_columns]
+            if missing_columns:
+                raise RuntimeError(f"{table} is missing PostgreSQL columns: " + ", ".join(missing_columns))
 
+            source_cursor.execute(sql.SQL("SELECT {} FROM {}").format(
+                _quoted_list(source_columns), sql.Identifier(table)))
+            rows = [tuple(row) for row in source_cursor.fetchall()]
             if not rows:
-                logging.warning(f"No data found in SQLite table '{table_name}'. Skipping.")
+                logging.info("%s: no rows to copy", table)
                 continue
 
-            # 3. Get column names from the SQLite table
-            column_names = [description[0] for description in sqlite_cursor.description]
-            
-            # 4. Prepare the INSERT statement for PostgreSQL
-            # Using %s placeholders for psycopg2
-            placeholders = ", ".join(["%s"] * len(column_names))
-            # Enclosing column names in double quotes to handle reserved keywords
-            quoted_columns = ", ".join([f'"{col}"' for col in column_names])
-            
-            insert_query = f"INSERT INTO {table_name} ({quoted_columns}) VALUES ({placeholders})"
+            insert_query = sql.SQL("INSERT INTO {} ({}) VALUES ({})").format(
+                sql.Identifier(table), _quoted_list(source_columns),
+                sql.SQL(", ").join(sql.Placeholder() for _ in source_columns))
+            dest_cursor.executemany(insert_query, rows)
+            logging.info("%s: copied %d rows", table, len(rows))
 
-            # 5. Insert data into PostgreSQL
-            logging.info(f"Inserting {len(rows)} rows into PostgreSQL table '{table_name}'...")
-            
-            # Convert each sqlite3.Row object to a tuple for insertion
-            data_to_insert = [tuple(row) for row in rows]
-            
-            postgres_cursor.executemany(insert_query, data_to_insert)
-            logging.info(f"Successfully inserted data into '{table_name}'.")
-
-        # Commit all changes to the PostgreSQL database
         postgres_conn.commit()
-        logging.info("\n✅ All tables migrated successfully! Changes have been committed.")
-
-    except (sqlite3.Error, psycopg2.Error) as e:
-        logging.error(f"A database error occurred: {e}")
-        if 'postgres_conn' in locals() and postgres_conn:
+        logging.info("Migration completed successfully.")
+        return True
+    except Exception as exc:
+        if postgres_conn is not None:
             postgres_conn.rollback()
-            logging.warning("PostgreSQL transaction has been rolled back.")
+        logging.error("Migration failed; destination transaction rolled back: %s", exc)
+        return False
     finally:
-        # Close all connections
-        if 'sqlite_conn' in locals() and sqlite_conn:
+        if sqlite_conn is not None:
             sqlite_conn.close()
-        if 'postgres_conn' in locals() and postgres_conn:
+        if postgres_conn is not None:
             postgres_conn.close()
         logging.info("Database connections closed.")
 
+
+def main():
+    parser = argparse.ArgumentParser(description="Migrate local SQLite data to Render PostgreSQL.")
+    parser.add_argument("--reset-destination", action="store_true",
+                        help="Delete destination rows before copying.")
+    parser.add_argument("--yes", action="store_true",
+                        help="Skip the interactive confirmation.")
+    args = parser.parse_args()
+    migrate_data(reset_destination=args.reset_destination, assume_yes=args.yes)
+
+
 if __name__ == "__main__":
-    migrate_data()
+    main()

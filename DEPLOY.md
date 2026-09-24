@@ -34,7 +34,7 @@ This project includes a `Procfile`, `runtime.txt`, and `render.yaml` for Render 
 Since Render's filesystem is **ephemeral** (data gets wiped on every deploy/restart), you MUST use PostgreSQL instead of SQLite:
 
 1. In Render dashboard, click **New** → **PostgreSQL**.
-2. Choose the **Free** plan (1 GB storage, valid for 90 days).
+2. Choose a **paid** PostgreSQL plan for a long-lived production database.
 3. After creation, copy the **Internal Database URL**.
 4. Go to your Web Service → **Environment** → add:
    - Key: `DATABASE_URL`
@@ -69,7 +69,8 @@ Set these under Web Service → Environment:
 ## Important Notes
 
 - **Free tier limitation**: Web service sleeps after 15 minutes of inactivity. First request after sleep takes ~30-50 seconds.
-- **PostgreSQL free tier**: Only 1 GB and expires after 90 days. Upgrade to a paid plan for long-term use.
+- **PostgreSQL free tier**: Free Render Postgres expires 30 days after creation, has a 14-day upgrade grace period, and does not include backups. Use a paid plan for production.
+- **Local data migration**: To copy an existing local `database.db` into a new Render PostgreSQL database, first deploy once with the new `DATABASE_URL`, then run `python migrate_data.py` locally. Review the prompt carefully; use `--reset-destination` only for a brand-new/replacement database.
 - Do not store secret keys in the repository. Use Render's environment settings.
 - The `Procfile` uses `gunicorn` for production. Do NOT use `python run.py` or `python app.py` in production.
 
