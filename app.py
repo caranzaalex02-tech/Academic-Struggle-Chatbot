@@ -177,6 +177,17 @@ def get_db():
             g.db.row_factory = sqlite3.Row
     return g.db
 
+
+def is_postgres_db(conn=None):
+    """Return whether the active database connection is PostgreSQL.
+
+    DATABASE_URL can be present even when the connection falls back to SQLite,
+    so query syntax must follow the actual connection instead of environment
+    configuration alone.
+    """
+    active_conn = conn if conn is not None else g.get("db")
+    return active_conn is not None and not isinstance(active_conn, sqlite3.Connection)
+
 @app.teardown_appcontext
 def close_db(e=None):
     """Closes the database again at the end of the request."""
@@ -187,8 +198,8 @@ def close_db(e=None):
 # ================= DATABASE =================
 def init_db():
     """Initializes the database by creating tables and adding necessary columns."""
-    is_postgres = 'DATABASE_URL' in os.environ
     conn = get_db()
+    is_postgres = is_postgres_db(conn)
     c = conn.cursor()
 
     # Use appropriate syntax based on the database type
@@ -417,8 +428,8 @@ def preload_quotes():
         "It always seems impossible until it's done.",
         "Keep moving forward."
     ]
-    is_postgres = 'DATABASE_URL' in os.environ
     conn = get_db()
+    is_postgres = is_postgres_db(conn)
     c = conn.cursor()
     for q in quotes:
         try:
@@ -451,7 +462,7 @@ def log_admin_action(admin_username, action, target_username):
     formatted_time = format_time(ph_time)
     
     # Use %s for PostgreSQL compatibility
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("INSERT INTO admin_logs (admin_username, action, target_username, timestamp) VALUES (%s, %s, %s, %s)",
                   (admin_username, action, target_username, formatted_time))
     else:
@@ -505,7 +516,7 @@ def login():
         db = get_db()
         c = db.cursor()
         # Use %s for PostgreSQL compatibility
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT email, password, role, ban_expires_at FROM users WHERE email=%s", (email,))
         else:
             c.execute("SELECT email, password, role, ban_expires_at FROM users WHERE email=?", (email,))
@@ -535,7 +546,7 @@ def admin_login():
     # Check if admin account exists (for template display)
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT id FROM users WHERE role = 'admin'")
     else:
         c.execute("SELECT id FROM users WHERE role = 'admin'")
@@ -545,7 +556,7 @@ def admin_login():
         username = request.form.get("username", "").strip().lower()
         password = request.form["password"]
         # Use %s for PostgreSQL compatibility
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT email, password, role FROM users WHERE email=%s", (username,))
         else:
             c.execute("SELECT email, password, role FROM users WHERE email=?", (username,))
@@ -573,7 +584,7 @@ def admin_register():
     c = db.cursor()
     
     # Security: Check if an admin already exists.
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT id FROM users WHERE role = 'admin'")
     else:
         c.execute("SELECT id FROM users WHERE role = 'admin'")
@@ -610,7 +621,7 @@ def admin_register():
         if error is None:
             hashed_password = hash_password(password)
             try:
-                if 'DATABASE_URL' in os.environ:
+                if is_postgres_db():
                     c.execute("INSERT INTO users (email, password, first_name, last_name, role) VALUES (%s, %s, %s, %s, %s)",
                               (email, hashed_password, "Admin", "User", "admin"))
                 else:
@@ -686,7 +697,7 @@ def register():
         if error is None:
             db = get_db()
             c = db.cursor()
-            if 'DATABASE_URL' in os.environ:
+            if is_postgres_db():
                 c.execute("SELECT id FROM users WHERE email = %s", (email,))
             else:
                 c.execute("SELECT id FROM users WHERE email = ?", (email,))
@@ -698,7 +709,7 @@ def register():
             c = db.cursor()
             try:
                 hashed_password = hash_password(password)
-                if 'DATABASE_URL' in os.environ:
+                if is_postgres_db():
                     c.execute("INSERT INTO users (first_name, last_name, password, email, phone, age, gender, course) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                               (first_name, last_name, hashed_password, email, student_id, int(age), gender, course))
                 else:
@@ -743,13 +754,13 @@ def _store_reset_code(email, code):
     db = get_db()
     c = db.cursor()
     # Invalidate all previous unused codes for this email
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("UPDATE password_reset_codes SET used = 1 WHERE email = %s AND used = 0", (email,))
     else:
         c.execute("UPDATE password_reset_codes SET used = 1 WHERE email = ? AND used = 0", (email,))
     # Insert new code
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=60)
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute(
             "INSERT INTO password_reset_codes (email, code, expires_at) VALUES (%s, %s, %s)",
             (email, code, expires_at)
@@ -765,7 +776,7 @@ def _verify_reset_code(email, code):
     """Check if the code is valid for the given email. Returns True/False."""
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute(
             "SELECT id FROM password_reset_codes WHERE email = %s AND code = %s AND used = 0 AND expires_at > %s ORDER BY created_at DESC LIMIT 1",
             (email, code, datetime.now(timezone.utc))
@@ -781,7 +792,7 @@ def _consume_reset_code(email, code):
     """Mark a verification code as used after successful verification."""
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute(
             "UPDATE password_reset_codes SET used = 1 WHERE email = %s AND code = %s AND used = 0",
             (email, code)
@@ -801,7 +812,7 @@ def forgot_password():
         email = request.form.get("email", "").strip().lower()
         db = get_db()
         c = db.cursor()
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT email FROM users WHERE email = %s AND role != 'admin'", (email,))
         else:
             c.execute("SELECT email FROM users WHERE email = ? AND role != 'admin'", (email,))
@@ -888,7 +899,7 @@ def reset_with_token(token):
     token_hash = hashlib.sha256(token.encode()).hexdigest()
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = %s", (token_hash,))
     else:
         c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = ?", (token_hash,))
@@ -917,7 +928,7 @@ def reset_with_token(token):
             flash("Passwords do not match.", "error")
         else:
             hashed_password = hash_password(password)
-            if 'DATABASE_URL' in os.environ:
+            if is_postgres_db():
                 c.execute(
                     "INSERT INTO used_reset_tokens (token_hash, used_at) VALUES (%s, %s)",
                     (token_hash, datetime.now(timezone.utc))
@@ -945,7 +956,7 @@ def admin_forgot_password():
         email = request.form.get("email", "").strip().lower()
         db = get_db()
         c = db.cursor()
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT email FROM users WHERE email = %s AND role = 'admin'", (email,))
         else:
             c.execute("SELECT email FROM users WHERE email = ? AND role = 'admin'", (email,))
@@ -1023,7 +1034,7 @@ def admin_reset_with_token(token):
     token_hash = hashlib.sha256(token.encode()).hexdigest()
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = %s", (token_hash,))
     else:
         c.execute("SELECT 1 FROM used_reset_tokens WHERE token_hash = ?", (token_hash,))
@@ -1053,7 +1064,7 @@ def admin_reset_with_token(token):
         else:
             # --- Mark token as used BEFORE updating password (atomic) ---
             hashed_password = hash_password(password)
-            if 'DATABASE_URL' in os.environ:
+            if is_postgres_db():
                 c.execute(
                     "INSERT INTO used_reset_tokens (token_hash, used_at) VALUES (%s, %s)",
                     (token_hash, datetime.now(timezone.utc))
@@ -1082,7 +1093,7 @@ def chatbot():
     c = db.cursor()
 
     # Daily quote
-    if 'DATABASE_URL' in os.environ: # PostgreSQL
+    if is_postgres_db(): # PostgreSQL
         c.execute("SELECT quote FROM daily_quotes ORDER BY RANDOM() LIMIT 1") # PostgreSQL
     else:
         c.execute("SELECT quote FROM daily_quotes ORDER BY RANDOM() LIMIT 1") # SQLite
@@ -1090,7 +1101,7 @@ def chatbot():
     daily_quote = row[0] if row else ""
 
     # Load messages
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT id, user_message, bot_response FROM messages WHERE user_email=%s ORDER BY id ASC", (session["user"],))
     else:
         c.execute("SELECT id, user_message, bot_response FROM messages WHERE user_email=? ORDER BY id ASC", (session["user"],))
@@ -1098,7 +1109,7 @@ def chatbot():
 
     # Check if mood was logged today
     today_str = get_ph_time().strftime('%Y-%m-%d')
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         # For PostgreSQL, we need to cast the timestamp to a date
         c.execute("SELECT COUNT(*) FROM mood_log WHERE user_email=%s AND CAST(timestamp AS DATE) = %s", (session["user"], today_str))
     else:
@@ -1134,7 +1145,7 @@ def chat():
     user_language = session.get("language", "tagalog")
 
     # Check user's current ban status and offense count
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT abuse_offense_count, ban_expires_at FROM users WHERE email = %s", (session["user"],))
     else:
         c.execute("SELECT abuse_offense_count, ban_expires_at FROM users WHERE email = ?", (session["user"],))
@@ -1210,7 +1221,7 @@ def chat():
 
     # Use correct placeholder based on DB type
     message_id = None
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("""INSERT INTO messages (user_email,user_message,bot_response,is_crisis,is_abusive,timestamp) VALUES (%s,%s,%s,%s,%s,%s) RETURNING id""",
                   (session["user"], message, reply, is_crisis, is_abusive, formatted_time))
         message_id = c.fetchone()[0]
@@ -1237,7 +1248,7 @@ def delete_message():
         return jsonify({"status": "error", "error": "Missing message_id"}), 400
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("DELETE FROM messages WHERE id=%s AND user_email=%s", (message_id, session["user"]))
     else:
         c.execute("DELETE FROM messages WHERE id=? AND user_email=?", (message_id, session["user"]))
@@ -1261,7 +1272,7 @@ def log_mood():
     db = get_db()
     c = db.cursor()
     # Use correct placeholder based on DB type
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("INSERT INTO mood_log (user_email,mood,timestamp) VALUES (%s,%s,%s)", (session["user"],mood,formatted_time))
     else:
         c.execute("INSERT INTO mood_log (user_email,mood,timestamp) VALUES (?,?,?)", (session["user"],mood,formatted_time))
@@ -1284,7 +1295,7 @@ def rate_session():
     db = get_db()
     c = db.cursor()
     # Use correct placeholder based on DB type
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("INSERT INTO ratings (user_email, rating, timestamp) VALUES (%s,%s,%s)", (session["user"], rating, formatted_time))
     else:
         c.execute("INSERT INTO ratings (user_email, rating, timestamp) VALUES (?,?,?)", (session["user"], rating, formatted_time))
@@ -1301,7 +1312,7 @@ def mini_dashboard():
     c = db.cursor()
 
     # Mood summary
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT mood, COUNT(*) as total FROM mood_log WHERE user_email=%s GROUP BY mood", (session["user"],))
     else:
         c.execute("SELECT mood, COUNT(*) as total FROM mood_log WHERE user_email=? GROUP BY mood", (session["user"],))
@@ -1317,7 +1328,7 @@ def mini_dashboard():
         day = (today - timedelta(days=i)).strftime("%Y-%m-%d")
         days.append(day)
         for mood in trend_data.keys():
-            if 'DATABASE_URL' in os.environ:
+            if is_postgres_db():
                 # For PostgreSQL, we need to cast the timestamp to a date
                 c.execute("SELECT COUNT(*) as total FROM mood_log WHERE user_email=%s AND mood=%s AND CAST(timestamp AS DATE)=%s",
                           (session["user"], mood, day))
@@ -1339,7 +1350,7 @@ def archived_room():
 
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT user_message, bot_response, timestamp, id FROM archived_messages WHERE user_email=%s ORDER BY id DESC", (session["user"],))
     else:
         c.execute("SELECT user_message, bot_response, timestamp, id FROM archived_messages WHERE user_email=? ORDER BY id DESC", (session["user"],))
@@ -1354,7 +1365,7 @@ def restart_chat():
         return redirect(url_for("login"))
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("""INSERT INTO archived_messages (user_email,user_message,bot_response,is_crisis,timestamp)
                      SELECT user_email,user_message,bot_response,is_crisis,timestamp FROM messages WHERE user_email=%s""", (session["user"],))
         c.execute("DELETE FROM messages WHERE user_email=%s", (session["user"],))
@@ -1371,7 +1382,7 @@ def restore_chat(archive_id):
         return redirect(url_for("login"))
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("""SELECT user_email,user_message,bot_response,is_crisis,timestamp
                      FROM archived_messages WHERE id=%s AND user_email=%s""", (archive_id, session["user"]))
     else:
@@ -1379,7 +1390,7 @@ def restore_chat(archive_id):
                      FROM archived_messages WHERE id=? AND user_email=?""", (archive_id, session["user"]))
     row = c.fetchone()
     if row:
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("INSERT INTO messages (user_email,user_message,bot_response,is_crisis,timestamp) VALUES (%s,%s,%s,%s,%s)", row)
             c.execute("DELETE FROM archived_messages WHERE id=%s AND user_email=%s", (archive_id, session["user"]))
         else:
@@ -1394,7 +1405,7 @@ def delete_chat(archive_id):
         return redirect(url_for("login"))
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("DELETE FROM archived_messages WHERE id=%s AND user_email=%s", (archive_id, session["user"]))
     else:
         c.execute("DELETE FROM archived_messages WHERE id=? AND user_email=?", (archive_id, session["user"]))
@@ -1415,7 +1426,7 @@ def community():
         return redirect(url_for("login"))
     db = get_db()
     c = db.cursor() # Use correct placeholder based on DB type
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT email, first_name, last_name, profile_pic FROM users WHERE email != %s AND role != 'admin'", (session["user"],))
     else:
         c.execute("SELECT email, first_name, last_name, profile_pic FROM users WHERE email != ? AND role != 'admin'", (session["user"],))
@@ -1427,7 +1438,7 @@ def community():
         u_profile_pic = get_profile_pic_url(u_row['profile_pic'])
         
         # Check if this user has opted to show in community
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT show_in_community FROM user_settings WHERE user_email=%s", (u_email,))
         else:
             c.execute("SELECT show_in_community FROM user_settings WHERE user_email=?", (u_email,))
@@ -1436,7 +1447,7 @@ def community():
             continue  # Skip users who opted out
         
         # Count unread messages from this user (u) to current user (using %s)
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT COUNT(*) FROM peer_messages WHERE sender=%s AND receiver=%s AND is_read=0", (u_email, session["user"]))
         else:
             c.execute("SELECT COUNT(*) FROM peer_messages WHERE sender=? AND receiver=? AND is_read=0", (u_email, session["user"]))
@@ -1444,7 +1455,7 @@ def community():
         users_data.append({"username": u_email, "email": u_email, "name": f"{u_row['first_name']} {u_row['last_name']}", "unread": count, "profile_pic": u_profile_pic})
 
     # Get current user's profile pic and name to display
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT profile_pic, first_name, last_name FROM users WHERE email = %s", (session["user"],))
     else:
         c.execute("SELECT profile_pic, first_name, last_name FROM users WHERE email = ?", (session["user"],))
@@ -1453,7 +1464,7 @@ def community():
     current_user_name = f"{current_user_pic_row[1]} {current_user_pic_row[2]}".strip() if current_user_pic_row else session["user"]
 
     # Fetch rooms the user is a member of
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = %s ORDER BY r.id DESC", (session["user"],))
     else:
         c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = ? ORDER BY r.id DESC", (session["user"],))
@@ -1467,7 +1478,7 @@ def peer_chat(partner):
         return redirect(url_for("login"))
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT profile_pic FROM users WHERE email = %s", (partner,))
     else:
         c.execute("SELECT profile_pic FROM users WHERE email = ?", (partner,))
@@ -1514,7 +1525,7 @@ def send_peer():
     ph_time = get_ph_time()
     formatted_time = format_time(ph_time)
 
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("INSERT INTO peer_messages (sender, receiver, message, timestamp) VALUES (%s,%s,%s,%s)",
                   (session["user"], receiver, message, formatted_time))
     else:
@@ -1532,13 +1543,13 @@ def get_peer(partner):
     c = db.cursor()
     
     # Mark messages as read when opening chat
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("UPDATE peer_messages SET is_read=1 WHERE sender=%s AND receiver=%s", (partner, user))
     else:
         c.execute("UPDATE peer_messages SET is_read=1 WHERE sender=? AND receiver=?", (partner, user))
     db.commit()
 
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("""SELECT id, sender, message, timestamp FROM peer_messages WHERE (sender=%s AND receiver=%s) OR (sender=%s AND receiver=%s) ORDER BY id ASC""",
                   (user, partner, partner, user))
     else:
@@ -1551,7 +1562,7 @@ def get_peer(partner):
 def is_room_member(room_id, user_email):
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=%s AND user_email=%s", (room_id, user_email))
     else:
         c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=? AND user_email=?", (room_id, user_email))
@@ -1563,7 +1574,7 @@ def create_room():
         return redirect(url_for("login"))
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT email, first_name, last_name FROM users WHERE email != %s AND role != 'admin'", (session["user"],))
     else:
         c.execute("SELECT email, first_name, last_name FROM users WHERE email != ? AND role != 'admin'", (session["user"],))
@@ -1581,7 +1592,7 @@ def api_create_room():
         return jsonify({"error": "Room name is required"}), 400
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("INSERT INTO group_rooms (name, created_by) VALUES (%s,%s) RETURNING id", (name, session["user"]))
         room_id = c.fetchone()[0]
     else:
@@ -1589,7 +1600,7 @@ def api_create_room():
         room_id = c.lastrowid
 
     def add_member(email):
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("INSERT INTO group_room_members (room_id, user_email) VALUES (%s,%s)", (room_id, email))
         else:
             c.execute("INSERT INTO group_room_members (room_id, user_email) VALUES (?,?)", (room_id, email))
@@ -1607,7 +1618,7 @@ def my_rooms():
         return jsonify({"error": "Unauthorized"}), 401
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = %s ORDER BY r.id DESC", (session["user"],))
     else:
         c.execute("SELECT r.id, r.name FROM group_rooms r JOIN group_room_members m ON r.id = m.room_id WHERE m.user_email = ? ORDER BY r.id DESC", (session["user"],))
@@ -1622,7 +1633,7 @@ def group_chat(room_id):
         return redirect(url_for("community"))
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT name, created_by FROM group_rooms WHERE id=%s", (room_id,))
     else:
         c.execute("SELECT name, created_by FROM group_rooms WHERE id=?", (room_id,))
@@ -1631,7 +1642,7 @@ def group_chat(room_id):
     created_by = row[1] if row else None
     is_creator = (created_by == session["user"])
 
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT user_email FROM group_room_members WHERE room_id=%s ORDER BY id ASC", (room_id,))
     else:
         c.execute("SELECT user_email FROM group_room_members WHERE room_id=? ORDER BY id ASC", (room_id,))
@@ -1654,7 +1665,7 @@ def send_group():
     c = db.cursor()
     ph_time = get_ph_time()
     formatted_time = format_time(ph_time)
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("INSERT INTO group_messages (room_id, sender, message, timestamp) VALUES (%s,%s,%s,%s)",
                   (room_id, session["user"], message, formatted_time))
     else:
@@ -1671,7 +1682,7 @@ def get_group(room_id):
         return jsonify({"error": "Not a member"}), 403
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT id, sender, message, timestamp FROM group_messages WHERE room_id=%s ORDER BY id ASC", (room_id,))
     else:
         c.execute("SELECT id, sender, message, timestamp FROM group_messages WHERE room_id=? ORDER BY id ASC", (room_id,))
@@ -1688,7 +1699,7 @@ def delete_group_message():
         return jsonify({"error": "Missing data"}), 400
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("DELETE FROM group_messages WHERE id=%s AND sender=%s", (message_id, session["user"]))
     else:
         c.execute("DELETE FROM group_messages WHERE id=? AND sender=?", (message_id, session["user"]))
@@ -1708,7 +1719,7 @@ def rename_room():
         return jsonify({"error": "Not a member"}), 403
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("UPDATE group_rooms SET name=%s WHERE id=%s", (name, room_id))
     else:
         c.execute("UPDATE group_rooms SET name=? WHERE id=?", (name, room_id))
@@ -1727,19 +1738,19 @@ def leave_room():
         return jsonify({"error": "Not a member"}), 403
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("DELETE FROM group_room_members WHERE room_id=%s AND user_email=%s", (room_id, session["user"]))
     else:
         c.execute("DELETE FROM group_room_members WHERE room_id=? AND user_email=?", (room_id, session["user"]))
     db.commit()
 
     # If no members remain, clean up the room and its messages
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=%s", (room_id,))
     else:
         c.execute("SELECT COUNT(*) FROM group_room_members WHERE room_id=?", (room_id,))
     if c.fetchone()[0] == 0:
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("DELETE FROM group_messages WHERE room_id=%s", (room_id,))
             c.execute("DELETE FROM group_rooms WHERE id=%s", (room_id,))
         else:
@@ -1758,7 +1769,7 @@ def delete_peer_message():
         return jsonify({"error": "Missing data"}), 400
     db = get_db()
     c = db.cursor()
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("DELETE FROM peer_messages WHERE id=%s AND sender=%s", (message_id, session["user"]))
     else:
         c.execute("DELETE FROM peer_messages WHERE id=? AND sender=?", (message_id, session["user"]))
@@ -1806,7 +1817,7 @@ def upload_profile_pic():
             file_url = url_for('static', filename=f'uploads/{unique_filename}')
             db = get_db()
             c = db.cursor() # Use correct placeholder based on DB type
-            if 'DATABASE_URL' in os.environ:
+            if is_postgres_db():
                 c.execute("UPDATE users SET profile_pic = %s WHERE email = %s", (file_url, username))
             else:
                 try:
@@ -1828,7 +1839,7 @@ def admin_dashboard():
     c = db.cursor()
     
     # Get all users
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT id, email, first_name, last_name, phone, age, gender, course, role, ban_expires_at, abuse_offense_count FROM users WHERE role != 'admin'")
     else:
         c.execute("SELECT id, email, first_name, last_name, phone, age, gender, course, role, ban_expires_at, abuse_offense_count FROM users WHERE role != 'admin'")
@@ -1839,7 +1850,7 @@ def admin_dashboard():
 
     for user in all_users:
         # Check for "At-Risk" status: 3 or more 'Sad' logs in the last 7 days
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("""SELECT COUNT(*) FROM mood_log WHERE user_email=%s AND mood='Sad' AND timestamp >= %s""",
                       (user['email'], seven_days_ago))
         else:
@@ -1849,7 +1860,7 @@ def admin_dashboard():
         sad_count = sad_row[0] if sad_row else 0
 
         # Check for any crisis messages
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT COUNT(*) FROM messages WHERE user_email=%s AND is_crisis=1", (user['email'],))
         else:
             c.execute("SELECT COUNT(*) FROM messages WHERE user_email=? AND is_crisis=1", (user['email'],))
@@ -1857,7 +1868,7 @@ def admin_dashboard():
         crisis_count = crisis_row[0] if crisis_row else 0
 
         # Check for any abusive messages
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("SELECT COUNT(*) FROM messages WHERE user_email=%s AND is_abusive=1", (user['email'],))
         else:
             c.execute("SELECT COUNT(*) FROM messages WHERE user_email=? AND is_abusive=1", (user['email'],))
@@ -1893,7 +1904,7 @@ def admin_user_details(username):
     c = db.cursor()
     
     # User Info
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT * FROM users WHERE email=%s", (username,))
     else:
         c.execute("SELECT * FROM users WHERE email=?", (username,))
@@ -1919,21 +1930,21 @@ def admin_user_details(username):
             pass
 
     # Chat History (Active)
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT * FROM messages WHERE user_email=%s ORDER BY timestamp DESC", (username,))
     else:
         c.execute("SELECT * FROM messages WHERE user_email=? ORDER BY timestamp DESC", (username,))
     active_chats = c.fetchall()
     
     # Chat History (Archived)
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT * FROM archived_messages WHERE user_email=%s ORDER BY timestamp DESC", (username,))
     else:
         c.execute("SELECT * FROM archived_messages WHERE user_email=? ORDER BY timestamp DESC", (username,))
     archived_chats = c.fetchall()
     
     # Mood Logs
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT mood, timestamp FROM mood_log WHERE user_email=%s ORDER BY timestamp ASC", (username,))
     else:
         c.execute("SELECT mood, timestamp FROM mood_log WHERE user_email=? ORDER BY timestamp ASC", (username,))
@@ -1956,7 +1967,7 @@ def admin_user_details(username):
         day = (today - timedelta(days=i)).strftime("%Y-%m-%d")
         days.append(day)
         for mood in trend_data.keys():
-            if 'DATABASE_URL' in os.environ:
+            if is_postgres_db():
                 # For PostgreSQL, we need to cast the timestamp to a date
                 c.execute("SELECT COUNT(*) as total FROM mood_log WHERE user_email=%s AND mood=%s AND CAST(timestamp AS DATE)=%s",
                           (username, mood, day))
@@ -1967,7 +1978,7 @@ def admin_user_details(username):
             trend_data[mood].append(result["total"] if result["total"] is not None else 0)
         
     # Get Average Rating
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT AVG(rating) FROM ratings WHERE user_email=%s", (username,))
     else:
         c.execute("SELECT AVG(rating) FROM ratings WHERE user_email=?", (username,))
@@ -1990,13 +2001,13 @@ def admin_delete_user(username):
     c = db.cursor()
 
     # Delete all associated data
-    placeholder = "%s" if 'DATABASE_URL' in os.environ else "?"
+    placeholder = "%s" if is_postgres_db() else "?"
     c.execute(f"DELETE FROM users WHERE email={placeholder}", (username,))
     c.execute(f"DELETE FROM messages WHERE user_email={placeholder}", (username,))
     c.execute(f"DELETE FROM archived_messages WHERE user_email={placeholder}", (username,))
     c.execute(f"DELETE FROM mood_log WHERE user_email={placeholder}", (username,))
     c.execute(f"DELETE FROM ratings WHERE user_email={placeholder}", (username,))
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("DELETE FROM peer_messages WHERE sender=%s OR receiver=%s", (username, username))
     else:
         c.execute("DELETE FROM peer_messages WHERE sender=? OR receiver=?", (username, username))
@@ -2021,12 +2032,12 @@ def admin_ban_user(username):
     db = get_db()
     c = db.cursor()
     # A "permanent" manual ban can be a date far in the future
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         permanent_ban_date = '9999-12-31 23:59:59+08' # For PostgreSQL, include timezone
     else:
         permanent_ban_date = '9999-12-31 23:59:59'
     log_admin_action(session['user'], 'ban_user', username)
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("UPDATE users SET ban_expires_at = %s WHERE email = %s", (permanent_ban_date, username))
     else:
         c.execute("UPDATE users SET ban_expires_at = ? WHERE email = ?", (permanent_ban_date, username))
@@ -2041,7 +2052,7 @@ def admin_unban_user(username):
     c = db.cursor()
     # Unbanning also resets their offense count
     log_admin_action(session['user'], 'unban_user', username)
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("UPDATE users SET ban_expires_at = NULL, abuse_offense_count = 0 WHERE email = %s", (username,))
     else:
         c.execute("UPDATE users SET ban_expires_at = NULL, abuse_offense_count = 0 WHERE email = ?", (username,))
@@ -2065,14 +2076,14 @@ def user_settings():
     user_email = session["user"]
     
     # Get user info
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT first_name, last_name, email FROM users WHERE email=%s", (user_email,))
     else:
         c.execute("SELECT first_name, last_name, email FROM users WHERE email=?", (user_email,))
     user_info = c.fetchone()
     
     # Get or create settings
-    if 'DATABASE_URL' in os.environ:
+    if is_postgres_db():
         c.execute("SELECT show_in_community, allow_peer_messages, language FROM user_settings WHERE user_email=%s", (user_email,))
     else:
         c.execute("SELECT show_in_community, allow_peer_messages, language FROM user_settings WHERE user_email=?", (user_email,))
@@ -2080,7 +2091,7 @@ def user_settings():
     
     if not settings:
         # Create default settings for existing users
-        if 'DATABASE_URL' in os.environ:
+        if is_postgres_db():
             c.execute("INSERT INTO user_settings (user_email) VALUES (%s)", (user_email,))
         else:
             c.execute("INSERT INTO user_settings (user_email) VALUES (?)", (user_email,))
@@ -2101,7 +2112,7 @@ def user_settings():
             if language not in ["tagalog", "waray"]:
                 language = "tagalog"
             
-            if 'DATABASE_URL' in os.environ:
+            if is_postgres_db():
                 c.execute("UPDATE user_settings SET show_in_community=%s, allow_peer_messages=%s, language=%s WHERE user_email=%s",
                           (show_community, allow_peer, language, user_email))
             else:
@@ -2127,7 +2138,7 @@ def user_settings():
                 error_msg = "New passwords do not match."
             else:
                 # Verify current password
-                if 'DATABASE_URL' in os.environ:
+                if is_postgres_db():
                     c.execute("SELECT password FROM users WHERE email=%s", (user_email,))
                 else:
                     c.execute("SELECT password FROM users WHERE email=?", (user_email,))
@@ -2135,7 +2146,7 @@ def user_settings():
                 
                 if user_row and check_password_hash(user_row['password'], current_password):
                     hashed_password = hash_password(new_password)
-                    if 'DATABASE_URL' in os.environ:
+                    if is_postgres_db():
                         c.execute("UPDATE users SET password=%s WHERE email=%s", (hashed_password, user_email))
                     else:
                         c.execute("UPDATE users SET password=? WHERE email=?", (hashed_password, user_email))
