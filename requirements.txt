@@ -17,7 +17,16 @@ itsdangerous==2.2.0
 Flask-Limiter==4.1.1
 
 # AI SDKs for Chatbot Logic
-google-generativeai==0.8.6
+# NOTE: Ang google-generativeai ay TINANGGAL dahil hinihila nito ang ~18 na
+# mabibigat na packages (grpcio, protobuf, google-api-core, google-api-python-client,
+# googleapis-common-protos, google-auth, httplib2, pyasn1, proto-plus, atbp.)
+# na nagpapabagal ng Render build (5-8 min) kahit hindi naman ginagamit.
+# Optional lang ang Gemini (fallback) at kusang nilalaktawan ng
+# utils/bot_logic.py kapag wala ang library (ImportError) o wala ang
+# GEMINI_API_KEY. Groq pa rin ang primary AI, OpenAI ang fallback.
+# Kung gusto mong ibalik ang Gemini: i-uncomment ang linya sa ibaba
+# TAPOS magdagdag ng GEMINI_API_KEY sa Render dashboard (Environment).
+# google-generativeai==0.8.6
 openai==2.49.0
 groq==1.7.0
 

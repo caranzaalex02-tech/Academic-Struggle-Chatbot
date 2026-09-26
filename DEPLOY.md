@@ -52,7 +52,7 @@ Set these under Web Service → Environment:
 | `ADMIN_REGISTRATION_CODE` | Yes | Secret code required to register an admin account |
 | `GROQ_API_KEY` | Yes (primary) | Groq API key (libre). Starts with `gsk_...` |
 | `GROQ_MODEL` | No | Groq model (default: `qwen/qwen3.8-27b`) |
-| `GEMINI_API_KEY` | No | Your Gemini API key (optional fallback) |
+| `GEMINI_API_KEY` | No | Your Gemini API key (optional fallback). NOTE: hindi naka-install ang `google-generativeai` sa `requirements.txt` para mabilis ang Render build. Kung gagamitin mo ito, i-uncomment ang linya at mag-redeploy |
 | `OPENAI_API_KEY` | No | Your OpenAI API key (optional fallback) |
 | `DATABASE_URL` | Yes (prod) | PostgreSQL connection URL from Render |
 | `MENTALHEALTHWEB_OPENAI_MODEL` | No | OpenAI model (default: `gpt-4o-mini`) |
