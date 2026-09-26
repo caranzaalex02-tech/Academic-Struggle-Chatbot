@@ -850,43 +850,50 @@ def forgot_password():
                 app.logger.error("Unexpected error sending password reset email to %s: %s", email, e)
                 email_sent = False
 
-            # Kapag blocked ang SMTP sa Render (o walang email config at all),
-            # magpakita ng malinaw na error imbes na generic message.
-            if not email_sent and (smtp_blocked or (not has_http_key and not has_smtp_creds)):
-                if smtp_blocked:
-                    app.logger.error(
-                        "Password reset FAILED for %s — SMTP is blocked on Render. "
-                        "Fix: maglagay ng SENDGRID_API_KEY sa Render dashboard (Environment) tapos Manual Deploy.",
-                        email,
-                    )
-                    flash(
-                        "Hindi na-send ang reset email: naka-block ang Gmail SMTP sa Render. "
-                        "Sabihin sa admin na maglagay ng SENDGRID_API_KEY sa Render → Environment → Save → Manual Deploy.",
-                        "error",
-                    )
+            # Kapag blocked ang SMTP sa Render: EMAIL-FIRST + FALLBACK.
+            # Susubukan pa rin ang email, pero kahit bumagsak, itutuloy ang user
+            # sa verify page na may on-screen code — hindi na siya naiipit
+            # sa forgot_password form. Tuloy-tuloy na ang flow.
+            if not email_sent:
+                if smtp_blocked or (not has_http_key and not has_smtp_creds):
+                    if smtp_blocked:
+                        app.logger.error(
+                            "Password reset email FAILED for %s — SMTP is blocked on Render. "
+                            "Ituloy sa verify page gamit ang on-screen fallback code. "
+                            "Permanent fix: maglagay ng SENDGRID_API_KEY sa Render dashboard (Environment) tapos Manual Deploy.",
+                            email,
+                        )
+                        flash(
+                            "Hindi na-send ang reset email (naka-block ang Gmail SMTP sa Render), "
+                            "kaya ito ang code mo (valid 1 hour). Pakilagay ito sa verification page.",
+                            "error",
+                        )
+                    else:
+                        app.logger.error(
+                            "Password reset email FAILED for %s — no email provider configured "
+                            "(backend=%s). Ituloy sa verify page gamit ang on-screen fallback code.",
+                            email, backend,
+                        )
+                        flash(
+                            "Hindi na-send ang reset email (hindi naka-configure ang email service), "
+                            "kaya ito ang code mo (valid 1 hour). Pakilagay ito sa verification page.",
+                            "error",
+                        )
                 else:
-                    app.logger.error(
-                        "Password reset FAILED for %s — no email provider configured "
-                        "(backend=%s, no SENDGRID/RESEND key, no SMTP credentials).",
+                    app.logger.warning(
+                        "Password reset email FAILED for %s (backend=%s) — "
+                        "ituloy pa rin sa verify page gamit ang on-screen fallback code.",
                         email, backend,
                     )
                     flash(
-                        "Hindi naka-configure ang email service sa server, kaya hindi na-send ang reset email. "
-                        "Sabihin sa admin na maglagay ng SENDGRID_API_KEY (at verified EMAIL_SENDER) sa Render → Environment → Save → Manual Deploy.",
+                        "Hindi na-send ang reset email, kaya ito ang code mo (valid 1 hour). "
+                        "Pakilagay ito sa verification page.",
                         "error",
                     )
-                return redirect(url_for('forgot_password'))
-
-            # Dev convenience: show code in console
-            if backend == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
-                flash(f"Dev: Reset code for {email}: {code}", "info")
-
-            if not email_sent:
-                if backend == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
-                    flash(f"Dev: Reset code for {email}: {code}", "info")
-                else:
-                    flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
-                return redirect(url_for('forgot_password'))
+                flash(f"Your verification code: {code}", "info")
+                # Tuloy sa verify page kahit failed ang email
+                session['reset_email'] = email
+                return redirect(url_for('verify_reset_code'))
 
         else:
             # Hindi nahanap ang email sa users table (o admin ito).
@@ -1046,8 +1053,20 @@ def admin_forgot_password():
                 if admin_backend == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                     flash(f"Dev: Admin reset code for {email}: {code}", "info")
                 else:
-                    flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
-                return redirect(url_for('admin_forgot_password'))
+                    # EMAIL-FIRST + FALLBACK para sa admin din: tuloy sa verify page.
+                    app.logger.warning(
+                        "Admin password reset email FAILED for %s (backend=%s) — "
+                        "ituloy pa rin sa verify page gamit ang on-screen fallback code.",
+                        email, admin_backend,
+                    )
+                    flash(
+                        "Hindi na-send ang reset email, kaya ito ang code mo (valid 1 hour). "
+                        "Pakilagay ito sa verification page.",
+                        "error",
+                    )
+                    flash(f"Your verification code: {code}", "info")
+                session['admin_reset_email'] = email
+                return redirect(url_for('admin_verify_reset_code'))
         else:
             app.logger.info("Admin password reset requested for non-existent admin email: %s", email)
 
