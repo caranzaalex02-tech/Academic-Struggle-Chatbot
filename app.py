@@ -830,6 +830,13 @@ def forgot_password():
         else:
             c.execute("SELECT email FROM users WHERE email = ? AND role != 'admin'", (email,))
         user = c.fetchone()
+        backend = get_email_backend()
+
+        # Kung hindi SMTP ang problema: walang SendGrid/Resend key AT walang
+        # SMTP credentials — magpakita agad ng actionable na error.
+        smtp_blocked = is_email_blocked_on_render()
+        has_http_key = bool(os.environ.get("SENDGRID_API_KEY") or os.environ.get("RESEND_API_KEY"))
+        has_smtp_creds = bool(os.environ.get("EMAIL_SENDER") and os.environ.get("EMAIL_PASSWORD"))
 
         if user:
             # Generate 6-digit verification code
@@ -837,26 +844,37 @@ def forgot_password():
             _store_reset_code(email, code)
 
             app.logger.info("Password reset OTP generated for user: %s", email)
-            backend = get_email_backend()
             try:
                 email_sent = send_password_reset_email(email, reset_code=code)
             except Exception as e:
                 app.logger.error("Unexpected error sending password reset email to %s: %s", email, e)
                 email_sent = False
 
-            # Kapag SMTP sa Render free tier: blocked ito (ports 25/465/587),
-            # kaya hindi talaga makakarating ang email — magpakita ng malinaw na error.
-            if not email_sent and is_email_blocked_on_render():
-                app.logger.error(
-                    "Password reset FAILED for %s — SMTP is blocked on Render. "
-                    "Fix: maglagay ng SENDGRID_API_KEY sa Render dashboard (Environment) tapos Manual Deploy.",
-                    email,
-                )
-                flash(
-                    "Hindi na-send ang reset email: naka-block ang Gmail SMTP sa Render. "
-                    "Sabihin sa admin na maglagay ng SENDGRID_API_KEY sa Render → Environment → Save → Manual Deploy.",
-                    "error",
-                )
+            # Kapag blocked ang SMTP sa Render (o walang email config at all),
+            # magpakita ng malinaw na error imbes na generic message.
+            if not email_sent and (smtp_blocked or (not has_http_key and not has_smtp_creds)):
+                if smtp_blocked:
+                    app.logger.error(
+                        "Password reset FAILED for %s — SMTP is blocked on Render. "
+                        "Fix: maglagay ng SENDGRID_API_KEY sa Render dashboard (Environment) tapos Manual Deploy.",
+                        email,
+                    )
+                    flash(
+                        "Hindi na-send ang reset email: naka-block ang Gmail SMTP sa Render. "
+                        "Sabihin sa admin na maglagay ng SENDGRID_API_KEY sa Render → Environment → Save → Manual Deploy.",
+                        "error",
+                    )
+                else:
+                    app.logger.error(
+                        "Password reset FAILED for %s — no email provider configured "
+                        "(backend=%s, no SENDGRID/RESEND key, no SMTP credentials).",
+                        email, backend,
+                    )
+                    flash(
+                        "Hindi naka-configure ang email service sa server, kaya hindi na-send ang reset email. "
+                        "Sabihin sa admin na maglagay ng SENDGRID_API_KEY (at verified EMAIL_SENDER) sa Render → Environment → Save → Manual Deploy.",
+                        "error",
+                    )
                 return redirect(url_for('forgot_password'))
 
             # Dev convenience: show code in console
@@ -869,6 +887,15 @@ def forgot_password():
                 else:
                     flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
                 return redirect(url_for('forgot_password'))
+
+        else:
+            # Hindi nahanap ang email sa users table (o admin ito).
+            # Huwag mag-reveal kung alin ang dahilan — pero i-log para sa admin.
+            app.logger.info(
+                "Password reset requested for unknown/non-user email: %s "
+                "(backend=%s, smtp_blocked=%s, has_http_key=%s, has_smtp_creds=%s)",
+                email, backend, smtp_blocked, has_http_key, has_smtp_creds,
+            )
 
         # Generic success message (even for non-existent emails — security)
         flash("If an account with that email exists, a 6-digit verification code has been sent. It is valid for 1 hour.", "success")
