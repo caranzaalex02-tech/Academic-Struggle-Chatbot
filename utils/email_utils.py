@@ -42,9 +42,33 @@ def get_email_backend():
     return _get_email_backend()
 
 
+def _is_running_on_render():
+    """True kapag tumatakbo sa Render (kahit walang RENDER=true na env var).
+
+    Ang RENDER env var ay naka-set sa Blueprint (RENDER=true sa render.yaml),
+    pero kapag manual Web Service ang ginamit, minsan wala ito. Kaya nagche-check
+    din tayo ng iba pang Render markers: RENDER_* vars, IS_RENDER, at
+    hostname na may '.onrender.com' / 'render'.
+    """
+    if os.environ.get("RENDER") or os.environ.get("IS_RENDER"):
+        return True
+    for key in ("RENDER_SERVICE_NAME", "RENDER_SERVICE_ID", "RENDER_INSTANCE_ID",
+                "RENDER_EXTERNAL_URL", "RENDER_GIT_COMMIT", "RENDER_REGION"):
+        if os.environ.get(key):
+            return True
+    try:
+        import socket
+        host = (socket.gethostname() or "").lower()
+        if "render" in host or "onrender" in host:
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def is_email_blocked_on_render():
     """True kapag nasa Render free tier at SMTP ang backend (blocked ports 25/465/587)."""
-    if not os.environ.get("RENDER"):
+    if not _is_running_on_render():
         return False
     return get_email_backend() == "smtp"
 
@@ -58,12 +82,17 @@ def get_email_status():
     masked_sender = sender[:2] + "***@" + sender.split("@")[-1] if "@" in sender else ""
     return {
         "backend": backend,
-        "is_render": bool(os.environ.get("RENDER")),
+        "is_render": _is_running_on_render(),
         "smtp_blocked_on_render": is_email_blocked_on_render(),
         "has_sendgrid_key": has_sendgrid,
         "has_resend_key": has_resend,
         "has_smtp_credentials": bool(os.environ.get("EMAIL_SENDER") and os.environ.get("EMAIL_PASSWORD")),
         "sender_hint": masked_sender,
+        "hint": (
+            "SMTP ay BLOCKED sa Render free tier (ports 25/465/587). "
+            "Maglagay ng SENDGRID_API_KEY + verified EMAIL_SENDER sa Render dashboard → Manual Deploy."
+            if is_email_blocked_on_render() else ""
+        ),
     }
 
 
@@ -268,7 +297,7 @@ Immediate attention required.
             _send_via_resend(receiver, "CRISIS ALERT - Academic Struggle Chatbot", body, f"<pre>{body}</pre>")
         return
 
-    if os.environ.get("RENDER"):
+    if _is_running_on_render():
         logging.error("Crisis email skipped: SMTP is blocked on Render. Set SENDGRID_API_KEY to enable it.")
         return
 
@@ -311,7 +340,7 @@ def send_registration_email(username, user_email):
 
     # Fail fast sa Render free tier: blocked ang SMTP ports (25/465/587),
     # kaya mag-hang lang ang request hanggang timeout kung susubukan pa.
-    if backend == 'smtp' and os.environ.get("RENDER"):
+    if backend == 'smtp' and _is_running_on_render():
         logging.error(
             "SMTP is blocked on Render free tier (ports 25/465/587). "
             "Set SENDGRID_API_KEY (or RESEND_API_KEY) in Render dashboard to send emails."
@@ -452,7 +481,7 @@ def send_password_reset_email(user_email, reset_code=None, reset_link=None):
         return False
 
     # Fail fast sa Render free tier: blocked ang SMTP ports (25/465/587).
-    if backend == 'smtp' and os.environ.get("RENDER"):
+    if backend == 'smtp' and _is_running_on_render():
         logging.error(
             "SMTP is blocked on Render free tier (ports 25/465/587). "
             "Set SENDGRID_API_KEY (or RESEND_API_KEY) in Render dashboard to send emails."
