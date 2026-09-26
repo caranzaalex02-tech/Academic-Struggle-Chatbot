@@ -19,6 +19,12 @@ def _get_email_backend():
     # NOTE: Tinatawag ito nang dynamic (hindi isang beses lang sa import)
     # para kapag nagdagdag ka ng API key sa Render dashboard + redeploy,
     # agad itong mag-switch nang walang code change.
+    #
+    # PRIORITY: Gmail API ang PINAKAMATAAS dahil ito ang pinakamagandang
+    # deliverability (tunay na Gmail ang nagpapadala, hindi napupunta sa spam,
+    # at HTTPS/port 443 kaya HINDI blocked sa Render free tier).
+    if os.environ.get("GMAIL_REFRESH_TOKEN"):
+        return "gmail_api"
     if os.environ.get("SENDGRID_API_KEY"):
         return "sendgrid"
     if os.environ.get("RESEND_API_KEY"):
@@ -78,21 +84,40 @@ def get_email_status():
     backend = get_email_backend()
     has_sendgrid = bool(os.environ.get("SENDGRID_API_KEY"))
     has_resend = bool(os.environ.get("RESEND_API_KEY"))
-    sender = os.environ.get("EMAIL_SENDER") or ""
+    gmail_cfg = {
+        k: bool(os.environ.get(k))
+        for k in ("GMAIL_CLIENT_ID", "GMAIL_CLIENT_SECRET", "GMAIL_REFRESH_TOKEN")
+    }
+    gmail_ready = all(gmail_cfg.values())
+    sender = os.environ.get("EMAIL_SENDER") or os.environ.get("GMAIL_SENDER") or ""
     masked_sender = sender[:2] + "***@" + sender.split("@")[-1] if "@" in sender else ""
+
+    if is_email_blocked_on_render():
+        hint = (
+            "SMTP ay BLOCKED sa Render free tier (ports 25/465/587). "
+            "Inirerekomenda: GMAIL_REFRESH_TOKEN + GMAIL_CLIENT_ID/SECRET "
+            "(patakbuhin ang get_gmail_token.py) para tunay na Gmail ang magpadala "
+            "at hindi mapunta sa spam."
+        )
+    elif not gmail_ready and not has_sendgrid and not has_resend and backend == "console":
+        hint = (
+            "Walang email provider na naka-configure. Maglagay ng GMAIL_REFRESH_TOKEN, "
+            "GMAIL_CLIENT_ID, at GMAIL_CLIENT_SECRET sa Render → Environment."
+        )
+    else:
+        hint = ""
+
     return {
         "backend": backend,
         "is_render": _is_running_on_render(),
         "smtp_blocked_on_render": is_email_blocked_on_render(),
+        "gmail_api_ready": gmail_ready,
+        "has_gmail_refresh_token": gmail_cfg["GMAIL_REFRESH_TOKEN"],
         "has_sendgrid_key": has_sendgrid,
         "has_resend_key": has_resend,
         "has_smtp_credentials": bool(os.environ.get("EMAIL_SENDER") and os.environ.get("EMAIL_PASSWORD")),
         "sender_hint": masked_sender,
-        "hint": (
-            "SMTP ay BLOCKED sa Render free tier (ports 25/465/587). "
-            "Maglagay ng SENDGRID_API_KEY + verified EMAIL_SENDER sa Render dashboard → Manual Deploy."
-            if is_email_blocked_on_render() else ""
-        ),
+        "hint": hint,
     }
 
 
@@ -225,6 +250,137 @@ def _send_via_resend(to_email, subject, plain_body, html_body):
         logging.error("Failed to send email via Resend to %s: %s", to_email, e)
         return False
 
+
+# ---------------------------------------------------------------------------
+# GMAIL API (OAuth2) — PINAKAMAGANDANG OPSYON para sa deliverability
+# ---------------------------------------------------------------------------
+# Bakit ito ang pinakamaganda:
+#   * Ang email ay TALAGANG nagmumula sa Gmail account mo (hindi third-party),
+#     kaya hindi ito itinuturing na spoofing at HINDI napupunta sa spam.
+#   * Gumagamit ito ng HTTPS (port 443) — HINDI blocked sa Render free tier,
+#     hindi tulad ng SMTP (ports 25/465/587).
+#   * Lalabas din ang bawat email sa "Sent" folder ng Gmail mo.
+#   * Purong standard library (urllib, json, base64) — WALANG bagong
+#     dependency, kaya hindi bumibigat ang Render build.
+#
+# Mga kailangang env vars (mula sa get_gmail_token.py):
+#   GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REFRESH_TOKEN
+#   GMAIL_SENDER (o EMAIL_SENDER) = ang Gmail address na nag-authorize
+# ---------------------------------------------------------------------------
+
+GMAIL_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GMAIL_SEND_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
+
+
+def _get_gmail_api_config():
+    """Fetch Gmail API OAuth2 settings from environment variables."""
+    return {
+        "client_id": os.environ.get("GMAIL_CLIENT_ID"),
+        "client_secret": os.environ.get("GMAIL_CLIENT_SECRET"),
+        "refresh_token": os.environ.get("GMAIL_REFRESH_TOKEN"),
+        "sender": os.environ.get("GMAIL_SENDER") or os.environ.get("EMAIL_SENDER"),
+        "display_name": os.environ.get("EMAIL_DISPLAY_NAME", "Academic Struggle Chatbot").strip(),
+    }
+
+
+def _get_gmail_access_token(cfg):
+    """Palitan ang refresh token ng bagong access token (may bisa ~1 oras).
+
+    Hindi ito nag-iimbak ng token sa disk para laging sariwa. Isang maliit na
+    HTTPS call lang ito, mas mabilis pa sa SMTP connection.
+    """
+    payload = urllib.parse.urlencode({
+        "client_id": cfg["client_id"],
+        "client_secret": cfg["client_secret"],
+        "refresh_token": cfg["refresh_token"],
+        "grant_type": "refresh_token",
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        GMAIL_TOKEN_URL,
+        data=payload,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        try:
+            detail = e.read().decode("utf-8")
+        except Exception:
+            detail = ""
+        logging.error("Gmail API token refresh failed (%s): %s", e.code, detail)
+        return None
+    except Exception as e:
+        logging.error("Gmail API token refresh failed: %s", e)
+        return None
+
+    token = data.get("access_token")
+    if not token:
+        logging.error("Gmail API token refresh returned no access_token: %s", data)
+    return token
+
+
+def _send_via_gmail_api(to_email, subject, plain_body, html_body):
+    """Send email through the Gmail API using OAuth2 (HTTPS).
+
+    Ito ang pinaka-reliable na paraan: tunay na Gmail ang nagpapadala, kaya
+    pumapasok sa Inbox (hindi spam) at hindi blocked sa Render.
+    """
+    cfg = _get_gmail_api_config()
+
+    missing = [k for k in ("client_id", "client_secret", "refresh_token", "sender") if not cfg.get(k)]
+    if missing:
+        logging.warning(
+            "Gmail API not configured; kulang ang env vars: %s. "
+            "Patakbuhin ang get_gmail_token.py at ilagay ang mga value sa Render.",
+            ", ".join("GMAIL_" + m.upper() for m in missing),
+        )
+        return False
+
+    access_token = _get_gmail_access_token(cfg)
+    if not access_token:
+        return False
+
+    # Buuin ang MIME message
+    msg = _build_html_message(subject, plain_body, html_body)
+    msg["To"] = to_email
+    msg["From"] = f"{cfg['display_name']} <{cfg['sender']}>"
+    msg["Reply-To"] = cfg["sender"]
+
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
+
+    req = urllib.request.Request(
+        GMAIL_SEND_URL,
+        data=json.dumps({"raw": raw}).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+            logging.info(
+                "Gmail API email sent to %s as %s (id %s)",
+                to_email, cfg["sender"], result.get("id", "?"),
+            )
+            return True
+    except urllib.error.HTTPError as e:
+        try:
+            detail = e.read().decode("utf-8")
+        except Exception:
+            detail = ""
+        logging.error("Gmail API error %s for %s: %s", e.code, to_email, detail)
+        return False
+    except Exception as e:
+        logging.error("Failed to send email via Gmail API to %s: %s", to_email, e)
+        return False
+
 def _get_email_config():
     """Helper to fetch all email configuration from environment variables."""
     def _safe_int(value, default, name="value"):
@@ -288,10 +444,12 @@ Immediate attention required.
         print("="*55 + "\n")
         return
 
-    # Sa Render: subukan muna ang HTTP API (SendGrid/Resend) kung naka-configure,
-    # bago mag-SMTP na blocked naman.
-    if backend_now in ('sendgrid', 'resend'):
-        if backend_now == 'sendgrid':
+    # Sa Render: subukan muna ang HTTP API (Gmail API/SendGrid/Resend) kung
+    # naka-configure, bago mag-SMTP na blocked naman.
+    if backend_now in ('gmail_api', 'sendgrid', 'resend'):
+        if backend_now == 'gmail_api':
+            _send_via_gmail_api(receiver, "CRISIS ALERT - Academic Struggle Chatbot", body, f"<pre>{body}</pre>")
+        elif backend_now == 'sendgrid':
             _send_via_sendgrid(receiver, "CRISIS ALERT - Academic Struggle Chatbot", body, f"<pre>{body}</pre>")
         else:
             _send_via_resend(receiver, "CRISIS ALERT - Academic Struggle Chatbot", body, f"<pre>{body}</pre>")
@@ -343,13 +501,14 @@ def send_registration_email(username, user_email):
     if backend == 'smtp' and _is_running_on_render():
         logging.error(
             "SMTP is blocked on Render free tier (ports 25/465/587). "
-            "Set SENDGRID_API_KEY (or RESEND_API_KEY) in Render dashboard to send emails."
+            "Set GMAIL_REFRESH_TOKEN (recommended) or SENDGRID_API_KEY in Render dashboard to send emails."
         )
         return False
 
-    # SMTP requires sender + password + user; HTTP backends (SendGrid/Resend)
-    # only need their API key + sender, which is checked inside each helper.
-    if backend not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
+    # SMTP requires sender + password + user; HTTP backends
+    # (Gmail API / SendGrid / Resend) only need their own credentials, which
+    # are checked inside each helper.
+    if backend not in ('gmail_api', 'sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
         logging.warning("Registration email not sent. Email credentials are not configured in environment variables.")
         return False
 
@@ -420,6 +579,8 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Welcome to Academic Struggle Chatbot", plain_body, html_body)
+    if backend == 'gmail_api':
+        return _send_via_gmail_api(user_email, "Welcome to Academic Struggle Chatbot", plain_body, html_body)
     if backend == 'sendgrid':
         return _send_via_sendgrid(user_email, "Welcome to Academic Struggle Chatbot", plain_body, html_body)
     if backend == 'resend':
@@ -476,7 +637,7 @@ def send_password_reset_email(user_email, reset_code=None, reset_link=None):
         print("="*55 + "\n")
         return True
 
-    if backend not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
+    if backend not in ('gmail_api', 'sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
         logging.warning("Password reset email not sent. Email credentials are not fully configured.")
         return False
 
@@ -557,6 +718,8 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Reset Your Password", plain_body, html_body)
+    if backend == 'gmail_api':
+        return _send_via_gmail_api(user_email, "Reset Your Password", plain_body, html_body)
     if backend == 'sendgrid':
         return _send_via_sendgrid(user_email, "Reset Your Password", plain_body, html_body)
     if backend == 'resend':

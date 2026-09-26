@@ -77,6 +77,20 @@ services:
       # (your verified single sender) to deliver email without a domain.
       - key: SENDGRID_API_KEY
         sync: false
+      # --- GMAIL API (OAuth2) — INIREREKOMENDA ---
+      # PINAKAMAGANDANG OPSYON: tunay na Gmail ang nagpapadala, kaya HINDI
+      # napupunta sa spam, at HTTPS (port 443) kaya HINDI blocked sa Render.
+      # Kunin ang mga value sa pamamagitan ng:  python get_gmail_token.py
+      # Kung naka-set ang GMAIL_REFRESH_TOKEN, awtomatikong ito ang gagamitin
+      # (mas priority kaysa SendGrid/Resend/SMTP).
+      - key: GMAIL_CLIENT_ID
+        sync: false
+      - key: GMAIL_CLIENT_SECRET
+        sync: false
+      - key: GMAIL_REFRESH_TOKEN
+        sync: false
+      - key: GMAIL_SENDER
+        sync: false
       - key: EMAIL_DISPLAY_NAME
         value: Academic Struggle Chatbot
       - key: EMAIL_LOGO_URL

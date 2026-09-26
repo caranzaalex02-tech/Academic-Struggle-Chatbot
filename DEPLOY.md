@@ -57,10 +57,14 @@ Set these under Web Service → Environment:
 | `DATABASE_URL` | Yes (prod) | PostgreSQL connection URL from Render |
 | `MENTALHEALTHWEB_OPENAI_MODEL` | No | OpenAI model (default: `gpt-4o-mini`) |
 | `REDIS_URL` | No | Redis URL for rate limiting (optional) |
-| `EMAIL_BACKEND` | No | Email backend (`smtp`, `sendgrid`, `resend`, o `console`). Sa Render free tier, HINDI gumagana ang `smtp` — gumamit ng SendGrid/Resend |
-| `SENDGRID_API_KEY` | Yes (sa Render) | SendGrid API key — FREE 100 emails/day, no domain needed (Single Sender Verification lang). Ito ang fix sa Forgot Password/Register email sa Render |
-| `RESEND_API_KEY` | No (alternative) | Resend HTTP API key (alternative sa SendGrid; kailangan ng verified domain) |
-| `EMAIL_SENDER` | Yes (sa Render) | Sender email address — DAPAT verified Single Sender sa SendGrid |
+| `EMAIL_BACKEND` | No | Email backend (`gmail_api`, `smtp`, `sendgrid`, `resend`, o `console`). Sa Render free tier, HINDI gumagana ang `smtp` |
+| `GMAIL_REFRESH_TOKEN` | **Inirerekomenda** | Gmail API OAuth2 refresh token. Kung naka-set ito, awtomatikong `gmail_api` ang backend. Kunin sa `python get_gmail_token.py`. **Ito ang pinakamagandang opsyun — hindi napupunta sa spam ang email** |
+| `GMAIL_CLIENT_ID` | Kasama ng nasa taas | Mula sa Google Cloud Console (OAuth client, Desktop app) |
+| `GMAIL_CLIENT_SECRET` | Kasama ng nasa taas | Mula sa Google Cloud Console |
+| `GMAIL_SENDER` | Kasama ng nasa taas | Ang Gmail address na ni-authorize (dapat PAREHO sa na-authorize) |
+| `SENDGRID_API_KEY` | Alternative | SendGrid API key — 100 emails/day. Madalas napupunta sa SPAM dahil walang SPF/DKIM (hindi mo pag-aari ang gmail.com) |
+| `RESEND_API_KEY` | Alternative | Resend HTTP API key (kailangan ng verified domain) |
+| `EMAIL_SENDER` | No | Sender email address (ginagamit ng SendGrid/Resend/SMTP) |
 | `EMAIL_HOST` | No | SMTP host |
 | `EMAIL_PORT` | No | SMTP port |
 | `EMAIL_HOST_USER` | No | SMTP username |
