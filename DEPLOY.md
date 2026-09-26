@@ -57,8 +57,10 @@ Set these under Web Service → Environment:
 | `DATABASE_URL` | Yes (prod) | PostgreSQL connection URL from Render |
 | `MENTALHEALTHWEB_OPENAI_MODEL` | No | OpenAI model (default: `gpt-4o-mini`) |
 | `REDIS_URL` | No | Redis URL for rate limiting (optional) |
-| `EMAIL_BACKEND` | No | Email backend (`smtp` or `console`) |
-| `EMAIL_SENDER` | No | Sender email address |
+| `EMAIL_BACKEND` | No | Email backend (`smtp`, `sendgrid`, `resend`, o `console`). Sa Render free tier, HINDI gumagana ang `smtp` — gumamit ng SendGrid/Resend |
+| `SENDGRID_API_KEY` | Yes (sa Render) | SendGrid API key — FREE 100 emails/day, no domain needed (Single Sender Verification lang). Ito ang fix sa Forgot Password/Register email sa Render |
+| `RESEND_API_KEY` | No (alternative) | Resend HTTP API key (alternative sa SendGrid; kailangan ng verified domain) |
+| `EMAIL_SENDER` | Yes (sa Render) | Sender email address — DAPAT verified Single Sender sa SendGrid |
 | `EMAIL_HOST` | No | SMTP host |
 | `EMAIL_PORT` | No | SMTP port |
 | `EMAIL_HOST_USER` | No | SMTP username |

@@ -35,7 +35,14 @@ if load_dotenv is not None:
 
 # Local Application Imports
 from utils.bot_logic import generate_response
-from utils.email_utils import send_crisis_email, send_registration_email, send_password_reset_email, EMAIL_BACKEND
+from utils.email_utils import (
+    send_crisis_email,
+    send_registration_email,
+    send_password_reset_email,
+    get_email_backend,
+    get_email_status,
+    is_email_blocked_on_render,
+)
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
@@ -144,6 +151,12 @@ def add_security_headers(response):
 
 
 # --- Global error handlers ---
+@app.route("/health/email")
+def health_email():
+    """Safe diagnostics para malaman kung bakit walang email sa Render (walang secrets)."""
+    return jsonify(get_email_status())
+
+
 @app.errorhandler(500)
 def internal_error(e):
     """Log the full traceback and show a friendly message instead of a blank 500 page."""
@@ -824,18 +837,34 @@ def forgot_password():
             _store_reset_code(email, code)
 
             app.logger.info("Password reset OTP generated for user: %s", email)
+            backend = get_email_backend()
             try:
                 email_sent = send_password_reset_email(email, reset_code=code)
             except Exception as e:
                 app.logger.error("Unexpected error sending password reset email to %s: %s", email, e)
                 email_sent = False
 
+            # Kapag SMTP sa Render free tier: blocked ito (ports 25/465/587),
+            # kaya hindi talaga makakarating ang email — magpakita ng malinaw na error.
+            if not email_sent and is_email_blocked_on_render():
+                app.logger.error(
+                    "Password reset FAILED for %s — SMTP is blocked on Render. "
+                    "Fix: maglagay ng SENDGRID_API_KEY sa Render dashboard (Environment) tapos Manual Deploy.",
+                    email,
+                )
+                flash(
+                    "Hindi na-send ang reset email: naka-block ang Gmail SMTP sa Render. "
+                    "Sabihin sa admin na maglagay ng SENDGRID_API_KEY sa Render → Environment → Save → Manual Deploy.",
+                    "error",
+                )
+                return redirect(url_for('forgot_password'))
+
             # Dev convenience: show code in console
-            if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+            if backend == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                 flash(f"Dev: Reset code for {email}: {code}", "info")
 
             if not email_sent:
-                if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+                if backend == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                     flash(f"Dev: Reset code for {email}: {code}", "info")
                 else:
                     flash("Sorry, we could not send the reset email right now. Please try again later.", "error")
@@ -968,17 +997,26 @@ def admin_forgot_password():
             code = _generate_reset_code()
             _store_reset_code(email, code)
             app.logger.info("Admin password reset OTP generated for: %s", email)
+            admin_backend = get_email_backend()
             try:
                 email_sent = send_password_reset_email(email, reset_code=code)
             except Exception as e:
                 app.logger.error("Unexpected error sending admin password reset email to %s: %s", email, e)
                 email_sent = False
 
-            if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+            if not email_sent and is_email_blocked_on_render():
+                flash(
+                    "Hindi na-send ang reset email: naka-block ang Gmail SMTP sa Render. "
+                    "Maglagay ng SENDGRID_API_KEY sa Render → Environment → Save → Manual Deploy.",
+                    "error",
+                )
+                return redirect(url_for('admin_forgot_password'))
+
+            if admin_backend == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                 flash(f"Dev: Admin reset code for {email}: {code}", "info")
 
             if not email_sent:
-                if EMAIL_BACKEND == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
+                if admin_backend == 'console' or os.environ.get('SHOW_RESET_LINKS', '').strip().lower() == 'true':
                     flash(f"Dev: Admin reset code for {email}: {code}", "info")
                 else:
                     flash("Sorry, we could not send the reset email right now. Please try again later.", "error")

@@ -40,9 +40,16 @@ services:
       - key: MENTALHEALTHWEB_DB
         value: database.db
 
-      # --- Email (SMTP) ---
+      # --- Email ---
+      # IMPORTANT: Naka-block ang SMTP (ports 25/465/587) sa Render free tier
+      # kaya HINDI gagana ang Gmail SMTP doon. Huwag nang gamiting default.
+      # Para gumana ang Forgot Password + Register email sa Render:
+      #   1. Gumawa ng FREE SendGrid account (100 emails/day, walang domain needed)
+      #   2. Verify Single Sender (yung Gmail mo) sa SendGrid dashboard
+      #   3. Gumawa ng API Key → ilagay bilang SENDGRID_API_KEY sa Render dashboard
+      #   4. Ilagay din ang EMAIL_SENDER (yung verified Gmail) → Manual Deploy
       - key: EMAIL_BACKEND
-        value: smtp
+        value: console
       - key: EMAIL_SENDER
         sync: false
       - key: EMAIL_PASSWORD
@@ -59,7 +66,7 @@ services:
         value: "false"
       - key: EMAIL_TIMEOUT
         value: "15"
-      # Resend HTTP API key. Render blocks outbound SMTP, so use Resend to
+      # Resend HTTP API key (alternative sa SendGrid). Render blocks outbound SMTP, so use Resend to
       # actually deliver emails from production.
       - key: RESEND_API_KEY
         sync: false

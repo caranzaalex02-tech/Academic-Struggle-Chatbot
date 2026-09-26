@@ -16,6 +16,9 @@ def _get_email_backend():
     # API keys take priority over a stale "smtp" default, because SMTP is
     # blocked on Render and won't work there anyway. Setting SENDGRID_API_KEY
     # (or RESEND_API_KEY) is enough to switch to the HTTP backend.
+    # NOTE: Tinatawag ito nang dynamic (hindi isang beses lang sa import)
+    # para kapag nagdagdag ka ng API key sa Render dashboard + redeploy,
+    # agad itong mag-switch nang walang code change.
     if os.environ.get("SENDGRID_API_KEY"):
         return "sendgrid"
     if os.environ.get("RESEND_API_KEY"):
@@ -28,6 +31,44 @@ def _get_email_backend():
         return "smtp"
     return "console"
 
+
+def get_email_backend():
+    """Dynamic version — tawagin ito palagi imbes na gamitin ang EMAIL_BACKEND variable.
+
+    Dahil ang EMAIL_BACKEND ay naka-freeze sa import time, hindi nito makikita
+    ang mga env var na nadagdag pagkatapos mag-boot ng worker (gunicorn).
+    Ang function na ito ay nagre-read ng environment sa bawat tawag.
+    """
+    return _get_email_backend()
+
+
+def is_email_blocked_on_render():
+    """True kapag nasa Render free tier at SMTP ang backend (blocked ports 25/465/587)."""
+    if not os.environ.get("RENDER"):
+        return False
+    return get_email_backend() == "smtp"
+
+
+def get_email_status():
+    """Safe diagnostics (walang secrets) para sa /health/email endpoint."""
+    backend = get_email_backend()
+    has_sendgrid = bool(os.environ.get("SENDGRID_API_KEY"))
+    has_resend = bool(os.environ.get("RESEND_API_KEY"))
+    sender = os.environ.get("EMAIL_SENDER") or ""
+    masked_sender = sender[:2] + "***@" + sender.split("@")[-1] if "@" in sender else ""
+    return {
+        "backend": backend,
+        "is_render": bool(os.environ.get("RENDER")),
+        "smtp_blocked_on_render": is_email_blocked_on_render(),
+        "has_sendgrid_key": has_sendgrid,
+        "has_resend_key": has_resend,
+        "has_smtp_credentials": bool(os.environ.get("EMAIL_SENDER") and os.environ.get("EMAIL_PASSWORD")),
+        "sender_hint": masked_sender,
+    }
+
+
+# Para sa backward-compat: frozen value sa import time (gamitin ang
+# get_email_backend() sa bagong code).
 EMAIL_BACKEND = _get_email_backend()
 
 
@@ -207,7 +248,8 @@ Message: {message}
 Immediate attention required.
     """
     
-    if EMAIL_BACKEND == 'console':
+    backend_now = get_email_backend()
+    if backend_now == 'console':
         print("\n" + "="*20 + " CONSOLE EMAIL " + "="*20)
         print(f"TO: Crisis Team <{receiver}>")
         print(f"FROM: {config['sender']}")
@@ -215,6 +257,19 @@ Immediate attention required.
         print("-" * 55)
         print(body)
         print("="*55 + "\n")
+        return
+
+    # Sa Render: subukan muna ang HTTP API (SendGrid/Resend) kung naka-configure,
+    # bago mag-SMTP na blocked naman.
+    if backend_now in ('sendgrid', 'resend'):
+        if backend_now == 'sendgrid':
+            _send_via_sendgrid(receiver, "CRISIS ALERT - Academic Struggle Chatbot", body, f"<pre>{body}</pre>")
+        else:
+            _send_via_resend(receiver, "CRISIS ALERT - Academic Struggle Chatbot", body, f"<pre>{body}</pre>")
+        return
+
+    if os.environ.get("RENDER"):
+        logging.error("Crisis email skipped: SMTP is blocked on Render. Set SENDGRID_API_KEY to enable it.")
         return
 
     if not all([config['sender'], config['password'], receiver]):
@@ -240,9 +295,10 @@ Immediate attention required.
 def send_registration_email(username, user_email):
     """Sends a welcome email to a newly registered user."""
     config = _get_email_config()
-    
+    backend = get_email_backend()
+
     formatted_sender = _format_sender(config)
-    if EMAIL_BACKEND == 'console':
+    if backend == 'console':
         print("\n" + "="*20 + " CONSOLE EMAIL " + "="*20)
         print(f"TO: {user_email}")
         print(f"FROM: {formatted_sender}")
@@ -253,9 +309,18 @@ def send_registration_email(username, user_email):
         print("="*55 + "\n")
         return True
 
+    # Fail fast sa Render free tier: blocked ang SMTP ports (25/465/587),
+    # kaya mag-hang lang ang request hanggang timeout kung susubukan pa.
+    if backend == 'smtp' and os.environ.get("RENDER"):
+        logging.error(
+            "SMTP is blocked on Render free tier (ports 25/465/587). "
+            "Set SENDGRID_API_KEY (or RESEND_API_KEY) in Render dashboard to send emails."
+        )
+        return False
+
     # SMTP requires sender + password + user; HTTP backends (SendGrid/Resend)
     # only need their API key + sender, which is checked inside each helper.
-    if EMAIL_BACKEND not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
+    if backend not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
         logging.warning("Registration email not sent. Email credentials are not configured in environment variables.")
         return False
 
@@ -326,9 +391,9 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Welcome to Academic Struggle Chatbot", plain_body, html_body)
-    if EMAIL_BACKEND == 'sendgrid':
+    if backend == 'sendgrid':
         return _send_via_sendgrid(user_email, "Welcome to Academic Struggle Chatbot", plain_body, html_body)
-    if EMAIL_BACKEND == 'resend':
+    if backend == 'resend':
         return _send_via_resend(user_email, "Welcome to Academic Struggle Chatbot", plain_body, html_body)
     msg["From"] = formatted_sender
     msg["To"] = user_email
@@ -361,9 +426,10 @@ def send_password_reset_email(user_email, reset_code=None, reset_link=None):
         reset_link: Fallback reset link (backward compatibility)
     """
     config = _get_email_config()
+    backend = get_email_backend()
 
     formatted_sender = _format_sender(config)
-    if EMAIL_BACKEND == 'console':
+    if backend == 'console':
         print("\n" + "="*20 + " CONSOLE EMAIL " + "="*20)
         print(f"TO: {user_email}")
         print(f"FROM: {formatted_sender}")
@@ -381,8 +447,16 @@ def send_password_reset_email(user_email, reset_code=None, reset_link=None):
         print("="*55 + "\n")
         return True
 
-    if EMAIL_BACKEND not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
+    if backend not in ('sendgrid', 'resend') and not all([config['sender'], config['password'], config['user']]):
         logging.warning("Password reset email not sent. Email credentials are not fully configured.")
+        return False
+
+    # Fail fast sa Render free tier: blocked ang SMTP ports (25/465/587).
+    if backend == 'smtp' and os.environ.get("RENDER"):
+        logging.error(
+            "SMTP is blocked on Render free tier (ports 25/465/587). "
+            "Set SENDGRID_API_KEY (or RESEND_API_KEY) in Render dashboard to send emails."
+        )
         return False
 
     plain_body = f"""
@@ -454,9 +528,9 @@ Academic Struggle Chatbot Team
 """
 
     msg = _build_html_message("Reset Your Password", plain_body, html_body)
-    if EMAIL_BACKEND == 'sendgrid':
+    if backend == 'sendgrid':
         return _send_via_sendgrid(user_email, "Reset Your Password", plain_body, html_body)
-    if EMAIL_BACKEND == 'resend':
+    if backend == 'resend':
         return _send_via_resend(user_email, "Reset Your Password", plain_body, html_body)
     msg["From"] = formatted_sender
     msg["To"] = user_email
