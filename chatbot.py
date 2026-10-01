@@ -75,6 +75,7 @@ def main():
     print("Commands:")
     print("  /lang tagalog  - Switch to Tagalog mode")
     print("  /lang waray    - Switch to Waray mode")
+    print("  /lang english  - Switch to English mode")
     print("  /keys          - Show API key status")
     print("  /quit or /exit - Exit the chatbot")
     print()
@@ -103,11 +104,11 @@ def main():
             continue
         elif user_input.lower().startswith("/lang"):
             parts = user_input.split()
-            if len(parts) >= 2 and parts[1] in ("tagalog", "waray"):
+            if len(parts) >= 2 and parts[1] in ("tagalog", "waray", "english"):
                 language = parts[1]
                 print(f"Bot: Language set to '{language}'.")
             else:
-                print("Bot: Usage: /lang tagalog or /lang waray")
+                print("Bot: Usage: /lang tagalog, /lang waray, or /lang english")
             continue
 
         # Generate response using the same logic as the web app

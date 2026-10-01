@@ -482,7 +482,12 @@ padding:8px 10px;
   <select name="language">
     <option value="tagalog" {% if settings['language'] == 'tagalog' %}selected{% endif %}>🇵🇭 Tagalog</option>
     <option value="waray" {% if settings['language'] == 'waray' %}selected{% endif %}>🇵🇭 Waray</option>
+    <option value="english" {% if settings['language'] == 'english' %}selected{% endif %}>🇺🇸 English</option>
   </select>
+  <p style="font-size:12px;color:#64748b;margin:8px 0 0;">
+    Ang bot ay sumasagot sa kaparehong wika ng iyong tanong (Tagalog, English, o Waray).
+    Ang setting na ito ang gagamitin kapag hindi malinaw ang wika ng iyong mensahe.
+  </p>
 </div>
 
 <div class="toggle-row">

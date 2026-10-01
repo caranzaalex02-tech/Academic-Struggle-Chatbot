@@ -34,7 +34,7 @@ if load_dotenv is not None:
     load_dotenv()
 
 # Local Application Imports
-from utils.bot_logic import generate_response
+from utils.bot_logic import generate_response, resolve_response_language
 from utils.email_utils import (
     send_crisis_email,
     send_registration_email,
@@ -1169,7 +1169,7 @@ def set_language():
         return jsonify({"status":"Unauthorized"}), 401
     data = request.get_json()
     language = data.get("language")
-    if language in ["tagalog", "waray"]:
+    if language in ["tagalog", "waray", "english"]:
         session["language"] = language
         return jsonify({"status": "ok", "language": language})
     return jsonify({"status": "error"}), 400
@@ -1186,6 +1186,9 @@ def chat():
 
     # Get user language preference (default to tagalog)
     user_language = session.get("language", "tagalog")
+
+    # Ang wika ng sagot ay susundan ang wika ng tanong (English/Tagalog/Waray).
+    reply_language = resolve_response_language(message, user_language)
 
     # Check user's current ban status and offense count
     if is_postgres_db():
@@ -1206,8 +1209,10 @@ def chat():
             if aware_ban_expiry_dt > get_ph_time():
                 expiry_formatted = aware_ban_expiry_dt.strftime('%B %d, %Y at %I:%M %p')
                 
-                if user_language == 'waray':
+                if reply_language == 'waray':
                     ban_msg = f"An imo account in suspendido pa. Pwede mo ini gamiton utro pagkatapos hiton {expiry_formatted}."
+                elif reply_language == 'english':
+                    ban_msg = f"Your account is currently suspended. You can use it again after {expiry_formatted}."
                 else:
                     ban_msg = f"Ang iyong account ay kasalukuyang suspendido. Maaari mo itong muling gamitin pagkatapos ng {expiry_formatted}."
                 return jsonify({"response": ban_msg})
@@ -2152,7 +2157,7 @@ def user_settings():
             allow_peer = 1 if request.form.get("allow_peer_messages") else 0
             language = request.form.get("language", "tagalog")
             
-            if language not in ["tagalog", "waray"]:
+            if language not in ["tagalog", "waray", "english"]:
                 language = "tagalog"
             
             if is_postgres_db():

@@ -7,6 +7,40 @@ import sqlite3
 import logging
 from pathlib import Path
 
+try:  # Normal package import (Flask app / pytest)
+    from .bot_responses_i18n import (
+        ABUSIVE_RESPONSE_EN,
+        ACADEMIC_REFERRAL_EN,
+        CRISIS_RESPONSE_TL,
+        DEFAULT_FAQ_ANSWERS_TL,
+        ENGLISH_FOLLOW_UPS,
+        ENGLISH_RESPONSES,
+        GENERIC_FALLBACKS_EN,
+        GENERIC_FALLBACKS_TL,
+        LANGUAGE_CHOICES,
+        TAGALOG_RESPONSES,
+        detect_language,
+        pick as _language_pick,
+        score_languages,
+    )
+except ImportError:  # pragma: no cover - kapag direktang pinatakbo bilang script
+    from bot_responses_i18n import (
+        ABUSIVE_RESPONSE_EN,
+        ACADEMIC_REFERRAL_EN,
+        CRISIS_RESPONSE_TL,
+        DEFAULT_FAQ_ANSWERS_TL,
+        ENGLISH_FOLLOW_UPS,
+        ENGLISH_RESPONSES,
+        GENERIC_FALLBACKS_EN,
+        GENERIC_FALLBACKS_TL,
+        LANGUAGE_CHOICES,
+        TAGALOG_RESPONSES,
+        detect_language,
+        pick as _language_pick,
+        score_languages,
+    )
+
+
 # Heavy AI SDKs are imported lazily (inside the _call_*_api functions) so that
 # the web worker does NOT load google.generativeai / openai / groq at startup.
 # Loading them eagerly was causing "Worker was sent SIGKILL! Perhaps out of
@@ -866,15 +900,22 @@ def _load_faq_answers():
     return DEFAULT_FAQ_ANSWERS
 
 
-def get_faq_answer(text):
+def get_faq_answer(text, language='tagalog'):
     normalized = text.lower().strip()
     if not normalized:
         return None
 
-    for question, answer in DEFAULT_FAQ_ANSWERS.items():
-        q = question.lower().strip()
-        if _has_signal(normalized, q):
-            return answer
+    # Sundin ang wika ng tanong: Tagalog muna para sa Tagalog na tanong.
+    if language == 'tagalog':
+        default_sets = (DEFAULT_FAQ_ANSWERS_TL, DEFAULT_FAQ_ANSWERS)
+    else:
+        default_sets = (DEFAULT_FAQ_ANSWERS,)
+
+    for defaults in default_sets:
+        for question, answer in defaults.items():
+            q = question.lower().strip()
+            if _has_signal(normalized, q):
+                return answer
 
     faq_answers = _load_faq_answers()
     if not faq_answers:
@@ -959,9 +1000,12 @@ def _call_groq_api(user_input, language='tagalog'):
         logging.exception(f"Groq API call failed: {e}")
         error_type = type(e).__name__
         if 'rate' in str(e).lower() or 'quota' in str(e).lower():
-            if language == 'waray':
-                return "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro."
-            return "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo."
+            return _language_pick(
+                language,
+                "Too many questions at once. Let's pause for a moment and try again in a few seconds.",
+                "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo.",
+                "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro.",
+            )
         return None
 
 
@@ -969,17 +1013,23 @@ def _call_gemini_api(user_input, language='tagalog'):
     """Calls the Google Gemini API as a fallback."""
     if not _gemini_available():
         logging.warning("Gemini API not available (library not installed or key not set).")
-        if language == 'waray':
-            return "Mayda problema ha AI service (diri naka-install an library). Alayon pagsumat ha administrator."
-        return "Nagkaproblema sa AI service (hindi naka-install ang library). Paki-abiso sa administrator."
+        return _language_pick(
+            language,
+            "There is a problem with the AI service (library not installed). Please inform the administrator.",
+            "Nagkaproblema sa AI service (hindi naka-install ang library). Paki-abiso sa administrator.",
+            "Mayda problema ha AI service (diri naka-install an library). Alayon pagsumat ha administrator.",
+        )
 
     try:
         api_key = _get_gemini_api_key()
         if not api_key:
             logging.error("Gemini API key not found. Please set GEMINI_API_KEY in the .env file.")
-            if language == 'waray':
-                return "Mayda problema ha AI service (waray API key). Alayon pagsumat ha administrator."
-            return "Nagkaproblema sa AI service (walang API key). Paki-abiso sa administrator."
+            return _language_pick(
+                language,
+                "There is a problem with the AI service (no API key). Please inform the administrator.",
+                "Nagkaproblema sa AI service (walang API key). Paki-abiso sa administrator.",
+                "Mayda problema ha AI service (waray API key). Alayon pagsumat ha administrator.",
+            )
 
         key_preview = f"{api_key[:5]}...{api_key[-4:]}" if len(api_key) > 9 else "Invalid Key"
         logging.info(f"Attempting to use Gemini API key: {key_preview}")
@@ -1007,9 +1057,12 @@ def _call_gemini_api(user_input, language='tagalog'):
                 if getattr(response, "parts", None):
                     return response.text.strip()
                 logging.error("Gemini API call was blocked by safety settings or returned no content.")
-                if language == 'waray':
-                    return "Pasensya, diri ko mababaton iton nga pakiana. Bangin an topic kay sensitibo."
-                return "Paumanhin, hindi ko masasagot ang tanong na iyan. Ang paksa ay maaaring masyadong sensitibo."
+                return _language_pick(
+                    language,
+                    "Sorry, I can't answer that question. The topic may be too sensitive.",
+                    "Paumanhin, hindi ko masasagot ang tanong na iyan. Ang paksa ay maaaring masyadong sensitibo.",
+                    "Pasensya, diri ko mababaton iton nga pakiana. Bangin an topic kay sensitibo.",
+                )
             except Exception as model_error:
                 logging.warning("Gemini model %s failed: %s", model_name, model_error)
                 if "invalidargument" in str(model_error).lower() and model_name != preferred_models[-1]:
@@ -1024,21 +1077,41 @@ def _call_gemini_api(user_input, language='tagalog'):
         logging.error(f"Gemini API call failed with a {error_type}. This will be shown to the user.")
 
         if "block" in str(e).lower():
-            if language == 'waray':
-                return "Pasensya, diri ko mababaton iton nga pakiana tungod han safety settings."
-            return "Paumanhin, hindi ko masasagot ang tanong na iyan dahil sa safety settings."
+            return _language_pick(
+                language,
+                "Sorry, I can't answer that question because of safety settings.",
+                "Paumanhin, hindi ko masasagot ang tanong na iyan dahil sa safety settings.",
+                "Pasensya, diri ko mababaton iton nga pakiana tungod han safety settings.",
+            )
 
         if error_type in ['PermissionDenied', 'Unauthenticated'] or 'API_KEY_INVALID' in str(e).upper():
-            if language == 'waray':
-                error_message = "Mayda problema ha AI service. Alayon pagsumat ha administrator. (API Key Error)"
-            else:
-                error_message = "Nagkaproblema sa AI service. Paki-abiso sa administrator. (API Key Error)"
+            error_message = _language_pick(
+                language,
+                "There is a problem with the AI service. Please inform the administrator. (API Key Error)",
+                "Nagkaproblema sa AI service. Paki-abiso sa administrator. (API Key Error)",
+                "Mayda problema ha AI service. Alayon pagsumat ha administrator. (API Key Error)",
+            )
         elif 'deadline' in str(e).lower():
-            error_message = "Masyadong matagal bago sumagot ang AI. Subukang muli."
+            error_message = _language_pick(
+                language,
+                "The AI took too long to answer. Please try again.",
+                "Masyadong matagal bago sumagot ang AI. Subukang muli.",
+                "Malawig an AI bago sumagot. Alayon pag-try utro.",
+            )
         elif 'invalidargument' in str(e).lower() or error_type == 'InvalidArgument':
-            error_message = "Nagkaproblema sa AI service. Paki-abiso sa administrator. (Invalid Argument)"
+            error_message = _language_pick(
+                language,
+                "There is a problem with the AI service. Please inform the administrator. (Invalid Argument)",
+                "Nagkaproblema sa AI service. Paki-abiso sa administrator. (Invalid Argument)",
+                "Mayda problema ha AI service. Alayon pagsumat ha administrator. (Invalid Argument)",
+            )
         else:
-            error_message = f"Nagkaproblema sa AI service. Paki-abiso sa administrator. (Error: {error_type})"
+            error_message = _language_pick(
+                language,
+                f"There is a problem with the AI service. Please inform the administrator. (Error: {error_type})",
+                f"Nagkaproblema sa AI service. Paki-abiso sa administrator. (Error: {error_type})",
+                f"Mayda problema ha AI service. Alayon pagsumat ha administrator. (Error: {error_type})",
+            )
         return error_message
 
 
@@ -1067,16 +1140,31 @@ def _build_openai_system_prompt(language='tagalog'):
         "- Include practical, actionable tips when relevant.\n"
     )
     if language == 'waray':
-        return (
+        role = (
             "You are a compassionate Waray academic struggle support chatbot for students. "
-            "Respond in gentle Waray whenever possible.\n\n"
-            + base_guidelines
+            "Always answer in Waray. "
         )
-    return (
-        "You are a compassionate academic struggle support chatbot for students. "
-        "Answer in Tagalog or Taglish based on the user's input.\n\n"
-        + base_guidelines
+    elif language == 'english':
+        role = (
+            "You are a compassionate academic struggle support chatbot for students. "
+            "Always answer in English. "
+        )
+    else:
+        role = (
+            "You are a compassionate academic struggle support chatbot for students. "
+            "Always answer in Tagalog or Taglish. "
+        )
+
+    language_rules = (
+        "\nLANGUAGE RULES (very important):\n"
+        "- Detect the language of the user's LAST message and reply in that SAME language.\n"
+        "- English question -> answer in English only.\n"
+        "- Tagalog/Taglish question -> answer in Tagalog/Taglish only.\n"
+        "- Waray question -> answer in Waray only.\n"
+        "- Never mix languages in one reply unless the user mixed them first.\n"
+        "- Do not translate the user's message; just answer naturally in their language.\n"
     )
+    return role + language_rules + "\n" + base_guidelines
 
 
 def _call_openai_api(user_input, intent=None, language='tagalog'):
@@ -1122,13 +1210,19 @@ def _call_openai_api(user_input, intent=None, language='tagalog'):
         logging.error("OpenAI quota/rate limit error: %s", e)
         # Check if the error is specifically about quota
         if 'insufficient_quota' in str(e).lower():
-            if language == 'waray':
-                return "Pasensya, an AI service in diri available yana tungod kay naubos na an credits. Alayon pagsumat ha administrator."
-            return "Pasensya, pansamantalang hindi available ang AI service dahil naubos na ang credits. Paki-abiso sa administrator."
+            return _language_pick(
+                language,
+                "Sorry, the AI service is temporarily unavailable because the credits ran out. Please inform the administrator.",
+                "Pasensya, pansamantalang hindi available ang AI service dahil naubos na ang credits. Paki-abiso sa administrator.",
+                "Pasensya, an AI service in diri available yana tungod kay naubos na an credits. Alayon pagsumat ha administrator.",
+            )
         # Otherwise, it's a rate limit issue (too many requests too fast)
-        if language == 'waray':
-            return "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro."
-        return "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo."
+        return _language_pick(
+            language,
+            "Too many questions at once. Let's pause for a moment and try again in a few seconds.",
+            "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo.",
+            "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro.",
+        )
     except Exception as e:
         logging.exception(f"OpenAI API call failed: {e}")
         return None
@@ -1142,6 +1236,61 @@ def _has_signal(text, signal):
     if not normalized_signal:
         return False
     return re.search(rf"(?<!\w){re.escape(normalized_signal)}(?!\w)", normalized_text) is not None
+
+
+def resolve_response_language(user_input, preferred='tagalog'):
+    """Tinutukoy ang wikang gagamitin sa SAGOT ng bot.
+
+    Sinusunod ang wika ng tanong ng user (English -> English, Tagalog ->
+    Tagalog, Waray -> Waray) at babalik sa ``preferred`` (setting ng user)
+    kapag hindi malinaw ang wika ng tanong.
+    """
+    preferred = (preferred or 'tagalog').lower()
+    if preferred not in LANGUAGE_CHOICES:
+        preferred = 'tagalog'
+
+    detected = detect_language(user_input)
+    if detected and detected != preferred:
+        # Malinaw ang wika ng tanong, sundin natin ito kahit iba sa setting.
+        return detected
+    if detected:
+        return detected
+
+    english, tagalog, waray = score_languages(user_input)
+    if preferred == 'waray' and waray >= 1 and waray >= tagalog:
+        # Waray ang setting at may Waray na palatandaan -> Waray ang sagot.
+        return 'waray'
+    return preferred
+
+
+def _crisis_response(language):
+    if language == 'waray':
+        return WARAY_CRISIS_RESPONSE
+    if language == 'english':
+        return CRISIS_RESPONSE
+    return CRISIS_RESPONSE_TL
+
+
+def _intent_response_choices(intent, language, intent_data):
+    """Pumipili ng response list na tugma sa wika ng tanong."""
+    if language == 'waray':
+        choices = WARAY_RESPONSES.get(intent, [])
+    elif language == 'english':
+        choices = ENGLISH_RESPONSES.get(intent, [])
+    else:
+        choices = TAGALOG_RESPONSES.get(intent, [])
+    if not choices:
+        choices = intent_data.get("response", [])
+    return choices
+
+
+def _intent_follow_ups(intent, language, intent_data):
+    """Pumipili ng follow-up questions na tugma sa wika ng tanong."""
+    if language == 'english':
+        choices = ENGLISH_FOLLOW_UPS.get(intent, [])
+        if choices:
+            return choices
+    return intent_data.get("follow_up", [])
 
 
 def detect_intent(text):
@@ -1178,6 +1327,8 @@ ACADEMIC_INTENTS.update({"thesis_topic_struggle", "recitation_anxiety", "feeling
 
 
 def academic_referral(language='tagalog'):
+    if language == 'english':
+        return ACADEMIC_REFERRAL_EN
     if language == 'waray':
         return (
             "Mas makakabulig ako labi na ha akademiko nga problema sugad han assignment, project, exam stress, "
@@ -1198,11 +1349,19 @@ def is_academic_intent(intent):
 def generate_response(user_input, last_intent=None, language='tagalog'):
     """
     Main function to generate a bot response.
+
+    Ang wika ng sagot ay sinusunod ang wika ng tanong ng user (English ->
+    English, Tagalog -> Tagalog, Waray -> Waray). Ang ``language`` argument
+    ang ginagamit na fallback kapag hindi malinaw ang wika ng tanong.
+
     Returns a tuple: (response_text, new_intent, is_crisis_flag, is_abusive_flag)
     """
     text = user_input.lower().strip()
     is_abusive = 0
     new_intent = None
+
+    # 0. Language of the REPLY (matching the user's question)
+    resp_lang = resolve_response_language(user_input, language)
 
     # 1. Crisis Check (Highest Priority)
     # We use the dedicated crisis keywords for immediate, hard-coded detection.
@@ -1211,7 +1370,7 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
         # Also flag if abusive language is present in a crisis message
         is_abusive_in_crisis = 1 if any(k in text for k in ABUSIVE_KEYWORDS) else 0
 
-        resp = WARAY_CRISIS_RESPONSE if language == 'waray' else CRISIS_RESPONSE
+        resp = _crisis_response(resp_lang)
         return (resp, "crisis_situation", 1, is_abusive_in_crisis)
 
     # 2. Abusive Language Check (High Priority)
@@ -1219,14 +1378,16 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
         is_abusive = 1
         # Provide a direct response to the abusive language before proceeding.
         # The ban logic in app.py will still trigger based on the is_abusive=1 flag.
-        if language == 'waray':
+        if resp_lang == 'waray':
             abusive_response = "Nasasabtan ko nga bangin nadidismaya ka, pero alayon paggamit hin maupay nga mga pulong. Paonan-o ako makakabulig ha imo ha maupay nga paagi yana?"
+        elif resp_lang == 'english':
+            abusive_response = ABUSIVE_RESPONSE_EN
         else:
             abusive_response = "Naiintindihan ko na maaaring ikaw ay nadidismaya, pero panatilihin nating magalang ang ating pag-uusap. Paano kita matutulungan sa maayos na paraan ngayon?"
         return (abusive_response, new_intent, 0, 1)
 
     # 3. FAQ dataset lookup (After crisis and abuse checks)
-    faq_answer = get_faq_answer(text)
+    faq_answer = get_faq_answer(text, resp_lang)
     if faq_answer:
         return (faq_answer, None, 0, is_abusive)
 
@@ -1235,21 +1396,16 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
     if intent:
         new_intent = intent
         intent_data = INTENTS.get(intent, {})
-        if language == 'waray':
-            response_choices = WARAY_RESPONSES.get(intent, [])
-            if not response_choices:
-                # If no specific waray response, use the main one (which is likely Tagalog/English)
-                # This part can be improved by ensuring all intents have waray versions if needed.
-                response_choices = intent_data.get("response", [])
-        else:
-            response_choices = intent_data.get("response", [])
+
+        # Piliin ang response na tugma sa wika ng tanong.
+        response_choices = _intent_response_choices(intent, resp_lang, intent_data)
 
         response = random.choice(response_choices) if response_choices else ""
 
         # Append a follow-up question if available and appropriate
-        # Only append follow up if we are not in Waray (unless we add Waray follow ups later)
-        follow_up_choices = intent_data.get("follow_up", [])
-        if follow_up_choices and language != 'waray':
+        # Waray has no follow-ups yet, so we skip them for Waray replies.
+        follow_up_choices = _intent_follow_ups(intent, resp_lang, intent_data)
+        if follow_up_choices and resp_lang != 'waray':
             follow_up = random.choice(follow_up_choices)
             response = f"{response}\n\n{follow_up}"
 
@@ -1260,8 +1416,7 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
         # If it's a crisis-level intent (like suicidal_thoughts), also send the crisis response.
         # This handles cases where the intent detection catches it instead of the keyword list.
         if is_crisis and intent != "grounding_request": # Don't send crisis text for grounding
-             resp = WARAY_CRISIS_RESPONSE if language == 'waray' else CRISIS_RESPONSE
-             return (resp, new_intent, 1, is_abusive)
+             return (_crisis_response(resp_lang), new_intent, 1, is_abusive)
 
         return (response, new_intent, is_crisis, is_abusive)
 
@@ -1269,30 +1424,27 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
     if not is_abusive:
         # Primary: Groq (Libre, mabilis, Llama 3.1)
         if _groq_available():
-            groq_reply = _call_groq_api(user_input, language)
+            groq_reply = _call_groq_api(user_input, resp_lang)
             if groq_reply:
                 return (groq_reply, None, 0, is_abusive)
 
         # Fallback 1: OpenAI (kung may valid key at credits)
         if _openai_available():
-            openai_reply = _call_openai_api(user_input, language=language)
+            openai_reply = _call_openai_api(user_input, language=resp_lang)
             if openai_reply:
                 return (openai_reply, None, 0, is_abusive)
 
         # Fallback 2: Gemini (kung may valid key)
         if _gemini_available():
-            gemini_reply = _call_gemini_api(user_input, language)
+            gemini_reply = _call_gemini_api(user_input, resp_lang)
             if gemini_reply:
                 return (gemini_reply, None, 0, is_abusive)
 
     # 6. Fallback Response if no intent is detected and not abusive
-    generic_fallbacks = [
-        "Naririnig kita. Nandito lang ako para makinig sa'yo. 💙",
-        "I understand. Please tell me more about how you're feeling.",
-        "Mahalaga ang nararamdaman mo. Handa akong makinig.",
-        "Thank you for sharing. I'm here to support you.",
-        "Masaya akong narinig ang iyong kuwento. Nandito ako para sa'yo.",
-        "Hindi mo kailangang harapin ang lahat mag-isa. Pwede mo akong kausapin tungkol dito."
-    ]
-    fallback = WARAY_FALLBACKS if language == 'waray' else generic_fallbacks
-    return (random.choice(fallback), new_intent, 0, is_abusive)
+    if resp_lang == 'waray':
+        generic_fallbacks = WARAY_FALLBACKS
+    elif resp_lang == 'english':
+        generic_fallbacks = GENERIC_FALLBACKS_EN
+    else:
+        generic_fallbacks = GENERIC_FALLBACKS_TL
+    return (random.choice(generic_fallbacks), new_intent, 0, is_abusive)
