@@ -626,54 +626,31 @@ Sabihin ang 'no' sa ilang bagay. Bigyan ng priyoridad ang iyong kalusugan. Walan
 
     "stress_management_tl": {
         "signals": ["stress", "stressed", "relax", "chill", "way mag destress", "meditation", "calm", "how to manage stress", "reduce stress", "paano i-manage stress", "pano mag-relax", "tips destress", "stress relief"],
-        "response": ["""Chronic stress activates the hypothalamic-pituitary-adrenal (HPA) axis, elevating cortisol levels and impairing prefrontal cortex function. This is physiologically dangerous but treatable.
+        "response": ["""Naiintindihan kong mabigat at pagod na pagod ka na. Normal lang makaramdam ng stress, lalo na ngayong estudyante ka. Kaya natin itong pagaanin nang paunti-unti. 🤍
 
-EVIDENCE-BASED STRESS MANAGEMENT STRATEGIES:
+Subukan mo ito:
 
-1. PHYSIOLOGICAL REGULATION:
-   - Diaphragmatic breathing (4-7-8 pattern): Activates vagal tone, downregulates amygdala.
-   - Progressive muscle relaxation (PMR): Reduces somatic tension; proven efficacy in cortisol reduction.
-   - Aerobic exercise: Evidence-level "A" intervention; enhances BDNF and reduces allostatic load.
+🧠 **Isip:** Kapag naiisip mong "hindi ko kaya," palitan mo ng "isang hakbang lang muna."
+🌬️ **Hininga:** Huminga nang malalim. Pasok sa ilong (4 segundo), pigil (4 segundo), labas sa bibig (6 segundo). Ulitin ng 3 beses.
+📚 **Aral:** Mag-aral nang paunti-unti (25 minuto aral, 5 minuto pahinga). Mas epektibo ito kaysa isang bagsakan.
+😴 **Tulog:** Unahin ang 7-8 oras na tulog. Mas magiging malinaw ang isip mo.
 
-2. COGNITIVE INTERVENTIONS:
-   - Identify stressor locus of control (changeable vs. unchangeable).
-   - Implement acceptance and commitment therapy (ACT) for unchangeable stressors.
-   - Time management and task prioritization reduce decision fatigue.
-
-3. BEHAVIORAL ACTIVATION:
-   - Engage in personally-meaningful activities (enhances dopaminergic reward pathways).
-   - Mindfulness meditation (8 weeks MBSR shows significant cortisol reduction).
-   - Social connection buffering (strong predictor of stress resilience).
-
-4. SLEEP & NUTRITION:
-   - Maintain consistent sleep schedule (optimizes circadian HPA axis function).
-   - Limit stimulants (caffeine inhibits stress recovery).
-   - Omega-3 supplementation shows preliminary stress-reduction efficacy.
-
-ASSESSMENT: If chronic stress impairs occupational/academic/social functioning, seek comprehensive professional evaluation. Clinician-guided intervention may include psychotherapy and/or pharmacological support."""],
+Kung ilang linggo ka nang nahihirapan at apektado na ang pag-aaral mo, makipag-usap sa guidance counselor o sa doktor."""],
         "follow_up": []
     },
 
     "motivation_tl": {
         "signals": ["motivation", "motivate", "encourage", "push myself", "walang gana", "drive", "energy", "how to stay motivated", "increase motivation", "paano motivated", "pano mag-motivation", "tips motivation", "ways to motivate","motivational"],
-        "response": ["""Motivation is a consequence of action, not a prerequisite. This is neurologically established: behavioral activation precedes mood elevation via dopaminergic pathways.
+        "response": ["""Naiintindihan kong wala kang gana ngayon. Normal lang yan—hindi ito katamaran. Minsan kailangan lang ng katawan at isip mo ng maliit na simula. 💙
 
-NEUROCHEMICAL BASIS:
-- Dopamine (motivational drive) increases with ACTION, not anticipation.
-- Each completed micro-task triggers dopamine release, reinforcing behavior.
-- Anhedonia (lack of interest) in depression improves fastest through behavioral activation FIRST.
+Subukan mo ito:
 
-IMPLEMENTATION (EVIDENCE-BASED):
-1. Goal Decomposition: Break objective into absurdly small tasks (one paragraph, 5-minute walk).
-2. Immediate Initiation: Start NOW—momentum builds momentum. No "feeling like it" required.
-3. Task Completion Reinforcement: Dopamine surge follows task completion, increasing subsequent motivation.
-4. Habit Formation: Repetition for 21-66 days creates neural pathways (neuroplasticity); motivation becomes automatic.
+1. **Hatiin ang gawain:** Gawin itong napakaliit. Isang talata, 5 minutong lakad, o isang tanong lang muna.
+2. **Magsimula ngayon:** Huwag nang hintayin ang "tamang gana." Kapag nagsimula ka na, kadalasan sumusunod na ang gana.
+3. **I-celebrate ang maliit:** Bawat maliit na natapos mo, ipagdiwang mo. Sumisigla ang loob kapag may natatapos.
+4. **Gawing gawi:** Ulitin araw-araw nang paunti-unti. Sa paglipas ng panahon, mas nagiging madali ito.
 
-CLINICAL PRINCIPLE: "Action precedes motivation in the neural reward circuits." Low dopamine states require BEHAVIORAL JUMP START—this is not laziness or character failure; it's neurobiology.
-
-If persistent anhedonia or lack of motivation despite behavioral efforts, assess for depression/ADHD with a licensed professional.
-
-Start. Now. One tiny action."""],
+Kung matagal ka nang walang ganang gawin ang mga dating gusto mo, makipag-usap sa guidance counselor o sa doktor."""],
         "follow_up": []
     },
 
@@ -987,7 +964,7 @@ def _call_groq_api(user_input, language='tagalog'):
             model=model,
             messages=messages,
             max_tokens=280,
-            temperature=0.8,
+            temperature=0.5,
         )
 
         if completion.choices and completion.choices[0].message:
@@ -1131,10 +1108,19 @@ def _build_openai_system_prompt(language='tagalog'):
         "9. Keep responses focused on academic struggles, study habits, and school-related concerns.\n"
         "10. If unsure or the topic is outside your scope, politely say you cannot answer and suggest talking to a trusted adult or counselor.\n"
         "\n"
-        "RESPONSE STYLE:\n"
+        "RESPONSE STYLE (very important):\n"
         "- Be warm, empathetic, validating, and calm.\n"
-        "- Use simple, clear language appropriate for students.\n"
-        "- Keep responses concise (2-4 sentences when possible).\n"
+        "- Write for a Filipino high school / college student.\n"
+        "- Use VERY SIMPLE, everyday words only. Explain like the student is 12 years old.\n"
+        "- NEVER use medical, scientific, academic, or technical words unless unavoidable "
+        "(for example: cortisol, dopamine, serotonin, neuroplasticity, anhedonia, hypothalamic, "
+        "allostatic, behavioral activation, cognitive, physiological, intervention, efficacy, "
+        "assessment, clinician, pharmacological, psychotherapy, MBSR, PMR, vagal, amygdala).\n"
+        "- If a hard word is unavoidable, explain it right away in one short, simple sentence "
+        "using a familiar example.\n"
+        "- Use short sentences (ideally under 15 words each).\n"
+        "- Keep responses concise: 1 short validating sentence, then 2-4 simple bullet tips.\n"
+        "- Always use bullets or numbered steps for tips, never long paragraphs.\n"
         "- Acknowledge the user's feelings before offering suggestions.\n"
         "- Use a supportive, non-judgmental tone.\n"
         "- Include practical, actionable tips when relevant.\n"
@@ -1197,7 +1183,7 @@ def _call_openai_api(user_input, intent=None, language='tagalog'):
             model=model,
             messages=messages,
             max_tokens=280,
-            temperature=0.8,
+            temperature=0.5,
         )
 
         if completion.choices and completion.choices[0].message:

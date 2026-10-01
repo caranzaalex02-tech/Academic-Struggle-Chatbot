@@ -148,6 +148,37 @@ class BotLogicTests(unittest.TestCase):
         self.assertIsNone(intent)
         self.assertIn("chatbot", response)
 
+    # ---- SIMPLE, NON-TECHNICAL LANGUAGE (madaling maintindihan) ----
+
+    def test_intent_responses_do_not_use_technical_jargon(self):
+        technical_words = {
+            "cortisol", "dopamine", "serotonin", "neuroplasticity", "anhedonia",
+            "dopaminergic", "hypothalamic", "allostatic", "vagal", "amygdala",
+            "physiological", "efficacy", "pharmacological", "psychotherapy",
+            "clinician", "allostatic load", "reward pathways",
+        }
+        responses = []
+        for choices in list(bot_logic.ENGLISH_RESPONSES.values()):
+            responses.extend(choices)
+        for choices in list(bot_logic.TAGALOG_RESPONSES.values()):
+            responses.extend(choices)
+        for _, intent_data in bot_logic.INTENTS.items():
+            responses.extend(intent_data.get("response", []))
+        for text in responses:
+            lowered = text.lower()
+            for word in technical_words:
+                self.assertNotIn(
+                    word, lowered,
+                    f"Technical word '{word}' found in a student-facing reply",
+                )
+
+    def test_system_prompt_requires_simple_student_friendly_words(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("very simple", prompt)
+            self.assertIn("cortisol", prompt)
+            self.assertIn("short sentences", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()
