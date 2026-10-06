@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import tempfile
+import types
 import unittest
 
 from utils import bot_logic
@@ -310,11 +311,242 @@ class BotLogicTests(unittest.TestCase):
         self.assertIn("Ang pula ay kulay ng puso.", cleaned)
         self.assertIn("Si Juan ay magaling.", cleaned)
 
+    def test_clean_ai_text_strips_br_variants_without_gluing_sentences(self):
+        # Kahit may attributes o ibang porma ang <br>, hindi ito dapat makita
+        # at hindi pwedeng magkadikit ang dalawang pangungusap.
+        raw = (
+            'Naiintindihan kita.<br class="x">Mahalaga ang pahinga mo. '
+            "<BR />Uminom ka ng tubig.<br/>Mag-aral nang maayos."
+        )
+        cleaned = bot_logic._clean_ai_text(raw)
+        lowered = cleaned.lower()
+        self.assertNotIn("<br", lowered)
+        self.assertNotIn("&lt;", cleaned)
+        self.assertNotIn("kita.Mahalaga", cleaned)
+        self.assertNotIn("tubig.Mag-aral", cleaned)
+        self.assertIn("Naiintindihan kita.", cleaned)
+        self.assertIn("Mahalaga ang pahinga mo.", cleaned)
+        self.assertIn("Uminom ka ng tubig.", cleaned)
+        self.assertIn("Mag-aral nang maayos.", cleaned)
+
+    def test_clean_ai_text_decodes_escaped_br_entities(self):
+        raw = "Unang pangungusap.&lt;br&gt;Ikalawang pangungusap.&#60;br&#62;Ikatlong pangungusap."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertNotIn("<br", cleaned.lower())
+        self.assertNotIn("&lt;", cleaned)
+        self.assertNotIn("&#60;", cleaned)
+        lines = [l.strip() for l in cleaned.split("\n") if l.strip()]
+        self.assertIn("Unang pangungusap.", lines)
+        self.assertIn("Ikalawang pangungusap.", lines)
+        self.assertIn("Ikatlong pangungusap.", lines)
+
+    def test_clean_ai_text_replaces_nbsp_with_plain_space(self):
+        raw = "Pahinga muna.&nbsp;Uminom ng tubig."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertNotIn("&nbsp;", cleaned)
+        self.assertIn("Pahinga muna. Uminom ng tubig.", cleaned)
+
+    def test_system_prompt_requires_complete_grammatical_sentences(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("complete, grammatically correct sentences", prompt)
+            self.assertIn("never cut a sentence mid-way", prompt)
+
     def test_system_prompt_forbids_repeats_and_html(self):
         for language in ("tagalog", "english", "waray"):
             prompt = bot_logic._build_openai_system_prompt(language).lower()
             self.assertIn("never repeat", prompt)
             self.assertIn("never output html", prompt)
+
+    # ---- LINE-AWARE REPAIR: WALANG DUPLIKASYON, WALANG PAGKAWALA NG NILALAMAN ----
+    def test_clean_ai_text_does_not_duplicate_list_when_tail_is_cut_off(self):
+        raw = "Naiintindihan kita.\n\n1. Magpahinga muna\n2. Hatiin ang gawain sa maliliit na hakbang na hind"
+        cleaned = bot_logic._clean_ai_text(raw)
+        # Hindi na-uulit ang listahan at walang blangkong "2." na naiwan
+        self.assertEqual(cleaned.count("Magpahinga muna"), 1)
+        stripped_lines = [l.strip() for l in cleaned.split("\n")]
+        self.assertNotIn("2.", stripped_lines)
+        # Tinanggal lang ang bitin na salita, hindi ang buong linya
+        self.assertNotIn("hind", cleaned)
+        self.assertIn("1. Magpahinga muna", cleaned)
+        self.assertTrue(cleaned.rstrip().endswith("."))
+
+    def test_clean_ai_text_does_not_treat_list_numbers_as_sentence_ends(self):
+        raw = "Narito ang mga tip.\n\n1. Pahinga muna.\n2. Gawin mo ito bawat araw hanggang sa makaka"
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertEqual(cleaned.count("Pahinga muna."), 1)
+        stripped_lines = [l.strip() for l in cleaned.split("\n")]
+        self.assertNotIn("2.", stripped_lines)
+        self.assertTrue(cleaned.rstrip().endswith("."))
+
+    def test_clean_ai_text_keeps_bullet_list_without_trailing_periods(self):
+        raw = "Subukan mo ito:\n\n- Magpahinga nang 10 minuto\n- Uminom ng tubig\n- Maglakad sandali"
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertIn("- Magpahinga nang 10 minuto", cleaned)
+        self.assertIn("- Uminom ng tubig", cleaned)
+        self.assertIn("- Maglakad sandali", cleaned)
+        self.assertTrue(cleaned.rstrip().endswith("."))
+
+    def test_clean_ai_text_appends_period_to_complete_final_line(self):
+        raw = "Naiintindihan kita.\n\nSubukan mong magpahinga nang kaunti"
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertIn("Subukan mong magpahinga nang kaunti.", cleaned)
+
+    def test_clean_ai_text_drops_dangling_heading_at_the_end(self):
+        raw = "Naiintindihan kita.\n\n**Mga Hakbang**"
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertEqual(cleaned, "Naiintindihan kita.")
+
+    def test_clean_ai_text_balances_unmatched_bold_markers(self):
+        raw = "Ang **burnout ay normal sa estudyante. Maari kang magpahinga."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertNotIn("**", cleaned)
+        self.assertIn("burnout ay normal", cleaned)
+
+    def test_clean_ai_text_keeps_balanced_bold_markers(self):
+        raw = "Ang **burnout** ay normal sa estudyante."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertIn("**burnout**", cleaned)
+
+    def test_clean_ai_text_removes_duplicate_sentences_in_same_line(self):
+        raw = "Ang pula ay kulay ng puso. Ang pula ay kulay ng puso. Tama ka dito."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertEqual(cleaned.count("Ang pula ay kulay ng puso."), 1)
+        self.assertIn("Tama ka dito.", cleaned)
+
+    def test_clean_ai_text_restarts_numbering_after_a_paragraph(self):
+        raw = "Paliwanag natin.\n\n1. Una\n2. Dalawa\nIpaliwanag natin ang susunod.\n1. Tatlo\n2. Apat"
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertIn("\n1. Tatlo", cleaned)
+        self.assertNotIn("\n3. Tatlo", cleaned)
+
+    # ---- CONTINUATION: KAPAG NA-CUT ANG SAGOT, ISANG BESES ITINUOY ----
+    def _restore_env_var(self, key, original):
+        if original is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = original
+
+    def _fake_openai_module(self, replies):
+        """Fake openai module: bawat create() ay kukuha ng susunod na
+        (content, finish_reason) mula sa ``replies`` at nag-iipon ng messages."""
+        calls = []
+
+        class FakeMessage:
+            def __init__(self, content):
+                self.content = content
+
+        class FakeChoice:
+            def __init__(self, content, finish_reason):
+                self.message = FakeMessage(content)
+                self.finish_reason = finish_reason
+
+        class FakeCompletion:
+            def __init__(self, choices):
+                self.choices = choices
+
+        class FakeCompletions:
+            def create(self, model=None, messages=None, max_tokens=None,
+                       temperature=None, **kwargs):
+                content, finish_reason = replies[len(calls)]
+                calls.append(messages)
+                return FakeCompletion([FakeChoice(content, finish_reason)])
+
+        class FakeChat:
+            def __init__(self):
+                self.completions = FakeCompletions()
+
+        class FakeClient:
+            def __init__(self, api_key=None):
+                self.chat = FakeChat()
+
+        class FakeOpenAI:
+            OpenAI = FakeClient
+
+            class RateLimitError(Exception):
+                pass
+
+        return FakeOpenAI, calls
+
+    @staticmethod
+    def _fake_gemini_response(text, finish_reason):
+        response = types.SimpleNamespace(text=text, parts=[object()])
+        response.candidates = [types.SimpleNamespace(finish_reason=finish_reason)]
+        return response
+
+    def test_openai_reply_requests_continuation_when_cut_off(self):
+        original_key = os.environ.get("OPENAI_API_KEY")
+        os.environ["OPENAI_API_KEY"] = "sk-test-1234567890"
+        self.addCleanup(self._restore_env_var, "OPENAI_API_KEY", original_key)
+
+        fake_module, calls = self._fake_openai_module([
+            ("Narito ang mga hakbang na hindi", "length"),
+            (" natutupad ko pa ngayon. Kaya mo ito!", "stop"),
+        ])
+        original_import = bot_logic._import_openai
+        bot_logic._import_openai = lambda: fake_module
+        self.addCleanup(setattr, bot_logic, "_import_openai", original_import)
+
+        reply = bot_logic._run_openai_chat("Paano ako mag-focus?", language="tagalog")
+
+        # 2 tawag: una na-cut, pangalawa ang nagpatuloy
+        self.assertEqual(len(calls), 2)
+        last_messages = calls[1]
+        self.assertEqual(last_messages[-2]["role"], "assistant")
+        self.assertIn("hindi", last_messages[-2]["content"])
+        self.assertEqual(last_messages[-1]["role"], "user")
+        self.assertIn("cut off", last_messages[-1]["content"])
+        # Kumpleto na ang pinagsamang sagot
+        self.assertIn("natutupad ko pa", reply)
+        self.assertTrue(reply.rstrip()[-1] in ".!?")
+
+    def test_openai_reply_skips_continuation_when_finished(self):
+        original_key = os.environ.get("OPENAI_API_KEY")
+        os.environ["OPENAI_API_KEY"] = "sk-test-1234567890"
+        self.addCleanup(self._restore_env_var, "OPENAI_API_KEY", original_key)
+
+        fake_module, calls = self._fake_openai_module([
+            ("Narito ang mga tip. 1. Magpahinga. 2. Pumunta sa counselor.", "stop"),
+        ])
+        original_import = bot_logic._import_openai
+        bot_logic._import_openai = lambda: fake_module
+        self.addCleanup(setattr, bot_logic, "_import_openai", original_import)
+
+        reply = bot_logic._run_openai_chat("Paano ako mag-focus?", language="tagalog")
+
+        self.assertEqual(len(calls), 1)
+        self.assertIn("counselor", reply)
+
+    def test_gemini_reply_requests_continuation_when_cut_off(self):
+        original_key = os.environ.get("GEMINI_API_KEY")
+        os.environ["GEMINI_API_KEY"] = "AIza-test-1234567890"
+        self.addCleanup(self._restore_env_var, "GEMINI_API_KEY", original_key)
+
+        responses = [
+            self._fake_gemini_response("Narito ang mga hakbang na hindi", finish_reason=2),
+            self._fake_gemini_response(" natutupad ko pa. Kaya mo!", finish_reason=1),
+        ]
+        generate_calls = []
+
+        class FakeModel:
+            def generate_content(self, contents=None):
+                generate_calls.append(contents)
+                return responses[len(generate_calls) - 1]
+
+        fake_genai = types.SimpleNamespace(
+            configure=lambda api_key=None: None,
+            GenerativeModel=lambda name: FakeModel(),
+        )
+        original_import = bot_logic._import_genai
+        bot_logic._import_genai = lambda: fake_genai
+        self.addCleanup(setattr, bot_logic, "_import_genai", original_import)
+
+        reply = bot_logic._call_gemini_api("Paano ako mag-focus?", "tagalog")
+
+        self.assertEqual(len(generate_calls), 2)
+        self.assertIn("cut off", generate_calls[1])
+        self.assertIn("natutupad ko pa", reply)
+        self.assertTrue(reply.rstrip()[-1] in ".!?")
 
 
 if __name__ == "__main__":

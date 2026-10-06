@@ -1152,6 +1152,8 @@ function inlineFormat(s){
 let out=escapeHtml(s);
 out=out.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
 out=out.replace(/__(.+?)__/g,"<strong>$1</strong>");
+// Alisin ang natitirang hilaw na * at _ (hindi tugma na bold/italic markers)
+out=out.replace(/[*_]+/g,"");
 return out;
 }
 
@@ -1160,10 +1162,14 @@ return out;
 function renderBotReply(text){
 if(!text) return "";
 let safe=text.replace(/\r/g,"").trim();
-// Kung may hilaw na <br> o HTML na nakalusot, gawing newline muna
-safe=safe.replace(/<br\s*\/?>/gi,"\n");
+// I-decode muna ang HTML entities para ang "&lt;br&gt;" ay maging tunay na tag
+safe=safe.replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&");
+// Kung may hilaw na <br> (kahit may attributes tulad ng <br class="x">) o HTML na nakalusot, gawing newline muna
+safe=safe.replace(/<br\b[^>]*>/gi,"\n");
 safe=safe.replace(/<\/(p|div|li|h[1-6])>/gi,"\n");
 safe=safe.replace(/<(p|div|li|ul|ol|h[1-6])[^>]*>/gi,"\n");
+// Natitirang HTML tags tanggalin bago i-escape - walang makikititang <br> o <b> sa chat
+safe=safe.replace(/<[^>]+>/g,"");
 let blocks=safe.split(/\n\s*\n/);
 let html="";
 let seen=new Set();
@@ -1182,19 +1188,33 @@ uniq.push(l);
 });
 lines=uniq;
 if(!lines.length){i++;continue;}
-let isList=lines.length>0 && lines.every(l=>/^(\d+[.)]\s+|[-*]\s+)/.test(l));
-if(isList){
-let ordered=/^\d+[.)]\s+/.test(lines[0]);
+// Hatiin ang block sa mga pagpapatakbo: talata vs listahan.
+// (hal. "Subukan mo ito:\n1. Pahinga" -> <p> para sa intro, <ol> sa list)
+let segs=[];
+lines.forEach(l=>{
+let isMarker=/^(\d{1,2}[.)]\s+|[-*]\s+)/.test(l);
+if(!segs.length||segs[segs.length-1].list!==isMarker){
+segs.push({list:isMarker,lines:[l]});
+}else{
+segs[segs.length-1].lines.push(l);
+}
+});
+segs.forEach(seg=>{
+if(seg.list){
+let ordered=/^\d{1,2}[.)]\s+/.test(seg.lines[0]);
+// Native ang numbering ng <ol>/<ul> — walang manual na "1." sa loob ng <li>
 html+=ordered?"<ol>":"<ul>";
-lines.forEach((l,idx)=>{
-let item=l.replace(/^(\d+[.)]\s+|[-*]\s+)/,"");
-if(ordered) item=(idx+1)+". "+item.replace(/^\d+[.)]\s+/,"");
+seg.lines.forEach(l=>{
+let item=l.replace(/^(\d{1,2}[.)]\s+|[-*]\s+)/,"");
 html+="<li>"+inlineFormat(item)+"</li>";
 });
 html+=ordered?"</ol>":"</ul>";
 }else{
-html+="<p>"+inlineFormat(lines.join("<br>"))+"</p>";
+// I-escape BAWAT linya muna bago magdagdag ng tunay na <br> na line break.
+// Dati, pinag-join muna bago i-escape kaya lumalabas ang literal na "&lt;br&gt;" sa chat.
+html+="<p>"+seg.lines.map(inlineFormat).join("<br>")+"</p>";
 }
+});
 i++;
 }
 return html||("<p>"+inlineFormat(safe)+"</p>");

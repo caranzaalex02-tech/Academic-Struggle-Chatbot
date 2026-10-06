@@ -973,7 +973,15 @@ def _call_groq_api(user_input, language='tagalog', history=None):
         )
 
         if completion.choices and completion.choices[0].message:
-            return _clean_ai_text(completion.choices[0].message.content.strip())
+            choice = completion.choices[0]
+            partial = (choice.message.content or "").strip()
+            if partial and "length" in str(getattr(choice, "finish_reason", "")).lower():
+                logging.info("Groq reply was cut off (finish_reason=length); requesting a continuation.")
+                extra = _request_chat_continuation(client, model, messages, partial)
+                if extra:
+                    partial = partial + extra
+            if partial:
+                return _clean_ai_text(partial)
 
         logging.warning("Groq response was empty or malformed.")
         return None
@@ -1041,7 +1049,13 @@ def _call_gemini_api(user_input, language='tagalog', history=None):
                     full_prompt = f"{system_prompt}\n\nUser: {user_input}\nAssistant:"
                 response = model.generate_content(contents=full_prompt)
                 if getattr(response, "parts", None):
-                    return _clean_ai_text(response.text.strip())
+                    text = response.text.strip()
+                    if _gemini_reply_was_cut(response):
+                        logging.info("Gemini reply was cut off (MAX_TOKENS); requesting a continuation.")
+                        extra = _request_gemini_continuation(model, full_prompt, text)
+                        if extra:
+                            text = text + extra
+                    return _clean_ai_text(text)
                 logging.error("Gemini API call was blocked by safety settings or returned no content.")
                 return _language_pick(
                     language,
@@ -1114,7 +1128,9 @@ def _dedupe_lines(text):
     seen = set()
     out_lines = []
     for line in text.split("\n"):
-        key = re.sub(r"^\s*\d+[.)]\s+", "", line.strip().lower())
+        # Tanggalin ang numbering/bullet markers bago ikumpara ang linya
+        # (hal. "1. Kaya mo!" at "- Kaya mo!" ay pareho lang ng linya).
+        key = re.sub(r"^(\s*\d{1,2}[.)]\s+|\s*[-*]\s+)", "", line.strip().lower())
         key = re.sub(r"\s+", " ", key).strip()
         if not key:
             out_lines.append(line)
@@ -1124,6 +1140,154 @@ def _dedupe_lines(text):
         seen.add(key)
         out_lines.append(line)
     return "\n".join(out_lines)
+
+
+def _dedupe_sentences(text):
+    """Tanggalin ang inuulit na sentence sa loob ng iisang linya.
+
+    Minsan inuulit ng AI ang parehong pangungusap sa iisang linya (hal.
+    "Ang pula ay kulay ng puso. Ang pula ay kulay ng puso."). Pang-isang-linya
+    lang ang paglilinis para hindi masira ang mga listahan na nakaayos sa
+    hihiwalay na linya.
+    """
+    if not text:
+        return text
+    out_lines = []
+    for line in text.split("\n"):
+        parts = re.split(r"(?<=[.!?])\s+", line.strip())
+        if len(parts) < 2:
+            out_lines.append(line)
+            continue
+        seen = set()
+        kept = []
+        for part in parts:
+            key = re.sub(r"[^\w\s]+", " ", part.lower())
+            key = re.sub(r"\s+", " ", key).strip()
+            # 4+ salita muna bago ituring na ulit, para hindi mabura ang
+            # maiikling pariralang normal na nauulit (hal. "Kaya mo! Kaya mo!").
+            if len(key.split()) >= 4 and key in seen:
+                continue
+            if key:
+                seen.add(key)
+            kept.append(part)
+        out_lines.append(" ".join(kept))
+    return "\n".join(out_lines)
+
+
+def _balance_bold_markers(text):
+    """Tanggalin ang hindi balanse na ** para hindi maghititaw ng hilaw na
+    asterisks sa frontend (hal. "Ang **burnout ay normal" ay walang kapareho)."""
+    if not text:
+        return text
+    if text.count("**") % 2:
+        idx = text.rfind("**")
+        text = text[:idx] + text[idx + 2:]
+    return text
+# Mga salitang hindi maaaring magtapos ng kumpletong pangungusap. Kapag ito
+# ang huling salita ng sagot, malamang na naputol (cut-off) ang dulo —
+# tinatanggal lang natin ang nakabitin na salita, hindi ang buong linya.
+_DANGLING_TAIL_WORDS = {
+    # English
+    "the", "a", "an", "to", "of", "in", "on", "at", "by", "for", "with",
+    "from", "into", "about", "over", "under", "between", "during",
+    "before", "after", "and", "or", "but", "if", "then", "because",
+    "than", "unless", "while", "until", "is", "are", "was", "were", "be",
+    "been", "am", "can", "could", "will", "would", "shall", "should",
+    "may", "might", "must", "do", "does", "did", "have", "has", "had",
+    # Tagalog / Waray
+    "na", "ng", "sa", "ang", "mga", "at", "o", "ay", "ha", "han",
+    "pero", "ngunit", "dahil", "kung", "kapag", "habang", "para",
+    "upang", "tungkol", "hanggang", "gaya", "tulad", "kailangan",
+    # Mga affix/prefix na laging may kasunod na salita
+    "mag", "nag", "pag", "hindi", "makaka", "makakapag",
+}
+
+_TERMINAL_END_CHARS = ".!?:;)\"'”’*"
+
+
+def _is_dangling_tail_word(token):
+    """True kapag hindi maaaring dulo ng kumpletong pangungusap ang salita."""
+    word = re.sub(r"[^\w'-]", "", token.lower())
+    if not word:
+        return False
+    # Cut-off sa kalagitnaan ng salita (hal. "hakbang-")
+    if token.rstrip().endswith("-"):
+        return True
+    if word in _DANGLING_TAIL_WORDS:
+        return True
+    # Bitin na salita na kalahati lang ng kilalang salita (hal. "hind" -> "hindi")
+    if len(word) >= 3 and any(w.startswith(word) for w in _DANGLING_TAIL_WORDS):
+        return True
+    return False
+
+
+def _trim_dangling_tail(line):
+    """Ibabalik ang linya na may kumpletong dulo, o '' kapag ubos na ang laman.
+
+    Hal: "2. Hatiin ang gawain sa maliliit na hakbang na hind" ->
+    "2. Hatiin ang gawain sa maliliit na hakbang."
+    """
+    stripped = line.strip()
+    marker_match = re.match(r"^(\d{1,2}[.)]|[-*])\s+", stripped)
+    marker = marker_match.group(0) if marker_match else ""
+    content = stripped[marker_match.end():] if marker_match else stripped
+    words = content.split()
+    while words and _is_dangling_tail_word(words[-1]):
+        words.pop()
+    if not words:
+        return ""
+    return marker + " ".join(words)
+
+
+
+def _repair_tail_line(line):
+    """Ayusin ang huling linya ng sagot.
+
+    Nagbabalik ng kumpletong linya (may ending punctuation), o ``None`` kapag
+    dapat na itong tanggalin (bitin na heading o walang laman natira).
+    """
+    stripped = line.strip()
+    if not stripped:
+        return None
+    # Bitin na heading na walang kasunod na listahan (hal. "**Mga Hakbang**")
+    if re.fullmatch(r"\*\*[^*]+\*\*", stripped):
+        return None
+    # May ending na (. ! ? ; : ) o katapusan ng bold phrase -> kumpleto na
+    if stripped[-1] in _TERMINAL_END_CHARS:
+        return stripped
+    trimmed = _trim_dangling_tail(stripped)
+    if not trimmed or re.fullmatch(r"\d{1,2}[.)]", trimmed):
+        return None
+    if trimmed[-1] not in _TERMINAL_END_CHARS:
+        trimmed += "."
+    return trimmed
+
+
+def _repair_truncated_tail(text):
+    """Buoin ang dulo ng sagot nang hindi binubura ang kumpletong nilalaman.
+
+    Dati, tinatanggal ang buong huling talata kapag walang ending punctuation
+    at nauulit pa ang listahan dahil sa maling regex. Ngayon linya-kada-linya
+    lang ang inaayos: tinatanggal lang ang talagang bitin na dulo, dinadagdagan
+    ng '.' kung kumpleto naman ang linya, at kailanman ay hindi inuulit ang
+    nilalaman.
+    """
+    paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+    while paragraphs:
+        lines = [l for l in paragraphs[-1].split("\n") if l.strip()]
+        repaired = False
+        while lines:
+            fixed_line = _repair_tail_line(lines[-1])
+            if fixed_line is not None:
+                lines[-1] = fixed_line
+                paragraphs[-1] = "\n".join(lines)
+                repaired = True
+                break
+            lines.pop()
+        if repaired:
+            break
+        paragraphs.pop()
+    return "\n\n".join(paragraphs).strip()
 
 
 def _clean_ai_text(text):
@@ -1143,14 +1307,22 @@ def _clean_ai_text(text):
     cleaned = re.sub(r"```(?:\w+)?\n?(.*?)```", r"\1", cleaned, flags=re.DOTALL)
     # Inline code `code` -> plain
     cleaned = cleaned.replace("`", "")
-    # <br>, <p>, <li> at iba pang line-break tags -> newline muna
-    cleaned = re.sub(r"(?i)<\s*br\s*/?\s*>", "\n", cleaned)
+    # <br> (kahit may attributes tulad ng <br class="x"/>), <p>, <li> at iba pang
+    # line-break tags -> newline muna para hindi magkadikit ang mga pangungusap
+    cleaned = re.sub(r"(?i)<\s*br\b[^>]*>", "\n", cleaned)
     cleaned = re.sub(r"(?i)</?\s*(p|div|li|ul|ol|h[1-6])[^>]*>", "\n", cleaned)
     # Natitirang HTML tags tanggalin
     cleaned = re.sub(r"<[^>]+>", "", cleaned)
-    # Escaped entities (&lt;br&gt;) i-decode
+    # Escaped entities (&lt;br&gt;, &#60;br&#62;, &#x3c;br&#x3e;) i-decode
     cleaned = cleaned.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
-    cleaned = re.sub(r"(?i)<\s*br\s*/?\s*>", "\n", cleaned)
+    cleaned = re.sub(r"(?i)&#0*60;", "<", cleaned)
+    cleaned = re.sub(r"(?i)&#0*62;", ">", cleaned)
+    cleaned = re.sub(r"(?i)&#x0*3c;", "<", cleaned)
+    cleaned = re.sub(r"(?i)&#x0*3e;", ">", cleaned)
+    cleaned = cleaned.replace("&nbsp;", " ").replace("&#160;", " ").replace("\xa0", " ")
+    # Ulitin ang pag-convert ng natitirang <br> pagkatapos ng decode - walang
+    # anumang <br> na dapat makita ng user sa sagot
+    cleaned = re.sub(r"(?i)<\s*br\b[^>]*>", "\n", cleaned)
     cleaned = re.sub(r"<[^>]+>", "", cleaned)
     # Emojis at pictographs tanggalin (hindi professional tingnan)
     cleaned = re.sub(
@@ -1170,18 +1342,20 @@ def _clean_ai_text(text):
     cleaned = re.sub(r"\*{3,}", "**", cleaned)
     # Tanggalin ang inuulit na linya (nadobleng numbered list galing sa AI)
     cleaned = _dedupe_lines(cleaned)
+    # Tanggalin ang inuulit na sentence sa loob ng parehong linya
+    cleaned = _dedupe_sentences(cleaned)
     # Ayusin ang numbering: gawing sunod-sunod (1. 2. 3.) ulit
     lines = cleaned.split("\n")
     counter = 0
     fixed = []
     for line in lines:
-        if re.match(r"^\s*\d+[.)]\s+", line):
+        # 1-2 digit lang para hindi mapagkamalang taon ang "2024."
+        if re.match(r"^\s*\d{1,2}[.)]\s+", line):
             counter += 1
-            fixed.append(re.sub(r"^\s*\d+[.)]\s+", f"{counter}. ", line))
+            fixed.append(re.sub(r"^\s*\d{1,2}[.)]\s+", f"{counter}. ", line))
         else:
-            # Reset kapag may blank line o normal na paragraph sa pagitan
-            if not line.strip():
-                counter = 0
+            # I-reset ang bilang sa labas ng listahan (blangko o talata)
+            counter = 0
             fixed.append(line)
     cleaned = "\n".join(fixed)
     # Stray special chars sa simula ng linya (@, $, %, |, \) linisin
@@ -1192,27 +1366,12 @@ def _clean_ai_text(text):
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
     # Alisin ang space bago ang punctuation
     cleaned = re.sub(r"\s+([.,!?:;])", r"\1", cleaned)
-    # Tanggalin ang naputol na huling sentence (walang ending punctuation)
-    # para hindi magmukhang bitin ang sagot.
-    paragraphs = [p.strip() for p in cleaned.split("\n\n") if p.strip()]
-    if paragraphs:
-        last = paragraphs[-1]
-        # Kung ang huling paragraph ay list, ayusin ang huling item
-        lines = last.split("\n")
-        last_line = lines[-1].strip()
-        if last_line and last_line[-1] not in ".!?:;":
-            # Subukan munang buuin: hanapin ang huling kumpletong sentence
-            m = re.search(r"(.+[.!?])[^.!?]*$", last, re.DOTALL)
-            if m:
-                lines[-1] = m.group(1).strip()
-                last = "\n".join(lines).strip()
-                if last:
-                    paragraphs[-1] = last
-                else:
-                    paragraphs = paragraphs[:-1]
-            else:
-                paragraphs = paragraphs[:-1]
-    cleaned = "\n\n".join(paragraphs)
+    # Hilaw na ** na walang kapareho -> tanggalin (hindi ito magmumukhang
+    # bitin na asterisks sa frontend)
+    cleaned = _balance_bold_markers(cleaned)
+    # Ayusin ang naputol na dulo (walang ending punctuation) nang hindi
+    # binubura ang kumpletong nilalaman at hindi inuulit ang listahan.
+    cleaned = _repair_truncated_tail(cleaned)
     return cleaned.strip()
 
 
@@ -1243,6 +1402,7 @@ def _build_openai_system_prompt(language='tagalog'):
         "- Use short sentences (ideally under 15 words each).\n"
         "- FORMAT LIKE CHATGPT (professional and easy to read): start with 1 short validating paragraph, then give 2-4 practical tips. Use **bold** only for key phrases, and use numbered steps (1. 2. 3.) or simple dashes (-) for lists. Separate ideas with blank lines so the answer looks clean and organized.\n"
         "- ALWAYS FINISH your answer completely. NEVER stop mid-sentence or leave words hanging. Every reply must end with a proper ending punctuation (. ! ?). Keep the whole reply short enough to finish: 1 paragraph plus 2-4 tips only.\n"
+        "- Write complete, grammatically correct sentences from start to finish. Every sentence must have a clear beginning and end - NEVER cut a sentence mid-way or leave a word hanging.\n"
         "- NEVER repeat the same sentence or list item twice. Each numbered step must be unique. If you are giving examples (like 10 sentences), number them 1 to 10 in order with NO duplicates and NO skipped numbers.\n"
         "- NEVER output HTML tags like <br>, <p>, or <div>. Use plain blank lines to separate paragraphs.\n"
         "- Keep the formatting clean: use only **bold**, numbered lists, dashes, and plain punctuation. NEVER use hashtags, backticks, tildes, emojis, HTML, or stray symbols. The app will render the reply beautifully, so write proper markdown structure.\n"
@@ -1297,6 +1457,74 @@ def _history_to_prompt_lines(history, limit=6):
     return lines
 
 
+def _request_chat_continuation(client, model, messages, partial_text,
+                               max_tokens=600, temperature=0.4):
+    """Isang beses na magpatuloy kapag na-cut (finish_reason = "length") ang sagot.
+
+    Ibabalik ang dagdag na teksto na dapat idikit sa dulo ng ``partial_text``
+    (hindi na uulit: sinasabi nating ituloy lang mismo kung saan huminto ang
+    modelo), o ``None`` kapag walang naibigay.
+    """
+    try:
+        continuation = client.chat.completions.create(
+            model=model,
+            messages=messages + [
+                {"role": "assistant", "content": partial_text},
+                {
+                    "role": "user",
+                    "content": (
+                        "Your previous reply was cut off. Continue it exactly "
+                        "where it stopped without repeating anything, and "
+                        "finish the whole answer."
+                    ),
+                },
+            ],
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+        if (
+            continuation.choices
+            and continuation.choices[0].message
+            and getattr(continuation.choices[0].message, "content", None)
+        ):
+            return continuation.choices[0].message.content
+    except Exception:
+        logging.exception("Chat continuation request failed.")
+    return None
+
+
+def _gemini_reply_was_cut(response):
+    """True kapag na-max-tokens ang Gemini reply (hindi pa tapos ang sagot)."""
+    try:
+        candidates = getattr(response, "candidates", None) or []
+        if not candidates:
+            return False
+        reason = str(getattr(candidates[0], "finish_reason", "")).upper()
+        return "MAX_TOKENS" in reason or reason.endswith("2")
+    except Exception:
+        return False
+
+
+def _request_gemini_continuation(model, full_prompt, partial_text):
+    """Magpatuloy ng isang beses kapag na-cut ang Gemini reply."""
+    try:
+        continuation = model.generate_content(
+            contents=(
+                f"{full_prompt}\n\n"
+                f"Your previous reply was cut off here:\n{partial_text}\n\n"
+                "Continue it exactly where it stopped without repeating "
+                "anything, and finish the whole answer. Continue:"
+            )
+        )
+        if getattr(continuation, "parts", None):
+            extra = (continuation.text or "").strip()
+            if extra:
+                return extra
+    except Exception:
+        logging.exception("Gemini continuation request failed.")
+    return None
+
+
 def _call_openai_api(user_input, intent=None, language='tagalog', history=None):
     if not _openai_available():
         return None
@@ -1341,7 +1569,15 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
         )
 
         if completion.choices and completion.choices[0].message:
-            return _clean_ai_text(completion.choices[0].message.content.strip())
+            choice = completion.choices[0]
+            partial = (choice.message.content or "").strip()
+            if partial and "length" in str(getattr(choice, "finish_reason", "")).lower():
+                logging.info("OpenAI reply was cut off (finish_reason=length); requesting a continuation.")
+                extra = _request_chat_continuation(client, model, messages, partial)
+                if extra:
+                    partial = partial + extra
+            if partial:
+                return _clean_ai_text(partial)
 
         logging.warning("OpenAI response was empty or malformed.")
         return None
