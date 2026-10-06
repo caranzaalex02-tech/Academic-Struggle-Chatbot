@@ -324,7 +324,7 @@ INTENTS = {
     "financial_problem": {
         "signals": ["walang pera", "financial problem", "kulang ang budget", "problema sa pera", "waray kwarta", "waray balon", "pamasahe", "bayadan ha school", "tuition"],
         "response": [
-            "Mabigat talaga ang problemang pinansyal.\nPaalala:\n• Hindi ito sukatan ng halaga mo\n• Maraming students ang dumadaan dito\n• Hindi ka nag-iisa"
+            "Mabigat talaga ang problemang pinansyal.\nPaalala:\n• Hindi pera ang batayan ng halaga mo\n• Maraming students ang dumadaan dito\n• Hindi ka nag-iisa"
         ],
         "follow_up": [
             "School-related ba ang gastos o personal?",
@@ -383,7 +383,7 @@ Subukan natin 'to:
 📚 **Aral:** Mag-aral nang paunti-unti (e.g., 25 mins aral, 5 mins pahinga). Mas epektibo 'to kaysa sa isang bagsakan.
 😴 **Tulog:** Unahin ang 7-8 oras na tulog. Mas matalino ang utak na nakapagpahinga.
 
-Ang score mo sa exam ay hindi sukatan ng pagkatao mo. Ang mahalaga ay ang iyong pagsisikap. Kaya mo 'yan! 💪"""]
+Ang score mo sa exam ay hindi batayan ng pagkatao mo. Ang mahalaga ay ang iyong pagsisikap. Kaya mo 'yan! 💪"""]
 ,
         "follow_up": []
     },
@@ -574,9 +574,9 @@ Ask for help without shame. Break work into daily chunks. You don't have to do e
     # ==================== TAGALOG ENTRIES ====================
     "stress_exam_tl": {
         "signals": ["stress sa exam", "exam stress", "medyo anxious sa exam", "takot sa exam", "pressure ng test", "araw-araw binibigla", "exam na papunta"],
-        "response": ["""Nauunawaan ko ang pressure na nararamdaman mo. Ang stress sa exam ay normal para sa lahat ng estudyante. Subukan mong maging organized—gumawa ng study schedule at mag-break regularly.
-Ang mahalaga ay ang iyong pagsisikap, hindi ang perpektongong score. Kayang-kaya mo yan!
-"Ang tagumpay ay sumisikad na walang tigil araw-araw." – Robert Collier"""],
+        "response": ["""Naiintindihan ko ang pressure na nararamdaman mo. Ang stress sa exam ay normal para sa lahat ng estudyante. Subukan mong maging organized—gumawa ng study schedule at mag-break regularly.
+Ang mahalaga ay ang iyong pagsisikap, hindi ang perpektong score. Kayang-kaya mo yan!
+"Ang tagumpay ay unti-unting pag-abot sa pangarap araw-araw." – Robert Collier"""],
         "follow_up": []
     },
 
@@ -584,8 +584,8 @@ Ang mahalaga ay ang iyong pagsisikap, hindi ang perpektongong score. Kayang-kaya
 
     "imposter_syndrome_tl": {
         "signals": ["imposter syndrome", "hindi ko deserve", "swerte lang", "fraud", "makakadiscover sila", "hindi ako talaga magaling"],
-        "response": ["""Ang imposter syndrome ay lalo sa magagatalinong tao! Kung nandito ka, nangangahulugang deserve mo talaga ito. Tinatamaan ang lahat, pero hindi lang nila sinasabi.
-Maglingkod sa sarili mo ng magandang feedback—tandaan ang mga success mo. Ikaw ay genuine, at kaya mo talaga.
+        "response": ["""Ang imposter syndrome ay lalo sa mga magagaling na tao! Kung nandito ka, ibig sabihin, deserve mo talaga ito. Tinatamaan ang lahat, pero hindi lang nila sinasabi.
+Magbigay ka sa sarili mo ng magandang feedback—tandaan ang mga nagawa mo. Ikaw ay genuine, at kaya mo talaga.
 "Ang impostor syndrome ay isang ilusyon, hindi katotohanan." – Unknown"""],
         "follow_up": []
     },
@@ -593,15 +593,15 @@ Maglingkod sa sarili mo ng magandang feedback—tandaan ang mga success mo. Ikaw
     "homesick_tl": {
         "signals": ["homesick", "nag-iisa sa college", "miss home", "miss family", "college away", "layo sa bahay"],
         "response": ["""Ang pakiramdam na nag-iisa ay natural, lalo na kung malayo ka sa tahanan. Makipag-ugnayan sa pamilya regularly—video call, chat, kahit mensahe lang.
-Ngunit samantalahin din ang kasama mo ngayon. Ang halo ng pamilya at bagong mga kaibigan ay lumikha ng bagong tahanan. Kaya mo!
+Pakinabangan mo rin ang oras na kasama mo sila ngayon. Kapag pinagsama ang pamilya at bagong mga kaibigan, may bagong tahanan ka na. Kaya mo!
 "Mapapangalagaan mo ang tatlong tahanan: kung saan ka mula, kung nasaan ka ngayon, at kung saan ka papunta." – Unknown"""],
         "follow_up": []
     },
 
     "struggling_grades_tl": {
         "signals": ["struggling grades", "bumababa grade", "hindi nakakuha", "class standing", "exam result", "maraming E", "mababang grado"],
-        "response": ["""Ang hindi pagpapabuti ng grade ay nakakapagod, pero hindi ito dahilan para sa iyo. Makipag-usap sa teacher tungkol sa extra credit, tutoring, o kung ano ang dapat mong gawin.
-Maraming estudyante ang tumaas mula sa mababang punto. Ang pagkamali ay hindi pangmatagalan—ito ay pagkakataon na mag-improve.
+        "response": ["""Nakakapagod kapag hindi nag-iimprove ang grade mo, pero hindi ito katapusan ng lahat. Makipag-usap sa teacher tungkol sa extra credit, tutoring, o kung ano ang dapat mong gawin.
+Maraming estudyante ang tumaas mula sa mababang punto. Ang pagkakamali ay hindi pangmatagalan—ito ay pagkakataon na mag-improve.
 "Ang bawat expert ay batang nagsimula." – Unknown"""],
         "follow_up": []
     },
@@ -609,7 +609,7 @@ Maraming estudyante ang tumaas mula sa mababang punto. Ang pagkamali ay hindi pa
     "financial_stress_tl": {
         "signals": ["walang pera", "gastos", "mahirap ang bayad", "financial", "utang", "bills", "presyo", "bili hindi kaya"],
         "response": ["""Ang financial stress ay tunay, ngunit hindi ito forever. Hanapin ang resources sa school: scholarships, grants, student loans, o work-study programs.
-Mag-budget, itanong tulong sa pamilya kung kaya nila, at tanggapin ang tulong na inaalok. Ang pagiging matalino sa pera ay nagsisimula sa pag-plano ngayon.
+Mag-budget, humingi ng tulong sa pamilya kung kaya nila, at tanggapin ang tulong na inaalok. Ang pagiging matalino sa pera ay nagsisimula sa pag-plano ngayon.
 "Ang pera ay tool, hindi iyong identity. Gamitin ito ng matalino." – Unknown"""],
         "follow_up": []
     },
@@ -617,8 +617,8 @@ Mag-budget, itanong tulong sa pamilya kung kaya nila, at tanggapin ang tulong na
     "burnout_tl": {
         "signals": ["burnout", "pagod na sobra", "exhausted", "walang energy", "laging busy", "burnout talaga", "tired na tired", "no more fuel"],
         "response": ["""Ang burnout ay sign na kailangan mo ng rest. Hindi ito pagweak—ito ay sign na tao ka. Magsimula ng napakaliit na pahinga: 10 minuto lang para sa iyong sarili.
-Sabihin ang 'no' sa ilang bagay. Bigyan ng priyoridad ang iyong kalusugan. Walang achievable na target na sulit nang sirain ang iyong buhay.
-"Ang pahinga ay hindi kaligtaan. Ito ay investment sa iyong kinabukasan." – Unknown"""],
+Sabihin ang 'no' sa ilang bagay. Bigyan ng priyoridad ang iyong kalusugan. Walang tagumpay na sulit na sirain ang iyong buhay.
+"Ang pahinga ay hindi katamaran. Ito ay investment para sa iyong kinabukasan." – Unknown"""],
         "follow_up": []
     },
 
@@ -648,7 +648,7 @@ Subukan mo ito:
 1. **Hatiin ang gawain:** Gawin itong napakaliit. Isang talata, 5 minutong lakad, o isang tanong lang muna.
 2. **Magsimula ngayon:** Huwag nang hintayin ang "tamang gana." Kapag nagsimula ka na, kadalasan sumusunod na ang gana.
 3. **I-celebrate ang maliit:** Bawat maliit na natapos mo, ipagdiwang mo. Sumisigla ang loob kapag may natatapos.
-4. **Gawing gawi:** Ulitin araw-araw nang paunti-unti. Sa paglipas ng panahon, mas nagiging madali ito.
+4. **Gawin itong ugali:** Ulitin araw-araw nang paunti-unti. Sa paglipas ng panahon, mas nagiging madali ito.
 
 Kung matagal ka nang walang ganang gawin ang mga dating gusto mo, makipag-usap sa guidance counselor o sa doktor."""],
         "follow_up": []
@@ -676,7 +676,7 @@ Ang mahalaga ay ang tapang mong sumubok. Ang iyong halaga ay hindi nababawasan n
     "thesis_topic_struggle": {
         "signals": ["thesis topic", "research topic", "hirap sa topic", "walang maisip na topic", "paano pumili ng thesis topic", "research title"],
         "response": ["""Ang pagpili ng thesis topic ay isang malaking hakbang, at normal lang na makaramdam ng pressure. Subukan mong pag-isipan: Ano ang mga paksang interesado ka talaga?
-Magsimula sa malawak na ideya at dahan-dahang gawin itong mas partikular. Makipag-usap sa iyong adviser; nandiyan sila para gabayan ka.
+Magsimula sa malawak na ideya at dahan-dahang gawin itong mas malinaw at detalyado. Makipag-usap sa iyong adviser; nandiyan sila para gabayan ka.
 "The secret of getting ahead is getting started." – Mark Twain"""],
         "follow_up": []
     },
@@ -699,7 +699,7 @@ Subukang kausapin ang iyong propesor o isang kaklase na nakakaintindi ng topic. 
 
     "org_work_overload": {
         "signals": ["org work", "sobrang daming org work", "org work and acads", "nahihirapan sa org", "pagod sa org", "balancing organization"],
-        "response": ["""Ang pagiging aktibo sa student organizations ay maganda, pero madali itong maging overwhelming. Mahalagang matutunan ang prioritization.
+        "response": ["""Ang pagiging aktibo sa student organizations ay maganda, pero madali itong maging overwhelming. Mahalagang matutunan kung ano ang uunahin.
 Alin sa mga gawain ang pinaka-importante? Okay lang din na matutong tumanggi sa ibang responsibilidad para protektahan ang iyong oras at kapayapaan ng isip.
 "You can do anything, but not everything." – David Allen"""],
         "follow_up": []
@@ -1399,6 +1399,12 @@ def _build_openai_system_prompt(language='tagalog'):
         "assessment, clinician, pharmacological, psychotherapy, MBSR, PMR, vagal, amygdala).\n"
         "- If a hard word is unavoidable, explain it right away in one short, simple sentence "
         "using a familiar example.\n"
+        "- When your reply is in Tagalog or Taglish, use ONLY simple, everyday words that students use when talking to friends. "
+        "NEVER use deep, literary, formal, or old-fashioned Tagalog words (malalalim na Tagalog). "
+        "Simple replacements: 'nararapat' -> 'dapat', 'katinuan' -> 'malinaw na pag-iisip', 'sukatan' -> 'batayan', "
+        "'pagtugon' -> 'gagawin o sagot', 'pananalig' -> 'tiwala', 'kapakanan' -> 'ikabubuti', 'kaligtaan' -> 'katamaran', "
+        "'gawi' -> 'ugali o nakagawian', 'nangangahulugang' -> 'ibig sabihin', 'nauunawaan' -> 'naiintindihan'.\n"
+        "- Natural Taglish is perfectly fine - write the way Filipino students actually talk. If an everyday English word is clearer than a deep Tagalog word, use the English word.\n"
         "- Use short sentences (ideally under 15 words each).\n"
         "- FORMAT LIKE CHATGPT (professional and easy to read): start with 1 short validating paragraph, then give 2-4 practical tips. Use **bold** only for key phrases, and use numbered steps (1. 2. 3.) or simple dashes (-) for lists. Separate ideas with blank lines so the answer looks clean and organized.\n"
         "- ALWAYS FINISH your answer completely. NEVER stop mid-sentence or leave words hanging. Every reply must end with a proper ending punctuation (. ! ?). Keep the whole reply short enough to finish: 1 paragraph plus 2-4 tips only.\n"

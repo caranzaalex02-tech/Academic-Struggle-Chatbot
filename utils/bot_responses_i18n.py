@@ -265,23 +265,23 @@ TAGALOG_RESPONSES = {
         "\"Ang pagiging perpekto ay hindi lang tungkol sa kontrol—may takot at sakit ding nakatago sa ilalim nito.\" – Brené Brown"
     ],
     "unmotivated_study": [
-        "Normal lang na mawalan ng gana. Subukan mong hanapin ang iyong 'bakit'—iugnay ang mga gawain sa mas malaking pangarap mo.\n"
+        "Normal lang na mawalan ng gana. Subukan mong hanapin ang iyong 'bakit'—i-connect ang mga gawain sa mas malaking pangarap mo.\n"
         "Palitan ang kapaligiran ng pag-aaral, mag-aral kasama ng kaibigan, o magpahinga nang maayos. Ang maliliit na tagumpay ay bumubuo ng momentum.\n"
-        "\"Ang motibasyon ang nagpapaumpisa. Ang gawi ang nagpapatuloy.\" – Jim Ryun"
+        "\"Ang motibasyon ang nagpapaumpisa. Ang paulit-ulit na ginagawa ang nagpapatuloy.\" – Jim Ryun"
     ],
     "major_uncertainty": [
         "Okay lang na hindi ka pa sigurado sa kurso mo! Naghahanap ka pa lang ng sarili mo. Kausapin ang adviser, kumuha ng electives, at mag-explore.\n"
-        "Maraming estudyante ang nagpapalit ng direksyon—tanda ito ng pagkilala sa sarili, hindi kabiguan. Ipagkatiwala mo sa proseso ang sarili mo.\n"
+        "Maraming estudyante ang nagpapalit ng direksyon—tanda ito na kilala mo ang sarili mo, hindi kabiguan. Magtiwala ka lang sa proseso.\n"
         "\"Ang tanging paraan para magawa ang dakilang gawain ay mahalin ang ginagawa mo.\" – Steve Jobs"
     ],
     "financial_stress": [
         "Totoo ang problema sa pera, pero hindi ito panghabang-buhay. Tingnan ang mga scholarship, part-time work, o tulong mula sa campus.\n"
-        "Gumawa ng simpleng budget at humingi ng tulong. Ang pera ay hindi sukatan ng halaga mo o ng kinabukasan mo. Maraming estudyante ang dumaan dito.\n"
+        "Gumawa ng simpleng budget at humingi ng tulong. Hindi pera ang batayan ng halaga mo o ng kinabukasan mo. Maraming estudyante ang dumaan dito.\n"
         "\"Ang tunay na isyu ay hindi ang pera kundi ang kapayapaan ng isip na nabibili nito.\" – Unknown"
     ],
     "work_school_balance": [
         "Hindi ka makakapagbigay mula sa walang laman na baso. Okay lang bawasan ang mga commitment, kahit pansamantala. Kalidad kaysa dami, lagi.\n"
-        "Unahin ang tulog, kalusugan, at katinuan kaysa sa sobrang pagod. Mas malaking oras ang nasasayang sa burnout kaysa sa pahinga.\n"
+        "Unahin ang tulog, kalusugan, at malinaw na pag-iisip kaysa sa sobrang pagod. Mas malaking oras ang nasasayang sa burnout kaysa sa pahinga.\n"
         "\"Ang pahinga ay hindi katamaran. Ito ay maintenance.\" – Unknown"
     ],
     "time_management": [
@@ -291,17 +291,17 @@ TAGALOG_RESPONSES = {
     ],
     "imposter_syndrome": [
         "Sobrang karaniwan ang imposter syndrome, lalo na sa mga mahuhusay. Tunay at pinaghirapan mo ang mga naabot mo.\n"
-        "Nararapat ka rito. Palitan ang 'nagkukunwari lang ako' ng 'natututo pa ako.' Lahat nakakaramdam nito—hindi ka nag-iisa.\n"
+        "Dapat ka rito. Palitan ang 'nagkukunwari lang ako' ng 'natututo pa ako.' Lahat nakakaramdam nito—hindi ka nag-iisa.\n"
         "\"Hindi ka impostor. Ikaw ay nag-aaral. At ang pag-aaral ay paglago.\" – Unknown"
     ],
     "adhd_concentration": [
         "Kung nahihirapan kang mag-focus, maaaring ADHD ito o iba pang dahilan. Magpatingin sa propesyonal.\n"
         "Makakatulong ang mga accommodation gaya ng mas mahabang oras sa test o tahimik na lugar. Maraming matatalinong tao ang may ADHD. Hindi ka sirang tao.\n"
-        "\"Hindi tayo dinidikta ng ating paghihirap; ang ating pagtugon dito ang mahalaga.\" – Unknown"
+        "\"Hindi tayo binubuhat ng mga paghihirap natin; ang mahalaga ay kung paano tayo tumugon dito.\" – Unknown"
     ],
     "freshman_adjustment": [
-        "Ang pag-adjust sa kolehiyo ay hamon para sa lahat. Normal lang na mamiss ang bahay at maligaw. Bigyan mo ng biyaya ang sarili mo.\n"
-        "Sumali sa mga komunidad, i-explore ang campus, at dahan-dahang sumubok ng bago. Ang unang semestre ang pinakamahirap; lumalaban ito paglaon.\n"
+        "Ang pag-adjust sa kolehiyo ay hamon para sa lahat. Normal lang na mamiss ang bahay at maligaw. Maging mabait ka sa sarili mo.\n"
+        "Sumali sa mga komunidad, i-explore ang campus, at dahan-dahang sumubok ng bago. Ang unang semestre ang pinakamahirap; unti-unti itong magiging madali paglaon.\n"
         "\"Mamulaklak ka kung saan ka itinanim, kahit hindi pamilyar sa'yo ang lupa.\" – Unknown"
     ],
     "impending_deadline": [
@@ -321,8 +321,8 @@ TAGALOG_RESPONSES = {
     ],
     "loud_roommate": [
         "Kailangan ng komunikasyon at kompromiso ang pakikisama. Kausapin nang mahinahon ang roommate tungkol sa quiet hours at maghanap ng oras na komportable sa inyong dalawa.\n"
-        "Gumamit ng earplugs, white noise, o mag-aral sa ibang lugar. Ang pagtatakda ng boundary ay malusog, hindi masama. Tungkulin din niyang makinig.\n"
-        "\"Ang malusog na relasyon ay naitatayo sa tapat na komunikasyon.\" – Unknown"
+        "Gumamit ng earplugs, white noise, o mag-aral sa ibang lugar. Ang pagtatakda ng boundary ay malusog, hindi masama. Dapat din siyang makinig.\n"
+        "\"Ang magandang relasyon ay nabubuo sa tapat at malinaw na pag-uusap.\" – Unknown"
     ],
     "difficult_professor": [
         "Nagtuturo ng tibay ang mahihirap na propesor. Kausapin sila sa office hours nang magalang, itanong kung paano ka makakabawi, at dumalo sa tutoring.\n"
@@ -351,7 +351,7 @@ TAGALOG_RESPONSES = {
     ],
     "assignment_overload": [
         "Sabay-sabay dumadating ang mga assignment sa lahat. Unahin ayon sa deadline, at humingi ng extension sa propesor kung kailangan.\n"
-        "Humingi ng tulong nang walang hiya. Hatiin ang gawain sa araw-araw na bahagi. Hindi mo kailangang tapusin lahat ngayon. Pag-usad kaysa bilis.\n"
+        "Huwag ka nang mahiyang humingi ng tulong. Hatiin ang gawain sa araw-araw na bahagi. Hindi mo kailangang tapusin lahat ngayon. Pag-usad kaysa bilis.\n"
         "\"Isang hakbang sa isang pagkakataon. Isang gawain sa isang pagkakataon.\" – Unknown"
     ],
     "fear_of_failure": [
@@ -362,10 +362,10 @@ TAGALOG_RESPONSES = {
     "stress_management_tl": [
         "Ang tuloy-tuloy na stress ay nakakaapekto sa katawan at isip—pero may mga paraan para mapagaan ito.\n\n"
         "Subukan ang mga ito:\n"
-        "• **Diaphragmatic breathing:** Huminga nang malalim gamit ang tiyan (4-7-8 pattern).\n"
-        "• **Progressive muscle relaxation:** Higpitan at pakawalan ang bawat grupo ng kalamnan.\n"
-        "• **Exercise:** Ang 20-30 minutong paggalaw ay tumutulong sa mood at pagtulog.\n"
-        "• **Mag-set ng boundaries:** Bawasan ang dagdag na responsibilidad.\n"
+        "• **Malalim na paghinga (4-7-8):** Huminga nang malalim gamit ang tiyan—4 na bilang habang humihinga, 7 habang hawak ang hangin, 8 habang naglalabas.\n"
+        "• **Pahinga ng katawan:** Higpitan nang dahan-dahan ang bawat grupo ng kalamnan, pagkatapos pakawalan.\n"
+        "• **Ehersisyo:** Ang 20-30 minutong paggalaw ay tumutulong sa mood at pagtulog.\n"
+        "• **Magtakda ng limitasyon:** Bawasan ang mga dagdag na responsibilidad.\n"
         "• **Matulog:** Panatilihin ang regular na oras ng tulog.\n\n"
         "Kung nagpapatuloy ang stress at naaapektuhan na ang pag-aaral mo, makipag-usap sa guidance counselor o sa doktor."
     ],
@@ -374,8 +374,8 @@ TAGALOG_RESPONSES = {
         "Gawin ito:\n"
         "1. **Hatiin ang goal:** Gawing napakaliit na gawain (isang talata, 5-minutong lakad).\n"
         "2. **Magsimula ngayon:** Ang momentum ay bumubuo ng momentum. Hindi kailangan ang \"tamang pakiramdam.\"\n"
-        "3. **I-celebrate ang maliit na tagumpay:** Bawat natapos na gawain ay nagpapatibay ng gawi.\n"
-        "4. **Gawi:** Ang pag-uulit sa loob ng 21-66 araw ay lumilikha ng bagong daanan sa utak.\n\n"
+        "3. **I-celebrate ang maliit na tagumpay:** Bawat natapos na gawain ay nagpapatibay ng nakagawian mo.\n"
+        "4. **Gawin itong ugali:** Kapag paulit-ulit mong ginagawa ito sa loob ng 21-66 araw, magiging nakasanayan na ng katawan at isip mo.\n\n"
         "Kung tuloy-tuloy pa rin ang kawalan ng ganang gawin ang dating kinagigiliwan mo, ipa-assess ito sa propesyonal."
     ],
     # Ang dalawang ito ay halo (Tagalog + English) sa bot_logic.INTENTS,
@@ -488,9 +488,9 @@ Totoo ang sakit na nararamdaman mo, at karapat-dapat kang makatanggap ng tulong 
 4. I-text ang HOPE sa +63917-558-5999
 
 ⏰ **NGAYON NA:**
-- Wala kang kailangang gawing padalos-dalos. Isang hininga lang muna.
+- Wala kang kailangang madaliin. Huminga ka muna nang malalim.
 - Totoo ang nararamdaman mo. Mahalaga ang buhay mo.
-- Temporaryo lang ang sakit na ito. Magbabago ito, ipinapangako ko.
+- Pansamantala lang ang sakit na ito. Magbabago ito, ipinapangako ko.
 - May mga taong nakaramdam din ng ganito at gumaling.
 
 💙 "Mahalaga ka nang higit sa alam mo. Mangyaring manatili. Mangyaring mag-reach out. Hindi ka nag-iisa."

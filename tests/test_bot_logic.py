@@ -352,6 +352,43 @@ class BotLogicTests(unittest.TestCase):
             self.assertIn("complete, grammatically correct sentences", prompt)
             self.assertIn("never cut a sentence mid-way", prompt)
 
+    # ---- SIMPLE, MADALING MAINTINDIHAN NA TAGALOG ----
+    def test_system_prompt_requires_simple_tagalog_words(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("malalalim na tagalog", prompt)
+            self.assertIn("nararapat", prompt)
+            self.assertIn("natural taglish", prompt)
+
+    def test_canned_tagalog_responses_avoid_deep_words(self):
+        # Dapat hindi na lumitaw ang mga malalalim o nakakalitang salita
+        # sa anumang naka-prepare na sagot (dataset + crisis + FAQ).
+        import re
+
+        hard_patterns = [
+            r"\bkatinuan\b", r"\bnararapat\b", r"\bkaligtaan\b", r"\bsumisikad\b",
+            r"\bnangangahulugang\b", r"\bnauunawaan\b", r"\bsamantalahin\b",
+            r"\bsukatan\b", r"\bipagkatiwala\b", r"\bpagtugon\b", r"\bprioritization\b",
+            r"biyaya ang sarili", r"nang walang hiya", r"tungkulin din",
+            r"diaphragmatic", r"progressive muscle relaxation", r"gawing gawi",
+            r"lumalaban ito", r"padalos-dalos", r"magagatalinong",
+        ]
+        blobs = []
+        for responses in bot_logic.TAGALOG_RESPONSES.values():
+            blobs.extend(responses)
+        blobs.append(bot_logic.CRISIS_RESPONSE_TL)
+        blobs.extend(bot_logic.DEFAULT_FAQ_ANSWERS_TL.values())
+        for entry in bot_logic.INTENTS.values():
+            blobs.extend(entry.get("response", []))
+        text = "\n".join(str(b) for b in blobs).lower()
+        for pattern in hard_patterns:
+            match = re.search(pattern, text)
+            if match:
+                snippet = text[match.start():match.end() + 60]
+                self.fail(
+                    f"Nakakita ng malalalim na salita na tumugma sa '{pattern}': {snippet}"
+                )
+
     def test_system_prompt_forbids_repeats_and_html(self):
         for language in ("tagalog", "english", "waray"):
             prompt = bot_logic._build_openai_system_prompt(language).lower()
