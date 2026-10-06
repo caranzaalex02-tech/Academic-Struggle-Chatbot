@@ -22,34 +22,31 @@ overflow-x:hidden;
 overflow-y:auto;
 min-height:100vh;
 padding-top:0;
-/* ESSU Guiuan logo na sumasakop sa buong background */
-background-color:#0e2a3a;
+/* Bagay na background: deep teal gradient */
+background:linear-gradient(135deg,#0b2530 0%,#10414f 45%,#0d6e7e 100%);
+background-attachment:fixed;
 -webkit-tap-highlight-color:transparent;
 display:flex;
 }
 
-/* Dark base */
+/* ESSU watermark sa kanang gilid: soft, hindi nakakasagabal */
 body::before{
 content:"";
 position:fixed;
-inset:0;
-background-color:#0e2a3a;
-z-index:-2;
-pointer-events:none;
-}
-/* Malinaw na ESSU logo sa gitna: buong-buo, hindi cropped, hindi malabo */
-body::after{
-content:"";
-position:fixed;
-inset:0;
+top:50%;
+right:-90px;
+width:min(46vmin,380px);
+height:min(46vmin,380px);
+transform:translateY(-50%);
 background-image:url("{{ url_for('static', filename='images/essu_logo_bg.png') }}");
 background-repeat:no-repeat;
 background-position:center center;
-background-size:min(62vmin,480px);
-opacity:1;
-z-index:-1;
+background-size:contain;
+opacity:0.28;
+z-index:0;
 pointer-events:none;
 }
+body::after{display:none;}
 
 /* ============================================================
    SIDEBAR — premium professional, modern SaaS style
