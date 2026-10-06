@@ -235,18 +235,20 @@ class BotLogicTests(unittest.TestCase):
     def test_system_prompt_requires_plain_text_and_on_topic_replies(self):
         for language in ("tagalog", "english", "waray"):
             prompt = bot_logic._build_openai_system_prompt(language).lower()
-            self.assertIn("special characters", prompt)
-            self.assertIn("plain sentences", prompt)
+            self.assertIn("format like chatgpt", prompt)
             self.assertIn("stay on topic", prompt)
             self.assertIn("same topic", prompt)
 
-    def test_clean_ai_text_removes_markdown_and_special_characters(self):
-        raw = "**Hello!** # Title\n1. First tip\n- Second tip\n> quote\n`code` 😊 <b>hi</b> @#$%"
+    def test_clean_ai_text_keeps_chatgpt_structure_without_raw_symbols(self):
+        raw = "### Study Tips\n\n**Hello!** Here is help.\n\n1. First tip\n2. Second tip\n\n```code``` 😊 <b>hi</b>"
         cleaned = bot_logic._clean_ai_text(raw)
-        for bad in ("**", "#", "`", "😊", "<", ">", "@", "#", "$", "%"):
+        # ChatGPT structure ay napanatili (bold + numbered list)
+        self.assertIn("**Study Tips**", cleaned)
+        self.assertIn("**Hello!**", cleaned)
+        self.assertIn("1. First tip", cleaned)
+        # Magugulong symbols ay tinanggal
+        for bad in ("###", "```", "😊", "<b>", "`"):
             self.assertNotIn(bad, cleaned)
-        self.assertIn("Hello!", cleaned)
-        self.assertIn("First tip", cleaned)
 
     def test_ai_reply_receives_conversation_history_for_follow_ups(self):
         seen = {}

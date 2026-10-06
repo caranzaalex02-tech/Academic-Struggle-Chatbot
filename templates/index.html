@@ -444,6 +444,11 @@ color:#1a4a5a;
 border:1px solid rgba(255,255,255,0.5);
 border-bottom-left-radius:6px;
 }
+.bot-row .message p{margin:0 0 8px;}
+.bot-row .message p:last-child{margin-bottom:0;}
+.bot-row .message strong{color:#0f3a4a;font-weight:700;}
+.bot-row .message ol,.bot-row .message ul{margin:6px 0 8px;padding-left:20px;}
+.bot-row .message li{margin-bottom:4px;}
 
 /* Typing indicator */
 .typing{
@@ -1131,6 +1136,56 @@ sendMessage();
 }
 }
 
+function escapeHtml(s){
+return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+}
+
+function inlineFormat(s){
+let out=escapeHtml(s);
+out=out.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+out=out.replace(/__(.+?)__/g,"<strong>$1</strong>");
+return out;
+}
+
+/* ChatGPT-style renderer: paragraphs + bold + numbered/bulleted lists.
+   Ligtas ito (escaped muna) kaya walang hilaw na ** o # na makikita. */
+function renderBotReply(text){
+if(!text) return "";
+let safe=text.replace(/\r/g,"").trim();
+let blocks=safe.split(/\n\s*\n/);
+let html="";
+let i=0;
+while(i<blocks.length){
+let block=blocks[i].trim();
+if(!block){i++;continue;}
+let lines=block.split("\n").map(l=>l.trim()).filter(Boolean);
+let isList=lines.length>0 && lines.every(l=>/^(\d+[.)]\s+|[-*]\s+)/.test(l));
+if(isList){
+let ordered=/^\d+[.)]\s+/.test(lines[0]);
+html+=ordered?"<ol>":"<ul>";
+lines.forEach(l=>{
+let item=l.replace(/^(\d+[.)]\s+|[-*]\s+)/,"");
+html+="<li>"+inlineFormat(item)+"</li>";
+});
+html+=ordered?"</ol>":"</ul>";
+}else{
+html+="<p>"+inlineFormat(lines.join("<br>"))+"</p>";
+}
+i++;
+}
+return html||("<p>"+inlineFormat(safe)+"</p>");
+}
+
+function renderStoredBotMessages(){
+document.querySelectorAll("#chat-box .bot-row .message.bot").forEach(function(el){
+if(!el.dataset.rendered){
+el.innerHTML=renderBotReply(el.textContent);
+el.dataset.rendered="1";
+}
+});
+}
+renderStoredBotMessages();
+
 function sendMessage(){
 let input=document.getElementById("user-input");
 let msg=input.value.trim();
@@ -1169,7 +1224,7 @@ botRow.className="message-row bot-row";
 botRow.innerHTML='<div class="bot-avatar sm"><i class="fas fa-robot"></i></div>';
 let botDiv=document.createElement("div");
 botDiv.className="message bot";
-botDiv.textContent=data.response;
+botDiv.innerHTML=renderBotReply(data.response);
 botRow.appendChild(botDiv);
 box.appendChild(botRow);
 scrollBottom();

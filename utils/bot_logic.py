@@ -1104,47 +1104,51 @@ def _call_gemini_api(user_input, language='tagalog', history=None):
 
 
 def _clean_ai_text(text):
-    """Linisin ang AI reply: tanggalin ang markdown/special characters.
+    """I-normalize ang AI reply sa ChatGPT-style na malinis at professional.
 
-    Gusto ng user na "talagang sagot talaga" ang lumabas — walang **bold**,
-    walang ## headings, walang backticks, walang emojis. Plain sentences lang
-    na may simpleng punctuation (.,?!- at apostrophe).
+    Panatilihin ang magandang structure (paragraphs, bold highlights,
+    numbered/bulleted lists) pero tanggalin ang magugulong characters:
+    emojis, HTML tags, code blocks, at stray symbols. Ang natitirang
+    markdown (**bold**, lists) ay ligtas na nire-render ng frontend bilang
+    maayos na HTML — kaya walang hilaw na special characters na makikita
+    ang user, pero ChatGPT-style pa rin ang itsura ng sagot.
     """
     if not text:
         return text
     cleaned = text.strip()
-    # Markdown code blocks muna (```...```) bago single backticks.
-    cleaned = re.sub(r"```.*?```", " ", cleaned, flags=re.DOTALL)
-    # Bold/italic markers
-    cleaned = re.sub(r"\*\*(.+?)\*\*", r"\1", cleaned)
-    cleaned = re.sub(r"__(.+?)__", r"\1", cleaned)
-    # Lahat ng natitirang *, _, `, ~ ay tanggalin
-    cleaned = cleaned.replace("*", "").replace("_", "").replace("`", "").replace("~", "")
-    # Headings (# Title), quotes (> ...), list bullets sa simula ng linya
-    cleaned = re.sub(r"(?m)^\s{0,3}#{1,6}\s*", "", cleaned)
-    cleaned = re.sub(r"(?m)^\s{0,3}>\s?", "", cleaned)
-    cleaned = re.sub(r"(?m)^\s*[-+•▪◦▪]+\s+", "", cleaned)
-    # Numbered list na "1. " gawing normal na pangungusap (tanggalin ang numero)
-    cleaned = re.sub(r"(?m)^\s*\d+[.)]\s+", "", cleaned)
-    # Mga divider lines (---, ***, ___)
-    cleaned = re.sub(r"(?m)^\s*([-*_])\1{2,}\s*$", "", cleaned)
-    # HTML tags kung mayroon
+    # Markdown code blocks -> kunin lang ang laman bilang plain text
+    cleaned = re.sub(r"```(?:\w+)?\n?(.*?)```", r"\1", cleaned, flags=re.DOTALL)
+    # Inline code `code` -> plain
+    cleaned = cleaned.replace("`", "")
+    # HTML tags tanggalin
     cleaned = re.sub(r"<[^>]+>", "", cleaned)
-    # Emojis at pictographs
+    # Emojis at pictographs tanggalin (hindi professional tingnan)
     cleaned = re.sub(
         "[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]",
         "",
         cleaned,
     )
-    # Iba pang special characters: panatilihin lang ang letters, numbers,
-    # whitespace, at simpleng punctuation . , ! ? : ; ' " ( ) -
-    cleaned = re.sub(r"[^\w\s.,!?:;()'\"\-]", " ", cleaned)
-    # Ayusin ang whitespace: max 1 blank line lang sa pagitan
+    # Divider lines (---, ***, ___) tanggalin
+    cleaned = re.sub(r"(?m)^\s*([-*_])\1{2,}\s*$", "", cleaned)
+    # Blockquotes "> ..." -> plain text
+    cleaned = re.sub(r"(?m)^\s{0,3}>\s?", "", cleaned)
+    # Headings "### Title" -> gawing bold line na lang (ChatGPT-style)
+    cleaned = re.sub(r"(?m)^\s{0,3}#{1,6}\s*(.+?)\s*$", r"**\1**", cleaned)
+    # Stray tildes tanggalin
+    cleaned = cleaned.replace("~", "")
+    # Ayusin ang sobrang asterisks (***bold*** -> **bold**)
+    cleaned = re.sub(r"\*{3,}", "**", cleaned)
+    # Stray special chars sa simula ng linya (@, $, %, |, \) linisin
+    cleaned = re.sub(r"(?m)^\s*[@$%|\\]+\s*", "", cleaned)
+    # Ayusin ang whitespace: max 1 blank line sa pagitan ng paragraphs
     cleaned = re.sub(r"[ \t]+", " ", cleaned)
     cleaned = re.sub(r"\n[ \t]*\n[ \t]*\n+", "\n\n", cleaned)
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
     # Alisin ang space bago ang punctuation
     cleaned = re.sub(r"\s+([.,!?:;])", r"\1", cleaned)
+    # Limitahan ang haba para laging concise at madaling basahin
+    paragraphs = [p.strip() for p in cleaned.split("\n\n") if p.strip()]
+    cleaned = "\n\n".join(paragraphs[:8])
     return cleaned.strip()
 
 
@@ -1173,8 +1177,8 @@ def _build_openai_system_prompt(language='tagalog'):
         "- If a hard word is unavoidable, explain it right away in one short, simple sentence "
         "using a familiar example.\n"
         "- Use short sentences (ideally under 15 words each).\n"
-        "- Keep responses concise: 1 short validating sentence, then 2-4 simple tips written as plain sentences.\n"
-        "- NEVER use markdown or special characters: no asterisks, hashtags, underscores, backticks, tildes, bullets, numbering, emojis, or HTML. Plain sentences only with simple punctuation (period, comma, question mark, exclamation).\n"
+        "- FORMAT LIKE CHATGPT (professional and easy to read): start with 1 short validating paragraph, then give 2-4 practical tips. Use **bold** only for key phrases, and use numbered steps (1. 2. 3.) or simple dashes (-) for lists. Separate ideas with blank lines so the answer looks clean and organized.\n"
+        "- Keep the formatting clean: use only **bold**, numbered lists, dashes, and plain punctuation. NEVER use hashtags, backticks, tildes, emojis, HTML, or stray symbols. The app will render the reply beautifully, so write proper markdown structure.\n"
         "- STAY ON TOPIC: answer only the user's academic concern. For follow-up messages (like yes, and, how, what else, go on), continue the SAME topic you were already discussing instead of starting a new unrelated topic.\n"
         "- Use simple sentence association: each sentence must clearly connect to the previous one so the whole reply reads as one clear answer.\n"
         "- Acknowledge the user's feelings before offering suggestions.\n"
