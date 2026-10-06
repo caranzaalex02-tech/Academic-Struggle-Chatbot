@@ -29,6 +29,32 @@ body::before{content:'';position:fixed;inset:0;background:rgba(15,32,39,.84);z-i
 .card i{font-size:1.4rem;color:#00c6ff}
 .card h3{font-size:.95rem;margin:10px 0 6px}
 .card p{font-size:.83rem;color:rgba(255,255,255,.75);line-height:1.65}
+/* ===== MOBILE / ANDROID RESPONSIVE (≤768px) ===== */
+@media (max-width:768px){
+/* Sa mobile, hindi maayos ang background-attachment:fixed kaya scroll na lang,
+   at mas maliit na larawan para mabilis ma-load sa data connection. */
+body{background-image:url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=70');background-attachment:scroll;-webkit-text-size-adjust:100%}
+.wrap{padding:24px 16px 48px}
+.hero{padding:18px 0 6px}
+.logo-frame{width:104px;height:104px;margin-bottom:14px}
+.badge{font-size:11px;letter-spacing:.6px;max-width:100%;line-height:1.6}
+.card{padding:18px 14px}
+}
+/* ===== TINY PHONES (≤480px) ===== */
+@media (max-width:480px){
+.wrap{padding:18px 12px 40px}
+.hero{padding:12px 0 4px}
+.logo-frame{width:92px;height:92px;margin-bottom:12px}
+.badge{font-size:10px;letter-spacing:.4px;padding:5px 10px}
+.hero h1{font-size:1.42rem}
+.sub{font-size:.92rem;line-height:1.65;margin-bottom:18px}
+/* Malalaking button na madaling i-tap sa daliri */
+.cta{flex-direction:column;align-items:stretch;gap:10px}
+.btn{justify-content:center;padding:14px 18px;font-size:.98rem}
+.note{font-size:11.5px;line-height:1.6}
+.card h3{font-size:.92rem}
+.card p{font-size:.82rem}
+}
 </style>
 </head>
 <body>

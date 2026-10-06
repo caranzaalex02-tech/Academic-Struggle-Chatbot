@@ -43,5 +43,41 @@ class FrontendRenderTests(unittest.TestCase):
         self.assertIn(r"<[^>]+>/g", self.source)
 
 
+LANDING_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "templates",
+    "landing.html",
+)
+
+
+class LandingPageMobileTests(unittest.TestCase):
+    """Dapat nakikita at madaling gamitin ang landing page sa Android/mobile."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(LANDING_PATH, encoding="utf-8") as fh:
+            cls.source = fh.read()
+        # Para sa CSS checks: tanggalin ang spaces para pare-pareho ang format
+        cls.compact = cls.source.replace(" ", "").replace("\n", "")
+
+    def test_landing_page_has_mobile_viewport_meta(self):
+        self.assertIn('name="viewport"', self.source)
+        self.assertIn("width=device-width", self.source)
+
+    def test_landing_page_has_mobile_media_queries(self):
+        self.assertIn("@media", self.source)
+        self.assertIn("@media(max-width:768px)", self.compact)
+        self.assertIn("@media(max-width:480px)", self.compact)
+
+    def test_mobile_uses_scroll_background_not_fixed(self):
+        # Ang background-attachment:fixed ay hindi maayos sa Android/iOS
+        self.assertIn("background-attachment:scroll", self.compact)
+
+    def test_mobile_buttons_are_full_width_and_tappable(self):
+        # Nakahiga (stacked) at malalaki ang button sa maliliit na screen
+        self.assertIn("flex-direction:column", self.compact)
+        self.assertIn(".btn{justify-content:center", self.compact)
+
+
 if __name__ == "__main__":
     unittest.main()
