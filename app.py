@@ -515,10 +515,9 @@ def get_profile_pic_url(pic_url):
 # ================= ROUTES =================
 @app.route("/")
 def home():
-    # Landing page muna: info tungkol sa system + Proceed to Login button.
-    # Kung naka-login na, diretso na sa chatbot.
-    if "user" in session:
-        return redirect(url_for("chatbot"))
+    # LANDING PAGE PALAGI ang unang bubungad sa pag-open ng link — kahit naka-login.
+    # Dito din napupunta ang logout at ang mga protected pages kapag walang session,
+    # kaya hindi na direktang login page ang unang makikita ng user.
     return render_template("landing.html")
 
 # ---- LOGIN ----
@@ -526,6 +525,10 @@ def home():
 @limiter.limit("10 per minute")
 def login():
     error = None
+    # Kapag naka-login na ang user at binuksan ang /login (hal. Proceed to Login),
+    # huwag nang ipakita ang form — diretso na sa chatbot.
+    if request.method == "GET" and "user" in session:
+        return redirect(url_for("chatbot"))
     if request.method=="POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form["password"]
@@ -1135,7 +1138,7 @@ def admin_reset_with_token(token):
 @app.route("/chatbot")
 def chatbot():
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     db = get_db()
     c = db.cursor()
 
@@ -1373,7 +1376,7 @@ def rate_session():
 @app.route("/mini_dashboard")
 def mini_dashboard():
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
 
     db = get_db()
     c = db.cursor()
@@ -1413,7 +1416,7 @@ def mini_games():
 @app.route("/archived_room")
 def archived_room():
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
 
     db = get_db()
     c = db.cursor()
@@ -1429,7 +1432,7 @@ def archived_room():
 @app.route("/restart_chat")
 def restart_chat():
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     db = get_db()
     c = db.cursor()
     if is_postgres_db():
@@ -1446,7 +1449,7 @@ def restart_chat():
 @app.route("/restore_chat/<int:archive_id>")
 def restore_chat(archive_id):
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     db = get_db()
     c = db.cursor()
     if is_postgres_db():
@@ -1469,7 +1472,7 @@ def restore_chat(archive_id):
 @app.route("/delete_chat/<int:archive_id>")
 def delete_chat(archive_id):
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     db = get_db()
     c = db.cursor()
     if is_postgres_db():
@@ -1484,13 +1487,14 @@ def delete_chat(archive_id):
 def logout():
     # You might want to remove the user from typing_users on logout
     session.clear()
-    return redirect(url_for("login"))
+    # Pagkatapos mag-logout, landing page ang bubungad — hindi login page.
+    return redirect(url_for("home"))
 
 # ================= PEER CHAT FEATURES =================
 @app.route("/community")
 def community():
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     db = get_db()
     c = db.cursor() # Use correct placeholder based on DB type
     if is_postgres_db():
@@ -1542,7 +1546,7 @@ def community():
 @app.route("/peer_chat/<partner>")
 def peer_chat(partner):
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     db = get_db()
     c = db.cursor()
     if is_postgres_db():
@@ -1638,7 +1642,7 @@ def is_room_member(room_id, user_email):
 @app.route("/create_room")
 def create_room():
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     db = get_db()
     c = db.cursor()
     if is_postgres_db():
@@ -1695,7 +1699,7 @@ def my_rooms():
 @app.route("/group_chat/<int:room_id>")
 def group_chat(room_id):
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     if not is_room_member(room_id, session["user"]):
         return redirect(url_for("community"))
     db = get_db()
@@ -2136,7 +2140,7 @@ def admin_logs():
 @app.route("/settings", methods=["GET", "POST"])
 def user_settings():
     if "user" not in session:
-        return redirect(url_for("login"))
+        return redirect(url_for("home"))
     
     db = get_db()
     c = db.cursor()
