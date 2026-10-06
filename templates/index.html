@@ -22,27 +22,26 @@ overflow-x:hidden;
 overflow-y:auto;
 min-height:100vh;
 padding-top:0;
-/* Bagay na background: deep teal gradient */
-background:linear-gradient(135deg,#0b2530 0%,#10414f 45%,#0d6e7e 100%);
+/* Classy elegant green: deep forest to soft sage */
+background:linear-gradient(135deg,#0d2b1f 0%,#14532d 45%,#3f6212 100%);
 background-attachment:fixed;
 -webkit-tap-highlight-color:transparent;
 display:flex;
 }
 
-/* ESSU watermark sa kanang gilid: soft, hindi nakakasagabal */
+/* ESSU watermark sa kaliwa taas: soft, hindi nakakasagabal */
 body::before{
 content:"";
 position:fixed;
-top:50%;
-right:-90px;
-width:min(46vmin,380px);
-height:min(46vmin,380px);
-transform:translateY(-50%);
+top:18px;
+left:290px;
+width:min(24vmin,190px);
+height:min(24vmin,190px);
 background-image:url("{{ url_for('static', filename='images/essu_logo_bg.png') }}");
 background-repeat:no-repeat;
 background-position:center center;
 background-size:contain;
-opacity:0.28;
+opacity:0.35;
 z-index:0;
 pointer-events:none;
 }
