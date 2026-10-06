@@ -274,6 +274,24 @@ class BotLogicTests(unittest.TestCase):
         self.assertIn("a9", lines[-1])
         self.assertNotIn("q0", "\n".join(lines))
 
+    # ---- KUMPLETO AT HINDI PUTOL NA SAGOT ----
+    def test_clean_ai_text_removes_trailing_cut_off_sentence(self):
+        raw = "Naiintindihan kita.\n\n1. Magpahinga muna\n2. Hatiin ang gawain sa maliit na hakbang na hind"
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertTrue(cleaned.rstrip().endswith((".", "!", "?", ";", ":", ")")))
+        self.assertNotIn("hind", cleaned.split()[-1])
+
+    def test_clean_ai_text_keeps_complete_reply_intact(self):
+        raw = "Naiintindihan kita.\n\n1. Magpahinga muna.\n2. Hatiin ang gawain."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertIn("Magpahinga muna.", cleaned)
+        self.assertIn("Hatiin ang gawain.", cleaned)
+
+    def test_system_prompt_requires_complete_answers(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("finish your answer completely", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

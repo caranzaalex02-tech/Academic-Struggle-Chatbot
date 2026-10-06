@@ -968,8 +968,8 @@ def _call_groq_api(user_input, language='tagalog', history=None):
         completion = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=280,
-            temperature=0.5,
+            max_tokens=600,
+            temperature=0.4,
         )
 
         if completion.choices and completion.choices[0].message:
@@ -1146,9 +1146,27 @@ def _clean_ai_text(text):
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
     # Alisin ang space bago ang punctuation
     cleaned = re.sub(r"\s+([.,!?:;])", r"\1", cleaned)
-    # Limitahan ang haba para laging concise at madaling basahin
+    # Tanggalin ang naputol na huling sentence (walang ending punctuation)
+    # para hindi magmukhang bitin ang sagot.
     paragraphs = [p.strip() for p in cleaned.split("\n\n") if p.strip()]
-    cleaned = "\n\n".join(paragraphs[:8])
+    if paragraphs:
+        last = paragraphs[-1]
+        # Kung ang huling paragraph ay list, ayusin ang huling item
+        lines = last.split("\n")
+        last_line = lines[-1].strip()
+        if last_line and last_line[-1] not in ".!?:;":
+            # Subukan munang buuin: hanapin ang huling kumpletong sentence
+            m = re.search(r"(.+[.!?])[^.!?]*$", last, re.DOTALL)
+            if m:
+                lines[-1] = m.group(1).strip()
+                last = "\n".join(lines).strip()
+                if last:
+                    paragraphs[-1] = last
+                else:
+                    paragraphs = paragraphs[:-1]
+            else:
+                paragraphs = paragraphs[:-1]
+    cleaned = "\n\n".join(paragraphs)
     return cleaned.strip()
 
 
@@ -1178,6 +1196,7 @@ def _build_openai_system_prompt(language='tagalog'):
         "using a familiar example.\n"
         "- Use short sentences (ideally under 15 words each).\n"
         "- FORMAT LIKE CHATGPT (professional and easy to read): start with 1 short validating paragraph, then give 2-4 practical tips. Use **bold** only for key phrases, and use numbered steps (1. 2. 3.) or simple dashes (-) for lists. Separate ideas with blank lines so the answer looks clean and organized.\n"
+        "- ALWAYS FINISH your answer completely. NEVER stop mid-sentence or leave words hanging. Every reply must end with a proper ending punctuation (. ! ?). Keep the whole reply short enough to finish: 1 paragraph plus 2-4 tips only.\n"
         "- Keep the formatting clean: use only **bold**, numbered lists, dashes, and plain punctuation. NEVER use hashtags, backticks, tildes, emojis, HTML, or stray symbols. The app will render the reply beautifully, so write proper markdown structure.\n"
         "- STAY ON TOPIC: answer only the user's academic concern. For follow-up messages (like yes, and, how, what else, go on), continue the SAME topic you were already discussing instead of starting a new unrelated topic.\n"
         "- Use simple sentence association: each sentence must clearly connect to the previous one so the whole reply reads as one clear answer.\n"
@@ -1269,8 +1288,8 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
         completion = client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=280,
-            temperature=0.5,
+            max_tokens=600,
+            temperature=0.4,
         )
 
         if completion.choices and completion.choices[0].message:
