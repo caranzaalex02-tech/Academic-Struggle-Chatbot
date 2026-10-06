@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Academic Struggle Support | ESSU-Guiuan</title>
+<title>Academic Struggle Support System Chatbot | ESSU-Guiuan</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -13,7 +13,8 @@ body{min-height:100vh;font-family:'Poppins',sans-serif;background:#0f2027 url('h
 body::before{content:'';position:fixed;inset:0;background:rgba(15,32,39,.84);z-index:1}
 .wrap{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:32px 20px 60px}
 .hero{text-align:center;padding:30px 10px 6px}
-.hero img{width:92px;border-radius:50%;margin-bottom:14px}
+.logo-frame{width:120px;height:120px;margin:0 auto 16px;border-radius:50%;padding:6px;background:rgba(255,255,255,.92);box-shadow:0 0 0 4px rgba(0,198,255,.35),0 10px 30px rgba(0,0,0,.45)}
+.logo-frame img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
 .badge{display:inline-block;font-size:12px;letter-spacing:1px;font-weight:600;color:#00e5ff;border:1px solid rgba(0,229,255,.4);border-radius:999px;padding:6px 14px;margin-bottom:12px}
 .hero h1{font-size:clamp(1.5rem,4vw,2.4rem);line-height:1.25;margin-bottom:12px}
 .hero h1 span{color:#00c6ff}
@@ -33,26 +34,26 @@ body::before{content:'';position:fixed;inset:0;background:rgba(15,32,39,.84);z-i
 <body>
 <div class="wrap">
 <div class="hero">
-<img src="{{ url_for('static', filename='images/essu_logo.png') }}" alt="ESSU Logo">
-<div class="badge">ESSU-GUIUAN &bull; STUDENT SUPPORT SYSTEM</div>
-<h1>Academic Struggle Support <span>Chatbot</span></h1>
-<p class="sub">Gabay para sa mga estudyante ng ESSU-Guiuan na nahihirapan sa pag-aaral &mdash; stress sa exams, thesis, grades at motivation. Makakausap mo ang chatbot sa <b>Tagalog, English o Waray</b>, anumang oras.</p>
+<div class="logo-frame"><img src="{{ url_for('static', filename='images/essu_logo.png') }}" alt="ESSU Guiuan Logo"></div>
+<div class="badge">ESSU-GUIUAN &bull; ACADEMIC STRUGGLE SUPPORT SYSTEM CHATBOT</div>
+<h1>Academic Struggle Support System <span>Chatbot</span></h1>
+<p class="sub">A student-friendly guide for ESSU-Guiuan students facing academic challenges &mdash; exam stress, thesis, grades, and motivation. Chat with the assistant in <b>English, Tagalog, or Waray</b>, anytime.</p>
 <div class="cta">
 <a class="btn btn-p" href="{{ url_for('login') }}">Proceed to Login <i class="fas fa-arrow-right"></i></a>
 <a class="btn btn-g" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Create Account</a>
 </div>
-<p class="note">May account na? Pindutin ang Proceed to Login.</p>
+<p class="note">Already have an account? Click Proceed to Login.</p>
 </div>
 <div class="cards">
-<div class="card"><i class="fas fa-robot"></i><h3>AI Chatbot</h3><p>Malinaw at simpleng sagot tungkol sa study stress, exams, thesis at motivation.</p></div>
-<div class="card"><i class="fas fa-heart-pulse"></i><h3>Mood Check-in</h3><p>I-log ang nararamdaman mo araw-araw at makita ang progress mo.</p></div>
-<div class="card"><i class="fas fa-users"></i><h3>Peer &amp; Community</h3><p>Community rooms, peer chat at mini-games pang-relax.</p></div>
-<div class="card"><i class="fas fa-shield-heart"></i><h3>Ligtas at Pribado</h3><p>Para sa iyo lang ang mga mensahe mo. May gabay din sa crisis.</p></div>
+<div class="card"><i class="fas fa-robot"></i><h3>AI Chatbot</h3><p>Clear and simple answers about study stress, exams, thesis, and motivation.</p></div>
+<div class="card"><i class="fas fa-heart-pulse"></i><h3>Mood Check-in</h3><p>Log how you feel every day and track your progress.</p></div>
+<div class="card"><i class="fas fa-users"></i><h3>Peer &amp; Community</h3><p>Community rooms, peer chat, and mini-games to relax.</p></div>
+<div class="card"><i class="fas fa-shield-heart"></i><h3>Safe and Private</h3><p>Your messages are yours alone. Includes guidance for crisis situations.</p></div>
 </div>
-<div class="card" style="margin-top:14px"><i class="fas fa-circle-info"></i><h3>Tungkol sa System</h3><p>Para sa mga estudyante ng ESSU-Guiuan na may academic pressure. Study tips, motivation at praktikal na gabay sa simpleng salita. Para saan: stress, burnout, thesis, exams at grades. Sino: estudyante ng ESSU-Guiuan na may account. Wika: Tagalog, English at Waray. Libre ito para sa campus.</p></div>
-<div class="card" style="margin-top:14px"><i class="fas fa-list-ol"></i><h3>Paano Gamitin</h3><p>1. Gumawa ng account at mag-login. 2. I-type ang problema mo sa pag-aaral. 3. Sundin ang study tips at mag-log ng mood araw-araw.</p></div>
+<div class="card" style="margin-top:14px"><i class="fas fa-circle-info"></i><h3>About the System</h3><p>Built for ESSU-Guiuan students under academic pressure. Study tips, motivation, and practical guidance in simple words. Purpose: stress, burnout, thesis, exams, and grades. Who can use it: ESSU-Guiuan students with an account. Languages: English, Tagalog, and Waray. Free for the campus.</p></div>
+<div class="card" style="margin-top:14px"><i class="fas fa-list-ol"></i><h3>How to Use</h3><p>1. Create an account and log in. 2. Type your academic concern. 3. Follow the study tips and log your mood daily.</p></div>
 <div class="cta" style="margin-top:22px"><a class="btn btn-p" href="{{ url_for('login') }}">Proceed to Login <i class="fas fa-arrow-right"></i></a></div>
-<p class="note" style="margin-top:14px">Paalala: gabay sa pag-aaral lamang ito, hindi kapalit ng professional counseling. Kung may emergency, tumawag agad sa trusted person o crisis hotline.</p>
+<p class="note" style="margin-top:14px">Reminder: this is a study guide only and not a replacement for professional counseling. In an emergency, contact a trusted person or crisis hotline immediately.</p>
 </div>
 </body>
 </html>
