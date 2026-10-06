@@ -37,7 +37,7 @@ background-color:#0e2a3a;
 z-index:-2;
 pointer-events:none;
 }
-/* Malaking ESSU logo: full-background, transparent na (tinanggal ang white) */
+/* Malinaw na ESSU logo sa gitna: buong-buo, hindi cropped, hindi malabo */
 body::after{
 content:"";
 position:fixed;
@@ -45,8 +45,8 @@ inset:0;
 background-image:url("{{ url_for('static', filename='images/essu_logo_bg.png') }}");
 background-repeat:no-repeat;
 background-position:center center;
-background-size:cover;
-opacity:0.5;
+background-size:min(62vmin,480px);
+opacity:1;
 z-index:-1;
 pointer-events:none;
 }
