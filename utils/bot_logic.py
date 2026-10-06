@@ -936,7 +936,7 @@ def _groq_available():
     return _import_groq() is not None and _get_groq_api_key() is not None
 
 
-def _call_groq_api(user_input, language='tagalog'):
+def _call_groq_api(user_input, language='tagalog', history=None):
     """Calls the Groq API (Llama 3.1) as the primary AI fallback."""
     if not _groq_available():
         logging.warning("Groq API not available (library not installed or key not set).")
@@ -957,8 +957,13 @@ def _call_groq_api(user_input, language='tagalog'):
         system_prompt = _build_openai_system_prompt(language)
         messages = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_input}
         ]
+        for line in _history_to_prompt_lines(history):
+            if line.startswith("Earlier user:"):
+                messages.append({"role": "user", "content": line[len("Earlier user:"):].strip()})
+            else:
+                messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
+        messages.append({"role": "user", "content": user_input})
 
         completion = client.chat.completions.create(
             model=model,
@@ -968,7 +973,7 @@ def _call_groq_api(user_input, language='tagalog'):
         )
 
         if completion.choices and completion.choices[0].message:
-            return completion.choices[0].message.content.strip()
+            return _clean_ai_text(completion.choices[0].message.content.strip())
 
         logging.warning("Groq response was empty or malformed.")
         return None
@@ -986,7 +991,7 @@ def _call_groq_api(user_input, language='tagalog'):
         return None
 
 
-def _call_gemini_api(user_input, language='tagalog'):
+def _call_gemini_api(user_input, language='tagalog', history=None):
     """Calls the Google Gemini API as a fallback."""
     if not _gemini_available():
         logging.warning("Gemini API not available (library not installed or key not set).")
@@ -1029,10 +1034,14 @@ def _call_gemini_api(user_input, language='tagalog'):
             try:
                 model = genai_module.GenerativeModel(model_name)
                 system_prompt = _build_openai_system_prompt(language)
-                full_prompt = f"{system_prompt}\n\nUser: {user_input}\nAssistant:"
+                history_block = "\n".join(_history_to_prompt_lines(history))
+                if history_block:
+                    full_prompt = f"{system_prompt}\n\n{history_block}\nUser: {user_input}\nAssistant:"
+                else:
+                    full_prompt = f"{system_prompt}\n\nUser: {user_input}\nAssistant:"
                 response = model.generate_content(contents=full_prompt)
                 if getattr(response, "parts", None):
-                    return response.text.strip()
+                    return _clean_ai_text(response.text.strip())
                 logging.error("Gemini API call was blocked by safety settings or returned no content.")
                 return _language_pick(
                     language,
@@ -1094,6 +1103,51 @@ def _call_gemini_api(user_input, language='tagalog'):
 
 
 
+def _clean_ai_text(text):
+    """Linisin ang AI reply: tanggalin ang markdown/special characters.
+
+    Gusto ng user na "talagang sagot talaga" ang lumabas — walang **bold**,
+    walang ## headings, walang backticks, walang emojis. Plain sentences lang
+    na may simpleng punctuation (.,?!- at apostrophe).
+    """
+    if not text:
+        return text
+    cleaned = text.strip()
+    # Markdown code blocks muna (```...```) bago single backticks.
+    cleaned = re.sub(r"```.*?```", " ", cleaned, flags=re.DOTALL)
+    # Bold/italic markers
+    cleaned = re.sub(r"\*\*(.+?)\*\*", r"\1", cleaned)
+    cleaned = re.sub(r"__(.+?)__", r"\1", cleaned)
+    # Lahat ng natitirang *, _, `, ~ ay tanggalin
+    cleaned = cleaned.replace("*", "").replace("_", "").replace("`", "").replace("~", "")
+    # Headings (# Title), quotes (> ...), list bullets sa simula ng linya
+    cleaned = re.sub(r"(?m)^\s{0,3}#{1,6}\s*", "", cleaned)
+    cleaned = re.sub(r"(?m)^\s{0,3}>\s?", "", cleaned)
+    cleaned = re.sub(r"(?m)^\s*[-+•▪◦▪]+\s+", "", cleaned)
+    # Numbered list na "1. " gawing normal na pangungusap (tanggalin ang numero)
+    cleaned = re.sub(r"(?m)^\s*\d+[.)]\s+", "", cleaned)
+    # Mga divider lines (---, ***, ___)
+    cleaned = re.sub(r"(?m)^\s*([-*_])\1{2,}\s*$", "", cleaned)
+    # HTML tags kung mayroon
+    cleaned = re.sub(r"<[^>]+>", "", cleaned)
+    # Emojis at pictographs
+    cleaned = re.sub(
+        "[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200d]",
+        "",
+        cleaned,
+    )
+    # Iba pang special characters: panatilihin lang ang letters, numbers,
+    # whitespace, at simpleng punctuation . , ! ? : ; ' " ( ) -
+    cleaned = re.sub(r"[^\w\s.,!?:;()'\"\-]", " ", cleaned)
+    # Ayusin ang whitespace: max 1 blank line lang sa pagitan
+    cleaned = re.sub(r"[ \t]+", " ", cleaned)
+    cleaned = re.sub(r"\n[ \t]*\n[ \t]*\n+", "\n\n", cleaned)
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
+    # Alisin ang space bago ang punctuation
+    cleaned = re.sub(r"\s+([.,!?:;])", r"\1", cleaned)
+    return cleaned.strip()
+
+
 def _build_openai_system_prompt(language='tagalog'):
     base_guidelines = (
         "SAFETY RULES (follow strictly):\n"
@@ -1119,8 +1173,10 @@ def _build_openai_system_prompt(language='tagalog'):
         "- If a hard word is unavoidable, explain it right away in one short, simple sentence "
         "using a familiar example.\n"
         "- Use short sentences (ideally under 15 words each).\n"
-        "- Keep responses concise: 1 short validating sentence, then 2-4 simple bullet tips.\n"
-        "- Always use bullets or numbered steps for tips, never long paragraphs.\n"
+        "- Keep responses concise: 1 short validating sentence, then 2-4 simple tips written as plain sentences.\n"
+        "- NEVER use markdown or special characters: no asterisks, hashtags, underscores, backticks, tildes, bullets, numbering, emojis, or HTML. Plain sentences only with simple punctuation (period, comma, question mark, exclamation).\n"
+        "- STAY ON TOPIC: answer only the user's academic concern. For follow-up messages (like yes, and, how, what else, go on), continue the SAME topic you were already discussing instead of starting a new unrelated topic.\n"
+        "- Use simple sentence association: each sentence must clearly connect to the previous one so the whole reply reads as one clear answer.\n"
         "- Acknowledge the user's feelings before offering suggestions.\n"
         "- Use a supportive, non-judgmental tone.\n"
         "- Include practical, actionable tips when relevant.\n"
@@ -1153,10 +1209,32 @@ def _build_openai_system_prompt(language='tagalog'):
     return role + language_rules + "\n" + base_guidelines
 
 
-def _call_openai_api(user_input, intent=None, language='tagalog'):
+def _history_to_prompt_lines(history, limit=6):
+    """Gawing prompt lines ang huling usapan para manatiling on-topic ang AI.
+
+    ``history`` ay list ng (user_text, bot_text) tuples. Kinukuha lang ang
+    huling ``limit`` na palitan para hindi humaba ang prompt.
+    """
+    if not history:
+        return []
+    lines = []
+    for user_text, bot_text in list(history)[-limit:]:
+        if user_text:
+            lines.append(f"Earlier user: {str(user_text).strip()[:300]}")
+        if bot_text:
+            lines.append(f"Earlier assistant: {str(bot_text).strip()[:300]}")
+    return lines
+
+
+def _call_openai_api(user_input, intent=None, language='tagalog', history=None):
     if not _openai_available():
         return None
 
+    return _run_openai_chat(user_input, intent=intent, language=language, history=history)
+
+
+def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
+    """Ang aktwal na OpenAI chat completion call (nire-reuse ng AI-first path)."""
     try:
         api_key = _get_openai_api_key()
         if not api_key:
@@ -1174,8 +1252,13 @@ def _call_openai_api(user_input, intent=None, language='tagalog'):
 
         messages = [
             {"role": "system", "content": _build_openai_system_prompt(language)},
-            {"role": "user", "content": user_input}
         ]
+        for line in _history_to_prompt_lines(history):
+            if line.startswith("Earlier user:"):
+                messages.append({"role": "user", "content": line[len("Earlier user:"):].strip()})
+            else:
+                messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
+        messages.append({"role": "user", "content": user_input})
         if intent:
             messages.append({"role": "assistant", "content": f"Detected intent: {intent}."})
 
@@ -1187,7 +1270,7 @@ def _call_openai_api(user_input, intent=None, language='tagalog'):
         )
 
         if completion.choices and completion.choices[0].message:
-            return completion.choices[0].message.content.strip()
+            return _clean_ai_text(completion.choices[0].message.content.strip())
 
         logging.warning("OpenAI response was empty or malformed.")
         return None
@@ -1212,6 +1295,45 @@ def _call_openai_api(user_input, intent=None, language='tagalog'):
     except Exception as e:
         logging.exception(f"OpenAI API call failed: {e}")
         return None
+
+# ----------------------------
+
+
+def _ai_first_enabled():
+    """True kapag AI ang dapat sumagot muna (default ON)."""
+    value = os.environ.get("MENTALHEALTHWEB_AI_FIRST", "true")
+    return value.strip().lower() in ("1", "true", "yes", "on")
+
+
+AI_FIRST_ENABLED = _ai_first_enabled()
+
+
+def _call_ai_reply(user_input, language='tagalog', history=None, **kwargs):
+    """AI-first reply chain: Groq (API key) -> OpenAI -> Gemini.
+
+    Nagbabalik ng AI reply kung mayroon, o None kapag walang available na AI
+    (para mag-fallback sa dataset).
+    """
+    # Primary: Groq (libre, mabilis) — ito ang GROQ_API_KEY sa Render.
+    if _groq_available():
+        groq_reply = _call_groq_api(user_input, language, history=history)
+        if groq_reply:
+            return groq_reply
+
+    # Fallback 1: OpenAI (may API key)
+    if _openai_available():
+        openai_reply = _run_openai_chat(user_input, language=language, history=history)
+        if openai_reply:
+            return openai_reply
+
+    # Fallback 2: Gemini (kung may valid key)
+    if _gemini_available():
+        gemini_reply = _call_gemini_api(user_input, language, history=history)
+        if gemini_reply:
+            return gemini_reply
+
+    return None
+
 
 # ----------------------------
 # DETECTION & RESPONSE LOGIC
@@ -1332,13 +1454,17 @@ def is_academic_intent(intent):
     return intent in ACADEMIC_INTENTS
 
 
-def generate_response(user_input, last_intent=None, language='tagalog'):
+def generate_response(user_input, last_intent=None, language='tagalog', history=None):
     """
     Main function to generate a bot response.
 
     Ang wika ng sagot ay sinusunod ang wika ng tanong ng user (English ->
     English, Tagalog -> Tagalog, Waray -> Waray). Ang ``language`` argument
     ang ginagamit na fallback kapag hindi malinaw ang wika ng tanong.
+
+    Ang ``history`` ay opsyonal na list ng (user_text, bot_text) tuples mula
+    sa mga huling mensahe — ginagamit ito ng AI para manatiling on-topic
+    ang sagot sa follow-up questions.
 
     Returns a tuple: (response_text, new_intent, is_crisis_flag, is_abusive_flag)
     """
@@ -1349,7 +1475,7 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
     # 0. Language of the REPLY (matching the user's question)
     resp_lang = resolve_response_language(user_input, language)
 
-    # 1. Crisis Check (Highest Priority)
+    # 1. Crisis Check (Highest Priority — NEVER bypassed, even in AI-first mode)
     # We use the dedicated crisis keywords for immediate, hard-coded detection.
     if any(k in text for k in CRISIS_KEYWORDS):
         conversation_memory["last_intent"] = "crisis_situation"
@@ -1359,7 +1485,7 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
         resp = _crisis_response(resp_lang)
         return (resp, "crisis_situation", 1, is_abusive_in_crisis)
 
-    # 2. Abusive Language Check (High Priority)
+    # 2. Abusive Language Check (High Priority — NEVER bypassed, even in AI-first mode)
     if any(k in text for k in ABUSIVE_KEYWORDS):
         is_abusive = 1
         # Provide a direct response to the abusive language before proceeding.
@@ -1372,10 +1498,24 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
             abusive_response = "Naiintindihan ko na maaaring ikaw ay nadidismaya, pero panatilihin nating magalang ang ating pag-uusap. Paano kita matutulungan sa maayos na paraan ngayon?"
         return (abusive_response, new_intent, 0, 1)
 
-    # 3. FAQ dataset lookup (After crisis and abuse checks)
+    # 3. AI-FIRST: lahat ng normal na tanong ay sinasagot ng API key AI.
+    # I-disable ito sa pamamagitan ng MENTALHEALTHWEB_AI_FIRST=false (default ON).
+    # Crisis at abusive messages ay hindi dumadaan dito (nahuli na sila sa itaas).
+    ai_first = AI_FIRST_ENABLED
+    ai_reply = None
+    if not is_abusive and ai_first:
+        ai_reply = _call_ai_reply(user_input, resp_lang, history=history)
+        if ai_reply:
+            return (ai_reply, None, 0, is_abusive)
+
+    # 4. Dataset path — ginagamit lang kapag:
+    #    (a) naka-disable ang AI-first mode, o
+    #    (b) walang available/magandang sagot ang AI (no keys, quota, error, empty reply).
     faq_answer = get_faq_answer(text, resp_lang)
     if faq_answer:
         return (faq_answer, None, 0, is_abusive)
+
+    # 5. Intent Detection (fallback kapag walang AI)
 
     # 4. Intent Detection (Primary Path)
     intent = detect_intent(text)
@@ -1406,27 +1546,8 @@ def generate_response(user_input, last_intent=None, language='tagalog'):
 
         return (response, new_intent, is_crisis, is_abusive)
 
-    # 5. Generative AI Fallback (Groq → OpenAI → Gemini)
-    if not is_abusive:
-        # Primary: Groq (Libre, mabilis, Llama 3.1)
-        if _groq_available():
-            groq_reply = _call_groq_api(user_input, resp_lang)
-            if groq_reply:
-                return (groq_reply, None, 0, is_abusive)
-
-        # Fallback 1: OpenAI (kung may valid key at credits)
-        if _openai_available():
-            openai_reply = _call_openai_api(user_input, language=resp_lang)
-            if openai_reply:
-                return (openai_reply, None, 0, is_abusive)
-
-        # Fallback 2: Gemini (kung may valid key)
-        if _gemini_available():
-            gemini_reply = _call_gemini_api(user_input, resp_lang)
-            if gemini_reply:
-                return (gemini_reply, None, 0, is_abusive)
-
-    # 6. Fallback Response if no intent is detected and not abusive
+    # 6. Fallback Response — naabot lang ito kapag walang AI reply AT walang
+    # intent ang na-detect (hal. naka-disable ang AI-first o down ang AI).
     if resp_lang == 'waray':
         generic_fallbacks = WARAY_FALLBACKS
     elif resp_lang == 'english':

@@ -21,14 +21,29 @@ class BotLogicTests(unittest.TestCase):
 
     def tearDown(self):
         self.temp_dir.cleanup()
+        os.environ.pop("MENTALHEALTHWEB_AI_FIRST", None)
+
+    def _set_ai_first(self, enabled):
+        os.environ["MENTALHEALTHWEB_AI_FIRST"] = "true" if enabled else "false"
+        bot_logic.AI_FIRST_ENABLED = bot_logic._ai_first_enabled()
+
+    def _stub_ai_reply(self, reply):
+        self._original_ai_reply = bot_logic._call_ai_reply
+        bot_logic._call_ai_reply = lambda user_input, language="tagalog", *args, **kwargs: reply  # noqa: E731
+        self.addCleanup(self._restore_ai_reply)
+
+    def _restore_ai_reply(self):
+        bot_logic._call_ai_reply = self._original_ai_reply
 
     def test_generate_response_returns_faq_answer(self):
+        self._set_ai_first(False)
         response, intent, is_crisis, is_abusive = bot_logic.generate_response("what is this app for", None, "tagalog")
         self.assertIn("academic struggle support chatbot", response)
         self.assertEqual(is_crisis, 0)
         self.assertEqual(is_abusive, 0)
 
     def test_generate_response_returns_greeting_response(self):
+        self._set_ai_first(False)
         response, intent, is_crisis, is_abusive = bot_logic.generate_response("hi", None, "tagalog")
         self.assertEqual(intent, "greetings")
         self.assertTrue(response)
@@ -37,12 +52,39 @@ class BotLogicTests(unittest.TestCase):
         self.assertEqual(is_abusive, 0)
 
     def test_generate_response_returns_gratitude_response(self):
+        self._set_ai_first(False)
         response, intent, is_crisis, is_abusive = bot_logic.generate_response("thank you", None, "tagalog")
         self.assertEqual(intent, "gratitude")
         self.assertTrue(response)
         self.assertNotIn("academic struggle", response.lower())
         self.assertEqual(is_crisis, 0)
         self.assertEqual(is_abusive, 0)
+
+    def test_ai_first_answers_normal_questions_before_the_dataset(self):
+        self._set_ai_first(True)
+        self._stub_ai_reply("Musna ini an akon AI nga baton para ha imo yana.")
+        response, intent, is_crisis, is_abusive = bot_logic.generate_response(
+            "I am so stressed about my exam tomorrow", None, "tagalog"
+        )
+        self.assertEqual(response, "Musna ini an akon AI nga baton para ha imo yana.")
+        self.assertIsNone(intent)
+        self.assertEqual(is_crisis, 0)
+        self.assertEqual(is_abusive, 0)
+
+    def test_ai_first_still_uses_dataset_when_the_ai_has_no_reply(self):
+        self._set_ai_first(True)
+        self._stub_ai_reply(None)
+        response, intent, _, _ = bot_logic.generate_response("thank you so much", None, "tagalog")
+        self.assertEqual(intent, "gratitude")
+        self.assertIn(response, bot_logic.ENGLISH_RESPONSES["gratitude"])
+
+    def test_dataset_mode_is_still_available_when_ai_first_is_disabled(self):
+        self._set_ai_first(False)
+        response, intent, _, _ = bot_logic.generate_response(
+            "I am so stressed about my exam tomorrow", None, "tagalog"
+        )
+        self.assertEqual(intent, "stress_exams")
+        self.assertIn(response, bot_logic.ENGLISH_RESPONSES["stress_exams"])
 
     # ---- LANGUAGE MATCHING (Tagalog question -> Tagalog, English -> English) ----
 
@@ -67,6 +109,7 @@ class BotLogicTests(unittest.TestCase):
         self.assertEqual(bot_logic.resolve_response_language("zzz qqq", "english"), "english")
 
     def test_english_question_gets_english_intent_response(self):
+        self._set_ai_first(False)
         response, intent, is_crisis, is_abusive = bot_logic.generate_response(
             "I am so stressed about my exam tomorrow", None, "tagalog"
         )
@@ -77,6 +120,7 @@ class BotLogicTests(unittest.TestCase):
         self.assertEqual(is_abusive, 0)
 
     def test_english_question_stays_english_even_if_setting_is_waray(self):
+        self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response(
             "I am so stressed about my exam tomorrow", None, "waray"
         )
@@ -84,6 +128,7 @@ class BotLogicTests(unittest.TestCase):
         self.assertIn(response, bot_logic.ENGLISH_RESPONSES["stress_exams"])
 
     def test_tagalog_question_gets_tagalog_intent_response(self):
+        self._set_ai_first(False)
         response, intent, is_crisis, is_abusive = bot_logic.generate_response(
             "Hindi ako nakakapag-focus, laging distracted", None, "tagalog"
         )
@@ -93,6 +138,7 @@ class BotLogicTests(unittest.TestCase):
         self.assertEqual(is_abusive, 0)
 
     def test_tagalog_question_uses_tagalog_follow_up(self):
+        self._set_ai_first(False)
         # Tagalog-bodied intent -> Tagalog na sagot at Tagalog na follow-up.
         response, intent, _, _ = bot_logic.generate_response(
             "Sobrang stress ko sa thesis namin ngayon", None, "tagalog"
@@ -101,6 +147,7 @@ class BotLogicTests(unittest.TestCase):
         self.assertIn("Mukhang mabigat", response)
 
     def test_english_question_uses_english_follow_up(self):
+        self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response(
             "I feel so much pressure and stress right now", None, "tagalog"
         )
@@ -111,6 +158,7 @@ class BotLogicTests(unittest.TestCase):
         )
 
     def test_waray_question_gets_waray_response(self):
+        self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response(
             "Hello po, maupay nga adlaw ha imo", None, "tagalog"
         )
@@ -127,6 +175,7 @@ class BotLogicTests(unittest.TestCase):
         self.assertEqual(response_tl, bot_logic.CRISIS_RESPONSE_TL)
 
     def test_tagalog_greeting_gets_tagalog_response(self):
+        self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response("kamusta ka po", None, "english")
         self.assertEqual(intent, "greetings")
         self.assertTrue(
@@ -134,16 +183,19 @@ class BotLogicTests(unittest.TestCase):
         )
 
     def test_tagalog_gratitude_gets_tagalog_response(self):
+        self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response("salamat po", None, "english")
         self.assertEqual(intent, "gratitude")
         self.assertIn(response, bot_logic.TAGALOG_RESPONSES["gratitude"])
 
     def test_english_gratitude_gets_english_response(self):
+        self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response("thank you so much", None, "tagalog")
         self.assertEqual(intent, "gratitude")
         self.assertIn(response, bot_logic.ENGLISH_RESPONSES["gratitude"])
 
     def test_tagalog_faq_answer_is_used_for_tagalog_question(self):
+        self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response("para saan ang app na ito", None, "tagalog")
         self.assertIsNone(intent)
         self.assertIn("chatbot", response)
@@ -178,6 +230,47 @@ class BotLogicTests(unittest.TestCase):
             self.assertIn("very simple", prompt)
             self.assertIn("cortisol", prompt)
             self.assertIn("short sentences", prompt)
+
+    # ---- MALINAW, ON-TOPIC, WALANG SPECIAL CHARACTERS ----
+    def test_system_prompt_requires_plain_text_and_on_topic_replies(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("special characters", prompt)
+            self.assertIn("plain sentences", prompt)
+            self.assertIn("stay on topic", prompt)
+            self.assertIn("same topic", prompt)
+
+    def test_clean_ai_text_removes_markdown_and_special_characters(self):
+        raw = "**Hello!** # Title\n1. First tip\n- Second tip\n> quote\n`code` 😊 <b>hi</b> @#$%"
+        cleaned = bot_logic._clean_ai_text(raw)
+        for bad in ("**", "#", "`", "😊", "<", ">", "@", "#", "$", "%"):
+            self.assertNotIn(bad, cleaned)
+        self.assertIn("Hello!", cleaned)
+        self.assertIn("First tip", cleaned)
+
+    def test_ai_reply_receives_conversation_history_for_follow_ups(self):
+        seen = {}
+
+        def fake_ai(user_input, language="tagalog", history=None, **kwargs):
+            seen["history"] = history
+            return "Naiintindihan kita. Ipagpatuloy natin ang tungkol sa exam mo."
+
+        self._set_ai_first(True)
+        self._original_ai_reply = bot_logic._call_ai_reply
+        bot_logic._call_ai_reply = fake_ai
+        self.addCleanup(self._restore_ai_reply)
+        history = [("Na-stress ako sa exam", "Naiintindihan kita tungkol sa exam.")]
+        response, _, _, _ = bot_logic.generate_response("paano pa", None, "tagalog", history=history)
+        self.assertEqual(seen.get("history"), history)
+        self.assertIn("exam", response)
+
+    def test_history_to_prompt_lines_keeps_only_recent_exchanges(self):
+        history = [(f"q{i}", f"a{i}") for i in range(10)]
+        lines = bot_logic._history_to_prompt_lines(history, limit=6)
+        self.assertEqual(len(lines), 12)
+        self.assertIn("q9", lines[-2])
+        self.assertIn("a9", lines[-1])
+        self.assertNotIn("q0", "\n".join(lines))
 
 
 if __name__ == "__main__":

@@ -35,6 +35,11 @@ services:
         sync: false
       - key: MENTALHEALTHWEB_OPENAI_MODEL
         value: gpt-4o-mini
+      # AI-first mode: true = ang API key AI ang sumasagot sa lahat ng normal
+      # na tanong; false = dating dataset-first behavior. Crisis/abuse ay
+      # laging hard-coded pa rin.
+      - key: MENTALHEALTHWEB_AI_FIRST
+        value: "true"
 
       # --- Database ---
       # Auto-filled kapag gumawa ka ng Render PostgreSQL database.

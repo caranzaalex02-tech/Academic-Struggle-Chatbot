@@ -1221,7 +1221,22 @@ def chat():
 
     # Generate bot response and check for abuse
     last_intent = session.get('last_intent')
-    reply, new_intent, is_crisis, is_abusive = generate_response(message, last_intent, user_language)
+    # Kunin ang huling 3 palitan para manatiling on-topic ang AI sa follow-ups.
+    history = []
+    try:
+        if is_postgres_db():
+            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=%s ORDER BY id DESC LIMIT 3", (session["user"],))
+        else:
+            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=? ORDER BY id DESC LIMIT 3", (session["user"],))
+        for row in (c.fetchall() or []):
+            try:
+                history.append((row["user_message"], row["bot_response"]))
+            except (TypeError, KeyError, IndexError):
+                history.append((row[0], row[1]))
+        history = list(reversed(history))
+    except Exception:
+        history = []
+    reply, new_intent, is_crisis, is_abusive = generate_response(message, last_intent, user_language, history=history)
     if new_intent:
         session['last_intent'] = new_intent
 
