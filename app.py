@@ -515,7 +515,11 @@ def get_profile_pic_url(pic_url):
 # ================= ROUTES =================
 @app.route("/")
 def home():
-    return redirect(url_for("login"))
+    # Landing page muna: info tungkol sa system + Proceed to Login button.
+    # Kung naka-login na, diretso na sa chatbot.
+    if "user" in session:
+        return redirect(url_for("chatbot"))
+    return render_template("landing.html")
 
 # ---- LOGIN ----
 @app.route("/login", methods=["GET","POST"])
