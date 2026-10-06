@@ -1160,19 +1160,35 @@ return out;
 function renderBotReply(text){
 if(!text) return "";
 let safe=text.replace(/\r/g,"").trim();
+// Kung may hilaw na <br> o HTML na nakalusot, gawing newline muna
+safe=safe.replace(/<br\s*\/?>/gi,"\n");
+safe=safe.replace(/<\/(p|div|li|h[1-6])>/gi,"\n");
+safe=safe.replace(/<(p|div|li|ul|ol|h[1-6])[^>]*>/gi,"\n");
 let blocks=safe.split(/\n\s*\n/);
 let html="";
+let seen=new Set();
 let i=0;
 while(i<blocks.length){
 let block=blocks[i].trim();
 if(!block){i++;continue;}
 let lines=block.split("\n").map(l=>l.trim()).filter(Boolean);
+// Tanggalin ang duplikadong linya sa loob ng block
+let uniq=[];
+lines.forEach(l=>{
+let key=l.replace(/^(\d+[.)]\s+|[-*]\s+)/,"").toLowerCase().replace(/\s+/g," ").trim();
+if(key && seen.has("line:"+key)) return;
+if(key) seen.add("line:"+key);
+uniq.push(l);
+});
+lines=uniq;
+if(!lines.length){i++;continue;}
 let isList=lines.length>0 && lines.every(l=>/^(\d+[.)]\s+|[-*]\s+)/.test(l));
 if(isList){
 let ordered=/^\d+[.)]\s+/.test(lines[0]);
 html+=ordered?"<ol>":"<ul>";
-lines.forEach(l=>{
+lines.forEach((l,idx)=>{
 let item=l.replace(/^(\d+[.)]\s+|[-*]\s+)/,"");
+if(ordered) item=(idx+1)+". "+item.replace(/^\d+[.)]\s+/,"");
 html+="<li>"+inlineFormat(item)+"</li>";
 });
 html+=ordered?"</ol>":"</ul>";

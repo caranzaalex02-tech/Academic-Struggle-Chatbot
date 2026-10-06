@@ -292,6 +292,30 @@ class BotLogicTests(unittest.TestCase):
             prompt = bot_logic._build_openai_system_prompt(language).lower()
             self.assertIn("finish your answer completely", prompt)
 
+    # ---- WALANG DUPLIKASYON, WALANG HILAW NA HTML ----
+    def test_clean_ai_text_removes_duplicate_list_items(self):
+        raw = "Narito ang mga pangungusap.\n\n1. Ang pula ay kulay ng puso.\n2. Si Juan ay magaling.\n1. Ang pula ay kulay ng puso.\n2. Si Juan ay magaling.\n3. Ang libro ay nasa mesa."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertEqual(cleaned.count("Ang pula ay kulay ng puso."), 1)
+        self.assertEqual(cleaned.count("Si Juan ay magaling."), 1)
+        self.assertIn("1. Ang pula ay kulay ng puso.", cleaned)
+        self.assertIn("2. Si Juan ay magaling.", cleaned)
+        self.assertIn("3. Ang libro ay nasa mesa.", cleaned)
+
+    def test_clean_ai_text_converts_br_tags_to_newlines(self):
+        raw = "1. Ang pula ay kulay ng puso.<br>2. Si Juan ay magaling.<br>3. Ang libro ay nasa mesa."
+        cleaned = bot_logic._clean_ai_text(raw)
+        self.assertNotIn("<br>", cleaned)
+        self.assertNotIn("&lt;", cleaned)
+        self.assertIn("Ang pula ay kulay ng puso.", cleaned)
+        self.assertIn("Si Juan ay magaling.", cleaned)
+
+    def test_system_prompt_forbids_repeats_and_html(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("never repeat", prompt)
+            self.assertIn("never output html", prompt)
+
 
 if __name__ == "__main__":
     unittest.main()

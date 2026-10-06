@@ -1103,6 +1103,29 @@ def _call_gemini_api(user_input, language='tagalog', history=None):
 
 
 
+def _dedupe_lines(text):
+    """Tanggalin ang inuulit na linya (hal. nadobleng numbered list).
+
+    Madalas umulit ang AI ng parehong items — kinukuha lang ang unang
+    paglitaw ng bawat linya para malinis ang listahan.
+    """
+    if not text:
+        return text
+    seen = set()
+    out_lines = []
+    for line in text.split("\n"):
+        key = re.sub(r"^\s*\d+[.)]\s+", "", line.strip().lower())
+        key = re.sub(r"\s+", " ", key).strip()
+        if not key:
+            out_lines.append(line)
+            continue
+        if key in seen:
+            continue
+        seen.add(key)
+        out_lines.append(line)
+    return "\n".join(out_lines)
+
+
 def _clean_ai_text(text):
     """I-normalize ang AI reply sa ChatGPT-style na malinis at professional.
 
@@ -1120,7 +1143,14 @@ def _clean_ai_text(text):
     cleaned = re.sub(r"```(?:\w+)?\n?(.*?)```", r"\1", cleaned, flags=re.DOTALL)
     # Inline code `code` -> plain
     cleaned = cleaned.replace("`", "")
-    # HTML tags tanggalin
+    # <br>, <p>, <li> at iba pang line-break tags -> newline muna
+    cleaned = re.sub(r"(?i)<\s*br\s*/?\s*>", "\n", cleaned)
+    cleaned = re.sub(r"(?i)</?\s*(p|div|li|ul|ol|h[1-6])[^>]*>", "\n", cleaned)
+    # Natitirang HTML tags tanggalin
+    cleaned = re.sub(r"<[^>]+>", "", cleaned)
+    # Escaped entities (&lt;br&gt;) i-decode
+    cleaned = cleaned.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+    cleaned = re.sub(r"(?i)<\s*br\s*/?\s*>", "\n", cleaned)
     cleaned = re.sub(r"<[^>]+>", "", cleaned)
     # Emojis at pictographs tanggalin (hindi professional tingnan)
     cleaned = re.sub(
@@ -1138,6 +1168,22 @@ def _clean_ai_text(text):
     cleaned = cleaned.replace("~", "")
     # Ayusin ang sobrang asterisks (***bold*** -> **bold**)
     cleaned = re.sub(r"\*{3,}", "**", cleaned)
+    # Tanggalin ang inuulit na linya (nadobleng numbered list galing sa AI)
+    cleaned = _dedupe_lines(cleaned)
+    # Ayusin ang numbering: gawing sunod-sunod (1. 2. 3.) ulit
+    lines = cleaned.split("\n")
+    counter = 0
+    fixed = []
+    for line in lines:
+        if re.match(r"^\s*\d+[.)]\s+", line):
+            counter += 1
+            fixed.append(re.sub(r"^\s*\d+[.)]\s+", f"{counter}. ", line))
+        else:
+            # Reset kapag may blank line o normal na paragraph sa pagitan
+            if not line.strip():
+                counter = 0
+            fixed.append(line)
+    cleaned = "\n".join(fixed)
     # Stray special chars sa simula ng linya (@, $, %, |, \) linisin
     cleaned = re.sub(r"(?m)^\s*[@$%|\\]+\s*", "", cleaned)
     # Ayusin ang whitespace: max 1 blank line sa pagitan ng paragraphs
@@ -1197,6 +1243,8 @@ def _build_openai_system_prompt(language='tagalog'):
         "- Use short sentences (ideally under 15 words each).\n"
         "- FORMAT LIKE CHATGPT (professional and easy to read): start with 1 short validating paragraph, then give 2-4 practical tips. Use **bold** only for key phrases, and use numbered steps (1. 2. 3.) or simple dashes (-) for lists. Separate ideas with blank lines so the answer looks clean and organized.\n"
         "- ALWAYS FINISH your answer completely. NEVER stop mid-sentence or leave words hanging. Every reply must end with a proper ending punctuation (. ! ?). Keep the whole reply short enough to finish: 1 paragraph plus 2-4 tips only.\n"
+        "- NEVER repeat the same sentence or list item twice. Each numbered step must be unique. If you are giving examples (like 10 sentences), number them 1 to 10 in order with NO duplicates and NO skipped numbers.\n"
+        "- NEVER output HTML tags like <br>, <p>, or <div>. Use plain blank lines to separate paragraphs.\n"
         "- Keep the formatting clean: use only **bold**, numbered lists, dashes, and plain punctuation. NEVER use hashtags, backticks, tildes, emojis, HTML, or stray symbols. The app will render the reply beautifully, so write proper markdown structure.\n"
         "- STAY ON TOPIC: answer only the user's academic concern. For follow-up messages (like yes, and, how, what else, go on), continue the SAME topic you were already discussing instead of starting a new unrelated topic.\n"
         "- Use simple sentence association: each sentence must clearly connect to the previous one so the whole reply reads as one clear answer.\n"
