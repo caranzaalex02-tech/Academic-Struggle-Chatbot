@@ -586,5 +586,242 @@ class BotLogicTests(unittest.TestCase):
         self.assertTrue(reply.rstrip()[-1] in ".!?")
 
 
+class AiProviderLimitTests(unittest.TestCase):
+    """Dapat hindi basta-basta sinasabi ng chatbot na "masyadong mabilis" ang user.
+
+    Kapag na-rate-limit lang ang isang provider, kailangang mag-retry at mag-
+    fallback muna bago magpakita ng error — at ang quota lang (naubos talaga ang
+    limit ng API key) ang ipinapakita bilang mensahe.
+    """
+
+    def setUp(self):
+        self._original_kind = bot_logic._ai_error_kind
+        self._original_delays = bot_logic._RATE_LIMIT_RETRY_DELAYS
+        bot_logic._ai_error_kind = None
+        bot_logic._RATE_LIMIT_RETRY_DELAYS = ()  # walang hintay sa mga test
+        self.addCleanup(setattr, bot_logic, "_ai_error_kind", self._original_kind)
+        self.addCleanup(setattr, bot_logic, "_RATE_LIMIT_RETRY_DELAYS", self._original_delays)
+
+    def _patch(self, name, value):
+        original = getattr(bot_logic, name)
+        setattr(bot_logic, name, value)
+        self.addCleanup(setattr, bot_logic, name, original)
+
+    def _set_groq_key(self, value):
+        original = os.environ.get("GROQ_API_KEY")
+
+        def restore():
+            if original is None:
+                os.environ.pop("GROQ_API_KEY", None)
+            else:
+                os.environ["GROQ_API_KEY"] = original
+
+        os.environ["GROQ_API_KEY"] = value
+        self.addCleanup(restore)
+
+    @staticmethod
+    def _fake_groq_module(error_for_call):
+        """Fake groq module: error_for_call(bilang, model) ang error (o None)."""
+        calls = {"count": 0, "models": []}
+
+        class FakeCompletion:
+            def __init__(self, choices):
+                self.choices = choices
+
+        class FakeChoice:
+            def __init__(self, content, finish_reason):
+                self.message = types.SimpleNamespace(content=content)
+                self.finish_reason = finish_reason
+
+        class FakeCompletions:
+            def create(self, model=None, messages=None, max_tokens=None,
+                       temperature=None, **kwargs):
+                calls["count"] += 1
+                calls["models"].append(model)
+                error = error_for_call(calls["count"], model)
+                if error:
+                    raise error
+                return FakeCompletion([FakeChoice("Kaya mo ito. Magpahinga muna.", "stop")])
+
+        class FakeChat:
+            def __init__(self):
+                self.completions = FakeCompletions()
+
+        class FakeClient:
+            def __init__(self, api_key=None):
+                self.chat = FakeChat()
+
+        return types.SimpleNamespace(Groq=FakeClient), calls
+
+    # ---- PAGKAKAKILALA NG ERROR ----
+
+    def test_classify_distinguishes_rate_limit_from_quota(self):
+        self.assertEqual(
+            bot_logic._classify_ai_error(
+                "Error code: 429 - Rate limit reached for model on requests per minute"
+            ),
+            "rate_limit",
+        )
+        self.assertEqual(
+            bot_logic._classify_ai_error(
+                "Rate limit reached for model in organization on tokens per day"
+            ),
+            "quota",
+        )
+        self.assertEqual(
+            bot_logic._classify_ai_error("insufficient_quota: you exceeded your current quota"),
+            "quota",
+        )
+
+    def test_classify_ignores_unrelated_errors_that_contain_rate(self):
+        # Dati: `'rate' in str(e)` -> "failed to generate" ay nag-fi-false positive.
+        self.assertIsNone(bot_logic._classify_ai_error("Failed to generate a response"))
+        self.assertIsNone(bot_logic._classify_ai_error("Error while generating the reply"))
+        self.assertIsNone(bot_logic._classify_ai_error("invalid_api_key"))
+
+    def test_rate_limit_error_uses_status_code_even_without_keywords(self):
+        error = Exception("unexpected failure")
+        error.status_code = 429
+        self.assertEqual(bot_logic._classify_ai_error(error), "rate_limit")
+
+    # ---- GROQ (PRIMARY PROVIDER) ----
+
+    def test_groq_rate_limit_falls_through_instead_of_scolding_the_user(self):
+        class RateLimited(Exception):
+            status_code = 429
+
+        fake_module, calls = self._fake_groq_module(
+            lambda n, model: RateLimited("Error code: 429 - rate limit reached")
+        )
+        self._patch("_import_groq", lambda: fake_module)
+        self._set_groq_key("gsk-test-1234567890")
+
+        reply = bot_logic._call_groq_api("Paano ako mag-focus?", "tagalog")
+
+        # Wala nang "Masyadong mabilis..." na sagot — None para mag-fallback.
+        self.assertIsNone(reply)
+        self.assertEqual(bot_logic._ai_error_kind, "rate_limit")
+
+    def test_groq_falls_back_to_the_next_model_when_the_primary_is_limited(self):
+        class QuotaReached(Exception):
+            status_code = 429
+
+        primary = "qwen/qwen3.8-27b"
+        fake_module, calls = self._fake_groq_module(
+            lambda n, model: (
+                QuotaReached("Rate limit reached on tokens per day")
+                if model == primary else None
+            )
+        )
+        self._patch("_import_groq", lambda: fake_module)
+        self._set_groq_key("gsk-test-1234567890")
+        self._patch("_groq_models", lambda: [primary, "openai/gpt-oss-120b"])
+
+        reply = bot_logic._call_groq_api("Paano ako mag-focus?", "tagalog")
+
+        # Nasagot pa rin gamit ang pangalawang model, kahit ubos na ang quota ng una.
+        self.assertIsNotNone(reply)
+        self.assertIn("Kaya mo ito", reply)
+        self.assertEqual(calls["models"], [primary, "openai/gpt-oss-120b"])
+        self.assertIsNone(bot_logic._ai_error_kind)
+
+    def test_transient_rate_limit_is_retried_and_then_answered(self):
+        bot_logic._RATE_LIMIT_RETRY_DELAYS = (0, 0)
+
+        class RateLimited(Exception):
+            status_code = 429
+
+        fake_module, calls = self._fake_groq_module(
+            lambda n, model: RateLimited("Error code: 429 - rate limit reached") if n < 3 else None
+        )
+        self._patch("_import_groq", lambda: fake_module)
+        self._set_groq_key("gsk-test-1234567890")
+
+        reply = bot_logic._call_groq_api("Paano ako mag-focus?", "tagalog")
+
+        self.assertEqual(calls["count"], 3)  # 2 kabiguan + 1 tagumpay
+        self.assertIsNotNone(reply)
+        self.assertIn("Kaya mo ito", reply)
+        self.assertIsNone(bot_logic._ai_error_kind)
+
+    def test_quota_error_is_retried_once_per_model_only(self):
+        bot_logic._RATE_LIMIT_RETRY_DELAYS = (0, 0)
+
+        class QuotaReached(Exception):
+            status_code = 429
+
+        fake_module, calls = self._fake_groq_module(
+            lambda n, model: QuotaReached("Rate limit reached on tokens per day")
+        )
+        self._patch("_import_groq", lambda: fake_module)
+        self._set_groq_key("gsk-test-1234567890")
+        self._patch("_groq_models", lambda: ["qwen/qwen3.8-27b", "openai/gpt-oss-120b"])
+
+        reply = bot_logic._call_groq_api("Paano ako mag-focus?", "tagalog")
+
+        self.assertIsNone(reply)             # diretso sa fallback, walang hintay
+        self.assertEqual(calls["count"], 2)  # isang tawat bawat model, walang retry
+        self.assertEqual(bot_logic._ai_error_kind, "quota")
+
+    # ---- BUONG CHAIN (Groq -> OpenAI -> Gemini) ----
+
+    def test_chain_shows_quota_notice_when_every_provider_is_out_of_quota(self):
+        def limited(*args, **kwargs):
+            bot_logic._note_ai_error("quota")
+            return None
+
+        self._patch("_groq_available", lambda: True)
+        self._patch("_call_groq_api", limited)
+        self._patch("_openai_available", lambda: False)
+        self._patch("_gemini_available", lambda: False)
+
+        reply = bot_logic._call_ai_reply("Paano ako mag-focus?", "tagalog")
+
+        self.assertIsNotNone(reply)
+        self.assertIn("limit", reply.lower())
+        self.assertNotIn("masyadong mabilis", reply.lower())
+
+    def test_chain_falls_back_to_dataset_when_only_rate_limited(self):
+        def limited(*args, **kwargs):
+            bot_logic._note_ai_error("rate_limit")
+            return None
+
+        self._patch("_groq_available", lambda: True)
+        self._patch("_call_groq_api", limited)
+        self._patch("_openai_available", lambda: False)
+        self._patch("_gemini_available", lambda: False)
+
+        # None = babalik sa dataset/FAQ para may sagot pa rin ang chatbot.
+        reply = bot_logic._call_ai_reply("Paano ako mag-focus?", "tagalog")
+        self.assertIsNone(reply)
+
+    def test_chain_uses_the_next_provider_when_the_first_is_rate_limited(self):
+        def rate_limited(*args, **kwargs):
+            bot_logic._note_ai_error("rate_limit")
+            return None
+
+        self._patch("_groq_available", lambda: True)
+        self._patch("_call_groq_api", rate_limited)
+        self._patch("_openai_available", lambda: True)
+        self._patch("_run_openai_chat", lambda *a, **k: "Galing ito sa OpenAI.")
+        self._patch("_gemini_available", lambda: False)
+
+        reply = bot_logic._call_ai_reply("Paano ako mag-focus?", "tagalog")
+
+        self.assertEqual(reply, "Galing ito sa OpenAI.")
+
+    def test_error_state_is_reset_for_the_next_question(self):
+        bot_logic._note_ai_error("quota")
+        self.assertEqual(bot_logic._ai_error_kind, "quota")
+
+        self._patch("_groq_available", lambda: True)
+        self._patch("_call_groq_api", lambda *a, **k: "Normal na sagot.")
+        self._patch("_openai_available", lambda: False)
+        self._patch("_gemini_available", lambda: False)
+
+        reply = bot_logic._call_ai_reply("Kumusta ka?", "tagalog")
+        self.assertEqual(reply, "Normal na sagot.")
+
+
 if __name__ == "__main__":
     unittest.main()

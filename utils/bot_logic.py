@@ -5,6 +5,7 @@ import random
 import re
 import sqlite3
 import logging
+import time
 from pathlib import Path
 
 try:  # Normal package import (Flask app / pytest)
@@ -936,6 +937,148 @@ def _groq_available():
     return _import_groq() is not None and _get_groq_api_key() is not None
 
 
+# ----------------------------
+# AI PROVIDER LIMIT HANDLING
+# ----------------------------
+# Kung naubos ang limit ng provider (429 rate limit o quota/tokens), itinatala
+# natin ang dahilan dito at ipinapakita lang ito sa user PAGKAPUNO ng lahat ng
+# provider sa chain (Groq -> OpenAI -> Gemini). Dati, bumabalik agad ang
+# "masyadong mabilis" na sagot kahit may pang-fallback na provider, kaya napupunta
+# ang tanong sa error message imbes na sa aktwal na sagot.
+_ai_error_kind = None
+
+# Gaano karamihing beses uulitin ang tawag kapag TRANSIENT na rate limit lang
+# (hal. requests/minute sa Groq free tier). Ito ay sandali lang — kaya imbes na
+# sabihing "masyadong mabilis" ang user, maghintay at ulitin na lang natin.
+_RATE_LIMIT_RETRY_DELAYS = (2.0, 4.0)
+
+
+def _classify_ai_error(error, status_code=None):
+    """Ibalik ang "rate_limit", "quota", o None mula sa error ng AI provider.
+
+    * "rate_limit" = masyadong mabilis ang mga hinihiling (429) — bumabalik ito
+      sa loob ng ilang segundo kaya nang i-retry.
+    * "quota" = naubos ang limit/tokens ng API key (hal. "tokens per day",
+      "insufficient_quota") — hindi ito aayos sa ilang segundo lang.
+
+    Dati ay sapat na ang `'rate' in str(e)` kaya nagfi-false-positive ito sa
+    kahit anong error na naglalaman ng "rate" (hal. "failed to generate").
+    """
+    text = str(error).lower()
+    if status_code is None:
+        status_code = getattr(error, "status_code", None)
+    error_code = str(getattr(error, "code", "") or "").lower()
+
+    if "insufficient_quota" in text or "insufficient_quota" in error_code:
+        return "quota"
+
+    quota_markers = (
+        "tokens per day", "requests per day", "per day limit", "daily limit",
+        "usage limit", "quota exceeded", "exceeded your current quota",
+        "tokens_per_day", "requests_per_day",
+    )
+    if any(marker in text or marker in error_code for marker in quota_markers):
+        return "quota"
+
+    rate_markers = (
+        "rate limit", "rate_limit", "too many requests",
+        "requests per minute", "tokens per minute",
+        "resource exhausted", "resource_exhausted", "429",
+    )
+    if (
+        status_code == 429
+        or type(error).__name__ == "RateLimitError"
+        or any(marker in text or marker in error_code for marker in rate_markers)
+    ):
+        return "rate_limit"
+
+    return None
+
+
+def _note_ai_error(kind):
+    """Itala ang uri ng error para magamit ng _call_ai_reply sa dulo ng chain."""
+    global _ai_error_kind
+    if not kind:
+        return
+    # Mas seryoso ang quota — siya ang laging ipapakita kung pareho ang nangyari.
+    if _ai_error_kind is None or kind == "quota":
+        _ai_error_kind = kind
+
+
+def _clear_ai_error():
+    """Burahin ang naunang limit error kapag may provider na nakasagot na."""
+    global _ai_error_kind
+    _ai_error_kind = None
+
+
+def _ai_error_reply(language, kind):
+    """Mensahe para sa user kapag sumuko na ang lahat ng AI provider."""
+    if kind == "quota":
+        return _language_pick(
+            language,
+            "The AI service has reached its limit for now. Please try again later or tomorrow, and please inform the administrator.",
+            "Naabutan ng limit ang AI service ngayon. Subukan muli mamaya o bukas, at paki-abiso sa administrator.",
+            "Naabutan han limit an AI service yana. Pag-try utro pagkamao o dumaha, ngan alayon pagsumat ha administrator.",
+        )
+    return _language_pick(
+        language,
+        "Too many questions at once. Let's pause for a moment and try again in a few seconds.",
+        "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo.",
+        "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro.",
+    )
+
+
+def _create_chat_completion(client, model, messages, max_tokens=600, temperature=0.4):
+    """.chat.completions.create na may retry kapag transient na rate limit lang.
+
+    Parehong gamit ito ng Groq at OpenAI (pareho ang openai-compatible na API).
+    Kapag quota ang problema, walang retry — diretso itatapon para makapag-
+    fallback sa susunod na provider.
+    """
+    delays = _RATE_LIMIT_RETRY_DELAYS
+    attempts = len(delays) + 1
+    for attempt in range(attempts):
+        try:
+            return client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature,
+            )
+        except Exception as e:
+            kind = _classify_ai_error(e)
+            if kind != "rate_limit" or attempt >= len(delays):
+                raise
+            wait = delays[attempt]
+            logging.warning(
+                "Rate limited by the AI provider (attempt %d/%d) — waiting %.1fs then retrying.",
+                attempt + 1, attempts, wait,
+            )
+            time.sleep(wait)
+
+
+def _groq_models():
+    """Modelong sinusubukan ng Groq, primary muna.
+
+    Bawat Groq model ay may SARILING free-tier allowance (hal. 200K tokens at
+    1K requests kada araw para sa `qwen/qwen3.8-27b`). Kapag naubos ang quota
+    ng primary model, sinusubukan ang iba bago ibalik ang error sa user.
+    Idagdag ang sariling listahan sa GROQ_MODEL_FALLBACKS (comma-separated).
+    """
+    primary = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
+    configured = [
+        model.strip()
+        for model in os.environ.get("GROQ_MODEL_FALLBACKS", "").split(",")
+        if model.strip()
+    ]
+    extras = configured or ["openai/gpt-oss-120b", "openai/gpt-oss-20b"]
+    models = [primary]
+    for model in extras:
+        if model not in models:
+            models.append(model)
+    return models
+
+
 def _call_groq_api(user_input, language='tagalog', history=None):
     """Calls the Groq API (Llama 3.1) as the primary AI fallback."""
     if not _groq_available():
@@ -952,7 +1095,6 @@ def _call_groq_api(user_input, language='tagalog', history=None):
         logging.info(f"Attempting to use Groq API key: {key_preview}")
 
         client = _import_groq().Groq(api_key=api_key)
-        model = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
 
         system_prompt = _build_openai_system_prompt(language)
         messages = [
@@ -965,37 +1107,47 @@ def _call_groq_api(user_input, language='tagalog', history=None):
                 messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
         messages.append({"role": "user", "content": user_input})
 
-        completion = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=600,
-            temperature=0.4,
-        )
+        for model in _groq_models():
+            try:
+                completion = _create_chat_completion(client, model, messages)
+            except Exception as model_error:
+                kind = _classify_ai_error(model_error)
+                if not kind:
+                    raise  # hindi limit error — ipapasa sa pangunahing handler
+                # Quota/rate limit lang ng model na ito — baka may allowance pa
+                # ang susunod na model, kaya doon tayo sa susubukan ng next.
+                _note_ai_error(kind)
+                logging.warning(
+                    "Groq model %s is limited (%s); trying the next Groq model.",
+                    model, kind,
+                )
+                continue
 
-        if completion.choices and completion.choices[0].message:
-            choice = completion.choices[0]
-            partial = (choice.message.content or "").strip()
-            if partial and "length" in str(getattr(choice, "finish_reason", "")).lower():
-                logging.info("Groq reply was cut off (finish_reason=length); requesting a continuation.")
-                extra = _request_chat_continuation(client, model, messages, partial)
-                if extra:
-                    partial = partial + extra
-            if partial:
-                return _clean_ai_text(partial)
+            if completion.choices and completion.choices[0].message:
+                choice = completion.choices[0]
+                partial = (choice.message.content or "").strip()
+                if partial and "length" in str(getattr(choice, "finish_reason", "")).lower():
+                    logging.info("Groq reply was cut off (finish_reason=length); requesting a continuation.")
+                    extra = _request_chat_continuation(client, model, messages, partial)
+                    if extra:
+                        partial = partial + extra
+                if partial:
+                    # Tagumpay ang model na ito — burahin ang naunang limit error.
+                    _clear_ai_error()
+                    return _clean_ai_text(partial)
 
-        logging.warning("Groq response was empty or malformed.")
+            logging.warning("Groq response from %s was empty or malformed.", model)
+
         return None
 
     except Exception as e:
         logging.exception(f"Groq API call failed: {e}")
-        error_type = type(e).__name__
-        if 'rate' in str(e).lower() or 'quota' in str(e).lower():
-            return _language_pick(
-                language,
-                "Too many questions at once. Let's pause for a moment and try again in a few seconds.",
-                "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo.",
-                "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro.",
-            )
+        kind = _classify_ai_error(e)
+        if kind:
+            # Huwag nang ibalik agad ang error sa user — hayaang subukan muna
+            # ang susunod na provider sa chain (o ang dataset fallback).
+            _note_ai_error(kind)
+            logging.warning("Groq is limited (%s); moving to the next AI provider.", kind)
         return None
 
 
@@ -1073,6 +1225,13 @@ def _call_gemini_api(user_input, language='tagalog', history=None):
 
     except Exception as e:
         logging.exception(f"Google Gemini API call failed: {e}")
+        kind = _classify_ai_error(e)
+        if kind:
+            # Rate limit/quota lang — tapos na ang chain, ipapakita na lang ito
+            # ng _call_ai_reply kung kinakailangan.
+            _note_ai_error(kind)
+            logging.warning("Gemini is limited (%s); ending the AI chain.", kind)
+            return None
         error_type = type(e).__name__
         logging.error(f"Gemini API call failed with a {error_type}. This will be shown to the user.")
 
@@ -1567,12 +1726,7 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
         if intent:
             messages.append({"role": "assistant", "content": f"Detected intent: {intent}."})
 
-        completion = client.chat.completions.create(
-            model=model,
-            messages=messages,
-            max_tokens=600,
-            temperature=0.4,
-        )
+        completion = _create_chat_completion(client, model, messages)
 
         if completion.choices and completion.choices[0].message:
             choice = completion.choices[0]
@@ -1588,24 +1742,17 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
         logging.warning("OpenAI response was empty or malformed.")
         return None
 
-    except openai_module.RateLimitError as e:
-        logging.error("OpenAI quota/rate limit error: %s", e)
-        # Check if the error is specifically about quota
-        if 'insufficient_quota' in str(e).lower():
-            return _language_pick(
-                language,
-                "Sorry, the AI service is temporarily unavailable because the credits ran out. Please inform the administrator.",
-                "Pasensya, pansamantalang hindi available ang AI service dahil naubos na ang credits. Paki-abiso sa administrator.",
-                "Pasensya, an AI service in diri available yana tungod kay naubos na an credits. Alayon pagsumat ha administrator.",
-            )
-        # Otherwise, it's a rate limit issue (too many requests too fast)
-        return _language_pick(
-            language,
-            "Too many questions at once. Let's pause for a moment and try again in a few seconds.",
-            "Masyadong mabilis ang mga tanong. Magpahinga muna tayo sandali at subukan ulit pagkatapos ng ilang segundo.",
-            "An AI service in nagpapahuway makadiyot. Alayon paghulat hin pipira ka segundo ngan pag-try utro.",
-        )
     except Exception as e:
+        # Dati: `except openai_module.RateLimitError` — nagiging NameError iyon
+        # kapag hindi ma-import ang openai bago pa nangyari ang error, kaya
+        # napupunta ang lahat ng error sa generic handler.
+        kind = _classify_ai_error(e)
+        if kind:
+            logging.error("OpenAI %s error: %s", kind, e)
+            # Ipagpatuloy sa susunod na provider (Gemini) imbes na agad na
+            # sabihing "masyadong mabilis" ang user.
+            _note_ai_error(kind)
+            return None
         logging.exception(f"OpenAI API call failed: {e}")
         return None
 
@@ -1627,6 +1774,10 @@ def _call_ai_reply(user_input, language='tagalog', history=None, **kwargs):
     Nagbabalik ng AI reply kung mayroon, o None kapag walang available na AI
     (para mag-fallback sa dataset).
     """
+    global _ai_error_kind
+    # Bagong tanong = bagong pagkakataon para sa mga provider.
+    _ai_error_kind = None
+
     # Primary: Groq (libre, mabilis) — ito ang GROQ_API_KEY sa Render.
     if _groq_available():
         groq_reply = _call_groq_api(user_input, language, history=history)
@@ -1645,6 +1796,18 @@ def _call_ai_reply(user_input, language='tagalog', history=None, **kwargs):
         if gemini_reply:
             return gemini_reply
 
+    # Walang nakasagot na provider. Dalawang bagay lang ang posibleng ipakita:
+    # * "quota"     -> naubos talaga ang limit/tokens ng API key; kailangang
+    #                   malaman ito ng user at ng administrator (hindi aayos sa
+    #                   ilang segundo lang).
+    # * "rate_limit"-> pagkatapos ng retry, pumapayag pa rin; mag-fallback na lang
+    #                   sa dataset para may sagot pa rin ang chatbot (walang
+    #                   "masyadong mabilis" na pambati sa bawat tanong).
+    if _ai_error_kind == "quota":
+        logging.error("All AI providers are out of quota/limits for this request.")
+        return _ai_error_reply(language, _ai_error_kind)
+    if _ai_error_kind == "rate_limit":
+        logging.warning("All AI providers are rate-limited; using the dataset fallback.")
     return None
 
 
