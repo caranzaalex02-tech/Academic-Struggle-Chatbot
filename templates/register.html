@@ -11,306 +11,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
   </head>
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: background-color 0.3s;
-        }
-        .password-container input {
-            padding-right: 54px;
-        }
-        .auth-box input::placeholder, .auth-box select, .auth-box select option[disabled] {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        .auth-box input:focus, .auth-box select:focus {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        .auth-box button {
-            width: 100%;
-            padding: 12px;
-            background: #00c6ff;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s;
-        }
-        .auth-box button:hover { background: #0072ff; }
-        .error { color: #ff6b6b; margin-bottom: 10px; font-size: 14px; }
-        .switch { margin-top: 15px; font-size: 14px; }
-        .switch a { color: #00c6ff; text-decoration: none; font-weight: 500; }
-
-        /* Password additions */
-        .password-container {
-            position: relative;
-        }
-        .password-container span {
-            position: absolute;
-            right: 15px;
-            top: 66%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            user-select: none;
-            color: #aaa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .password-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: -5px;
-            margin-bottom: 10px;
-        }
-        #passwordHint {
-            font-size: 12px;
-            color: #aaa;
-            text-align: left;
-        }
-        #suggestBtn {
-            font-size: 12px;
-            color: #00c6ff;
-            background: none;
-            border: none;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        /* New styles for side-by-side fields */
-        .form-row {
-            display: flex;
-            gap: 10px; /* Space between fields */
-            margin: 10px 0;
-        }
-        .form-row > * {
-            margin: 0 !important; /* Override default margin for inputs inside a row */
-        }
-
-        /* New Transition Styles */
-        .auth-box h2, .auth-box .error, .auth-box form, .auth-box .switch {
-            opacity: 0;
-            animation: fadeInUp 0.5s ease-out 0.4s forwards; /* Delay this animation */
-        }
-        .auth-box {
-            animation: rotateIn 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            transition: transform 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045), opacity 0.6s;
-        }
-        .auth-box.is-flipping-out {
-            transform: rotateY(90deg) scale(0.9);
-            opacity: 0;
-        }
-        .auth-box h2 { animation-delay: 0.1s; }
-        .auth-box .error { animation-delay: 0.2s; }
-        .auth-box form { animation-delay: 0.3s; }
-        .auth-box .switch { animation-delay: 0.4s; }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* New keyframes for the box rotation */
-        @keyframes rotateIn {
-            from {
-                transform: rotateY(-90deg) scale(0.9);
-                opacity: 0;
-            }
-            to {
-                transform: rotateY(0deg) scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* -----------------------------------------------
-           Terms & Conditions Modal – Dark Glassmorphism
-           Matches registration page design
-        ----------------------------------------------- */
-        /* Ensure modal is above everything & vertically centered */
-        #termsModal {
-            z-index: 9999 !important;
-        }
-        /* Center modal vertically only when visible */
-        #termsModal.show {
-            display: flex !important;
-            align-items: center !important;
-        }
-        .modal-backdrop {
-            z-index: 9998 !important;
-            background: rgba(0, 0, 0, 0.75) !important;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-        }
-        #termsModal .modal-dialog {
-            max-width: 700px;
-            margin: 0 auto;
-            width: 100%;
-        }
-        #termsModal .modal-content {
-            background: linear-gradient(145deg, rgba(20, 30, 48, 0.98), rgba(15, 23, 42, 0.98));
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(0, 198, 255, 0.35);
-            border-radius: 16px;
-            box-shadow: 0 0 50px rgba(0, 198, 255, 0.25), 0 20px 60px rgba(0, 0, 0, 0.6);
-            color: #e2e8f0;
-            overflow: hidden;
-        }
-        #termsModal .modal-header {
-            background: linear-gradient(135deg, rgba(0, 198, 255, 0.15), rgba(0, 114, 255, 0.1));
-            border-bottom: 1px solid rgba(0, 198, 255, 0.25);
-            padding: 18px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        #termsModal .modal-title {
-            color: #fff !important;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            font-size: 1.25rem;
-            letter-spacing: 0.01em;
-        }
-        #termsModal .modal-header .close {
-            padding: 0;
-            margin: 0;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: #ccc;
-            font-size: 20px;
-            font-weight: 300;
-            line-height: 1;
-            text-shadow: none;
-            opacity: 0.85;
-            transition: all 0.25s ease;
-            outline: none;
-        }
-        #termsModal .modal-header .close:hover {
-            background: rgba(255, 100, 100, 0.2);
-            border-color: rgba(255, 100, 100, 0.5);
-            color: #ff6b6b;
-            opacity: 1;
-            transform: rotate(90deg);
-        }
-        #termsModal .modal-header .close span {
-            display: block;
-            line-height: 1;
-        }
-        #termsModal .modal-body {
-            padding: 22px 28px;
-            color: #cbd5e1;
-            font-size: 0.93rem;
-            line-height: 1.7;
-            max-height: 55vh;
-            overflow-y: auto;
-        }
-        #termsModal .modal-body p {
-            margin-bottom: 14px;
-        }
-        #termsModal .modal-body ul {
-            padding-left: 20px;
-            margin-bottom: 14px;
-        }
-        #termsModal .modal-body ul li {
-            margin-bottom: 10px;
-            color: #b0bec5;
-        }
-        #termsModal .modal-body ul li strong {
-            color: #00c6ff;
-            font-weight: 600;
-        }
-        /* Scrollbar for modal body */
-        #termsModal .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-        #termsModal .modal-body::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 3px;
-        }
-        #termsModal .modal-body::-webkit-scrollbar-thumb {
-            background: rgba(0, 198, 255, 0.35);
-            border-radius: 3px;
-        }
-        #termsModal .modal-body::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 198, 255, 0.55);
-        }
-        #termsModal .modal-footer {
-            background: rgba(0, 0, 0, 0.2);
-            border-top: 1px solid rgba(0, 198, 255, 0.2);
-            padding: 14px 24px;
-            display: flex;
-            justify-content: flex-end;
-        }
-        #termsModal .modal-footer .btn-secondary {
-            background: linear-gradient(135deg, #00c6ff, #0072ff);
-            border: none;
-            border-radius: 8px;
-            padding: 10px 28px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
-        }
-        #termsModal .modal-footer .btn-secondary:hover {
-            background: linear-gradient(135deg, #33d4ff, #1a8cff);
-            box-shadow: 0 6px 22px rgba(0, 198, 255, 0.5);
-            transform: translateY(-2px);
-        }
-        /* Fade animation for modal */
-        #termsModal.fade .modal-dialog {
-            transform: translateY(-30px);
-            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
-        }
-        #termsModal.show .modal-dialog {
-            transform: translateY(0);
-        }
-        /* Responsive */
-        @media (max-width: 600px) {
-            #termsModal .modal-dialog {
-                margin: 0 12px;
-            }
-            #termsModal .modal-body {
-                padding: 16px 18px;
-                max-height: 50vh;
-            }
-            #termsModal .modal-header {
-                padding: 14px 18px;
-            }
-            #termsModal .modal-footer {
-                padding: 12px 18px;
-            }
-        }
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-</head>
-
 <body>
 
 <div class="auth-box">
-    <img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo" style="width: 80px; margin-bottom: 15px;">
+    <div class="logo-wrap">
+        <img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo">
+    </div>
     <h2>Create Account</h2>
 
     {% if error %}
@@ -319,11 +25,11 @@
 
     <form method="POST" autocomplete="off">
         <div class="form-row">
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group">
                 <label for="first_name">First Name</label>
                 <input type="text" id="first_name" name="first_name" placeholder="e.g., Juan" required oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g,'').replace(/^\w/,c => c.toUpperCase())">
             </div>
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group">
                 <label for="last_name">Last Name</label>
                 <input type="text" id="last_name" name="last_name" placeholder="e.g., Dela Cruz" required oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g,'').replace(/^\w/,c => c.toUpperCase())">
             </div>
@@ -347,11 +53,11 @@
             <button type="button" id="suggestBtn">Suggest</button>
         </div>
         <div class="form-row">
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group">
                 <label for="age">Age</label>
                 <input type="number" id="age" name="age" placeholder="e.g., 21" min="13" max="120" required>
             </div>
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group">
                 <label for="gender">Gender</label>
                 <select id="gender" name="gender" required>
                     <option value="" disabled selected>Select Gender</option>
@@ -363,7 +69,7 @@
             </div>
         </div>
         <div class="form-row">
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group">
                 <label for="course">College/Department</label>
                 <select id="course" name="course" required>
                     <option value="" disabled selected>Select your college</option>
@@ -378,18 +84,18 @@
                     <option value="College of Technology">College of Technology</option>
                 </select>
             </div>
-            <div class="form-group" style="flex: 1;">
+            <div class="form-group">
                 <label for="student_id">Student ID</label>
                 <input type="text" id="student_id" name="student_id" placeholder="e.g., 23-0768" required pattern="\d{2}-\d{4}" maxlength="7" autocomplete="off" inputmode="numeric" oninput="let v=this.value.replace(/[^0-9]/g,'');if(v.length>2)v=v.slice(0,2)+'-'+v.slice(2,6);this.value=v.slice(0,7)" onkeydown="if(this.value.length===3&&event.key==='Backspace'){this.value=this.value.slice(0,2);event.preventDefault()}" title="Format: 2 digits, dash, 4 digits (e.g., 23-0768)">
             </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; text-align: left;">
-            <input type="checkbox" id="accept_terms" name="accept_terms" value="yes" required style="width: 16px; height: 16px; flex-shrink: 0; cursor: pointer; margin: 0;">
-            <label for="accept_terms" style="color: #ccc; font-size: 14px; margin: 0; cursor: pointer;">I accept the 
-                <a href="#" data-toggle="modal" data-target="#termsModal" style="color: #00c6ff;">Terms and Conditions</a>
+        <div class="form-check">
+            <input type="checkbox" id="accept_terms" name="accept_terms" value="yes" required class="form-check-input">
+            <label for="accept_terms" class="form-check-label">I accept the 
+                <a href="#" data-toggle="modal" data-target="#termsModal">Terms and Conditions</a>
             </label>
         </div>
-        <button type="submit">Register</button>
+        <button type="submit" class="btn btn-p">Register</button>
     </form>
 
     <p class="switch">

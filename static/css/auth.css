@@ -63,6 +63,13 @@ body {
     font-family: 'Inter', 'Segoe UI', sans-serif;
     color: var(--text-primary);
     background: linear-gradient(160deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+    position: relative;
+    padding: 40px 20px;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
 
 /* ===== Forms ===== */
 .auth-box form {
@@ -120,6 +127,44 @@ body {
 .form-group select option {
     color: var(--text-primary);
     background: #fff;
+}
+
+/* Side-by-side fields */
+.form-row {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.form-row > * {
+    flex: 1;
+    margin: 0 !important;
+}
+
+/* Password container (register page) */
+.password-container {
+    position: relative;
+}
+
+.password-container input {
+    padding-right: 48px;
+}
+
+.password-container span {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-container span:hover {
+    color: var(--text-secondary);
 }
 
 /* Password wrapper */
@@ -229,15 +274,6 @@ body {
     width: 100%;
     padding: 14px;
     margin-top: 6px;
-}
-
-
-    position: relative;
-    padding: 40px 20px;
-    overflow-x: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
 }
 
 /* ============================================
