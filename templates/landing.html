@@ -11,7 +11,13 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{min-height:100vh;font-family:'Poppins',sans-serif;background:#0f2027 url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2560&q=80') center/cover fixed;color:#fff}
 body::before{content:'';position:fixed;inset:0;background:rgba(15,32,39,.84);z-index:1}
-.wrap{position:relative;z-index:2;max-width:960px;margin:0 auto;padding:32px 20px 60px}
+
+/* ===== SPLIT LAYOUT: landing sa KALIWA, login sa KANAN ===== */
+.split{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:32px 20px 60px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login" "features login";gap:24px;align-items:start}
+.landing-side{grid-area:landing;min-width:0}
+.features{grid-area:features;min-width:0}
+.login-side{grid-area:login;position:sticky;top:24px;align-self:start;min-width:0}
+
 .hero{text-align:center;padding:30px 10px 6px}
 .logo-frame{width:120px;height:120px;margin:0 auto 16px;border-radius:50%;padding:6px;background:rgba(255,255,255,.92);box-shadow:0 0 0 4px rgba(0,198,255,.35),0 10px 30px rgba(0,0,0,.45)}
 .logo-frame img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
@@ -20,29 +26,57 @@ body::before{content:'';position:fixed;inset:0;background:rgba(15,32,39,.84);z-i
 .hero h1 span{color:#00c6ff}
 .sub{color:rgba(255,255,255,.82);max-width:640px;margin:0 auto 22px;line-height:1.7;font-size:clamp(.9rem,2.4vw,1.02rem)}
 .cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:600;font-size:1rem}
+.btn{display:inline-flex;align-items:center;gap:10px;text-decoration:none;padding:14px 32px;border-radius:12px;font-weight:600;font-size:1rem;border:none;cursor:pointer;font-family:'Poppins',sans-serif}
 .btn-p{background:linear-gradient(135deg,#00c6ff,#0072ff);color:#fff}
 .btn-g{border:1px solid rgba(255,255,255,.3);color:#fff;background:rgba(255,255,255,.06)}
 .note{text-align:center;font-size:12px;color:rgba(255,255,255,.6);margin-top:10px}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:28px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:14px}
 .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:20px 16px}
 .card i{font-size:1.4rem;color:#00c6ff}
 .card h3{font-size:.95rem;margin:10px 0 6px}
 .card p{font-size:.83rem;color:rgba(255,255,255,.75);line-height:1.65}
+/* ===== LOGIN PANEL (kanang side) ===== */
+.auth-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:22px;padding:30px 26px 26px;box-shadow:0 24px 60px rgba(0,0,0,.5);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-align:center}
+.auth-card .logo-wrap{width:84px;height:84px;margin:0 auto 14px;border-radius:50%;padding:5px;background:rgba(255,255,255,.92);box-shadow:0 0 0 4px rgba(0,198,255,.3),0 10px 26px rgba(0,0,0,.4)}
+.auth-card .logo-wrap img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
+.auth-card h2{font-size:1.28rem;line-height:1.3;margin-bottom:6px}
+.auth-card .subtitle{font-size:.86rem;color:rgba(255,255,255,.7);margin-bottom:18px;line-height:1.6}
+.auth-card form{text-align:left}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.82rem;font-weight:600;color:rgba(255,255,255,.85);margin-bottom:6px;letter-spacing:.01em}
+.form-group input{width:100%;padding:13px 15px;border-radius:12px;border:1.5px solid rgba(255,255,255,.22);outline:none;font-size:.94rem;font-family:'Poppins',sans-serif;background:rgba(255,255,255,.95);color:#0f2027;transition:border-color .2s ease,box-shadow .2s ease}
+.form-group input:focus{border-color:#00c6ff;box-shadow:0 0 0 4px rgba(0,198,255,.22)}
+.form-group input::placeholder{color:#6b7280}
+.password-wrapper{position:relative}
+.password-wrapper input{padding-right:50px}
+.toggle-password{position:absolute;top:50%;right:12px;transform:translateY(-50%);width:30px;height:30px;background:rgba(15,32,39,.08);border:1px solid rgba(15,32,39,.15);border-radius:50%;color:#0f2027;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;transition:background .2s ease,border-color .2s ease}
+.toggle-password:hover{background:rgba(15,32,39,.16);border-color:#00c6ff}
+.toggle-password svg{width:17px;height:17px}
+.auth-card .btn{width:100%;justify-content:center;padding:14px 24px;font-size:1rem}
+.switch{margin-top:16px;font-size:.87rem;color:rgba(255,255,255,.72);text-align:center}
+.switch a{color:#00e5ff;font-weight:600;text-decoration:none}
+.switch a:hover{text-decoration:underline}
+.flash-message{padding:12px 14px;margin-bottom:14px;border-radius:12px;font-size:.86rem;text-align:left;line-height:1.5;word-break:break-word;background:rgba(0,198,255,.12);color:#cffafe;border:1px solid rgba(0,198,255,.32)}
+.flash-success{background:rgba(74,222,128,.16);color:#bbf7d0;border:1px solid rgba(74,222,128,.4)}
+.flash-error{background:rgba(248,113,113,.16);color:#fecaca;border:1px solid rgba(248,113,113,.4)}
+.error{color:#fecaca;background:rgba(248,113,113,.14);border:1px solid rgba(248,113,113,.35);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.86rem;text-align:left}
+
 /* ===== MOBILE / ANDROID RESPONSIVE (≤768px) ===== */
 @media (max-width:768px){
 /* Sa mobile, hindi maayos ang background-attachment:fixed kaya scroll na lang,
    at mas maliit na larawan para mabilis ma-load sa data connection. */
 body{background-image:url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=70');background-attachment:scroll;-webkit-text-size-adjust:100%}
-.wrap{padding:24px 16px 48px}
+.split{grid-template-columns:1fr;grid-template-areas:"landing" "login" "features";gap:18px;padding:24px 16px 48px}
+.login-side{position:static;top:auto}
 .hero{padding:18px 0 6px}
 .logo-frame{width:104px;height:104px;margin-bottom:14px}
 .badge{font-size:11px;letter-spacing:.6px;max-width:100%;line-height:1.6}
 .card{padding:18px 14px}
+.auth-card{padding:24px 18px 22px}
 }
 /* ===== TINY PHONES (≤480px) ===== */
 @media (max-width:480px){
-.wrap{padding:18px 12px 40px}
+.split{padding:18px 12px 40px}
 .hero{padding:12px 0 4px}
 .logo-frame{width:92px;height:92px;margin-bottom:12px}
 .badge{font-size:10px;letter-spacing:.4px;padding:5px 10px}
@@ -54,22 +88,76 @@ body{background-image:url('https://images.unsplash.com/photo-1518770660439-46361
 .note{font-size:11.5px;line-height:1.6}
 .card h3{font-size:.92rem}
 .card p{font-size:.82rem}
+.auth-card h2{font-size:1.14rem}
 }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="split">
+
+<!-- ===== KALIWANG SIDE: LANDING PAGE ===== -->
+<section class="landing-side">
 <div class="hero">
 <div class="logo-frame"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Guiuan Logo"></div>
 <div class="badge">ESSU-GUIUAN &bull; ACADEMIC STRUGGLE SUPPORT SYSTEM CHATBOT</div>
 <h1>Academic Struggle Support System <span>Chatbot</span></h1>
 <p class="sub">A student-friendly guide for ESSU-Guiuan students facing academic challenges &mdash; exam stress, thesis, grades, and motivation. Chat with the assistant in <b>English, Tagalog, or Waray</b>, anytime.</p>
 <div class="cta">
-<a class="btn btn-p" href="{{ url_for('login') }}">Proceed to Login <i class="fas fa-arrow-right"></i></a>
+<a class="btn btn-p" href="#login-panel">Proceed to Login <i class="fas fa-arrow-right"></i></a>
 <a class="btn btn-g" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Create Account</a>
 </div>
 <p class="note">Already have an account? Click Proceed to Login.</p>
 </div>
+</section>
+
+<!-- ===== KANANG SIDE: LOGIN PAGE ===== -->
+<section class="login-side" id="login-panel">
+<div class="auth-card">
+<div class="logo-wrap"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo"></div>
+<h2>Academic Struggle Support ESSU-Guiuan</h2>
+<p class="subtitle">Sign in with your student account to start.</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash-message flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% endif %}
+
+<form method="POST" action="{{ url_for('login') }}" autocomplete="off">
+    <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" name="email" id="email" placeholder="you@example.com" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+            <input type="password" name="password" id="password" placeholder="Enter your password" required>
+            <span class="toggle-password" id="toggle-password-button" role="button" aria-label="Show or hide password">
+                <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 7.61 17 4.5 12 4.5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7M2.28 4.49L.86 5.91 2 7.05C1.29 7.95.72 9 1 10.24c.73 3.38 3.97 6.03 7 6.71v-1.7c-1.73-.43-3.23-1.55-4.26-3.01.3-.5.66-1 1.06-1.47l1.42 1.42c-.15.43-.28.88-.36 1.34h1.5c.08-.44.21-.86.39-1.26l2.11 2.11c-.4.1-.81.15-1.23.15-2.76 0-5-2.24-5-5c0-.59.11-1.16.31-1.69L2.28 4.49M12 17c.95 0 1.82-.27 2.57-.72l1.43 1.43C15.9 18.44 14.62 19 13.19 19v1.7c3.03-.68 6.27-3.33 7-6.71.28-1.24-.29-2.29-1-3.19L17.73 8.57 12 14.3 2.28 4.49Z"/></svg>
+                <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5m0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Z"/></svg>
+            </span>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-p">Sign In</button>
+</form>
+
+<p class="switch">
+    Don't have an account? <a id="go-to-register" href="{{ url_for('register') }}">Create Account</a>
+</p>
+<p class="switch">
+    <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
+</p>
+</div>
+</section>
+
+<!-- ===== KALIWANG SIDE (ibaba): MGA FEATURE / INFO CARD ===== -->
+<section class="features">
 <div class="cards">
 <div class="card"><i class="fas fa-robot"></i><h3>AI Chatbot</h3><p>Clear and simple answers about study stress, exams, thesis, and motivation.</p></div>
 <div class="card"><i class="fas fa-heart-pulse"></i><h3>Mood Check-in</h3><p>Log how you feel every day and track your progress.</p></div>
@@ -78,8 +166,53 @@ body{background-image:url('https://images.unsplash.com/photo-1518770660439-46361
 </div>
 <div class="card" style="margin-top:14px"><i class="fas fa-circle-info"></i><h3>About the System</h3><p>Built for ESSU-Guiuan students under academic pressure. Study tips, motivation, and practical guidance in simple words. Purpose: stress, burnout, thesis, exams, and grades. Who can use it: ESSU-Guiuan students with an account. Languages: English, Tagalog, and Waray. Free for the campus.</p></div>
 <div class="card" style="margin-top:14px"><i class="fas fa-list-ol"></i><h3>How to Use</h3><p>1. Create an account and log in. 2. Type your academic concern. 3. Follow the study tips and log your mood daily.</p></div>
-<div class="cta" style="margin-top:22px"><a class="btn btn-p" href="{{ url_for('login') }}">Proceed to Login <i class="fas fa-arrow-right"></i></a></div>
+<div class="cta" style="margin-top:22px"><a class="btn btn-p" href="#login-panel">Proceed to Login <i class="fas fa-arrow-right"></i></a></div>
 <p class="note" style="margin-top:14px">Reminder: this is a study guide only and not a replacement for professional counseling. In an emergency, contact a trusted person or crisis hotline immediately.</p>
+</section>
+
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleButton = document.getElementById('toggle-password-button');
+        const passwordInput = document.getElementById('password');
+        const eyeOpen = document.getElementById('eye-open');
+        const eyeClosed = document.getElementById('eye-closed');
+
+        if (toggleButton && passwordInput && eyeOpen && eyeClosed) {
+            toggleButton.addEventListener('click', function () {
+                const isPassword = passwordInput.type === 'password';
+
+                if (isPassword) {
+                    // Show password
+                    passwordInput.type = 'text';
+                    eyeClosed.style.display = 'none';
+                    eyeOpen.style.display = 'inline';
+                } else {
+                    // Hide password
+                    passwordInput.type = 'password';
+                    eyeOpen.style.display = 'none';
+                    eyeClosed.style.display = 'inline';
+                }
+            });
+        }
+
+        // Kapag pinindot ang "Proceed to Login", i-scroll at i-focus ang login form
+        document.querySelectorAll('a[href="#login-panel"]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const panel = document.getElementById('login-panel');
+                if (panel) {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    const email = document.getElementById('email');
+                    if (email && window.matchMedia('(min-width: 769px)').matches) {
+                        email.focus({ preventScroll: true });
+                    }
+                }
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

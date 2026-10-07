@@ -518,7 +518,8 @@ def home():
     # LANDING PAGE PALAGI ang unang bubungad sa pag-open ng link — kahit naka-login.
     # Dito din napupunta ang logout at ang mga protected pages kapag walang session,
     # kaya hindi na direktang login page ang unang makikita ng user.
-    return render_template("landing.html")
+    # Kombinadong page na ito: landing sa kaliwa at login sa kanan.
+    return render_template("landing.html", error=None)
 
 # ---- LOGIN ----
 @app.route("/login", methods=["GET","POST"])
@@ -555,7 +556,9 @@ def login():
             else:
                 app.logger.warning("Login failed for %r: password mismatch", email)
             error = "Invalid credentials."
-    return render_template("login.html", error=error)
+    # Iisang combined page (landing sa kaliwa + login sa kanan) ang ipapakita —
+    # kasama ang error/flash kaya hindi na hiwalay ang login.html.
+    return render_template("landing.html", error=error)
 
 # ---- ADMIN LOGIN (Separate Route) ----
 @app.route("/admin_login", methods=["GET","POST"])
