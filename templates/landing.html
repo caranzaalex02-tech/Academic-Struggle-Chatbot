@@ -10,8 +10,8 @@
 <style>
 :root{--ink:#14532d;--ink-2:#4d7c0f;--muted:#64715a;--green:#22c55e;--green-2:#4ade80;--yellow:#facc15;--yellow-2:#fde68a;--card:rgba(255,255,255,.78);--card-border:rgba(134,239,172,.45)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{min-height:100vh;font-family:'Poppins',sans-serif;color:var(--ink);background:#f0fdf4 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat}
-body::before{content:'';position:fixed;inset:0;background:linear-gradient(160deg,rgba(240,253,244,.30),rgba(254,249,195,.22));z-index:1}
+body{min-height:100vh;font-family:'Poppins',sans-serif;color:var(--ink);background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(160deg,rgba(220,252,231,.28),rgba(187,247,208,.20));z-index:1}
 
 /* ===== SPLIT LAYOUT: landing sa KALIWA, login sa KANAN ===== */
 .split{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:32px 20px 60px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login" "features login";gap:24px;align-items:start}
