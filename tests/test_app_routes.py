@@ -35,7 +35,12 @@ class LandingAlwaysFirstTests(unittest.TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, 200)
         self.assertIn(b"Academic Struggle Support System", resp.data)
-        self.assertIn(b"Proceed to Login", resp.data)
+        # Kombinadong page na ngayon: nasa mismong page na ang login form
+        # sa kanang side, kaya wala nang hiwalay na "Proceed to Login" o
+        # "Create Account" na button sa landing side.
+        self.assertIn(b"login-panel", resp.data)
+        self.assertIn(b'name="password"', resp.data)
+        self.assertNotIn(b"Proceed to Login", resp.data)
 
     def test_root_shows_landing_even_when_logged_in(self):
         # Kahit naka-login, landing page pa rin ang unang bubungad —

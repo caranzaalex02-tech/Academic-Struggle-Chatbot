@@ -103,11 +103,6 @@ body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.
 <div class="badge">ESSU-GUIUAN &bull; ACADEMIC STRUGGLE SUPPORT SYSTEM CHATBOT</div>
 <h1>Academic Struggle Support System <span>Chatbot</span></h1>
 <p class="sub">A student-friendly guide for ESSU-Guiuan students facing academic challenges &mdash; exam stress, thesis, grades, and motivation. Chat with the assistant in <b>English, Tagalog, or Waray</b>, anytime.</p>
-<div class="cta">
-<a class="btn btn-p" href="#login-panel">Proceed to Login <i class="fas fa-arrow-right"></i></a>
-<a class="btn btn-g" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Create Account</a>
-</div>
-<p class="note">Already have an account? Click Proceed to Login.</p>
 </div>
 </section>
 
@@ -167,8 +162,7 @@ body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.
 </div>
 <div class="card" style="margin-top:14px"><i class="fas fa-circle-info"></i><h3>About the System</h3><p>Built for ESSU-Guiuan students under academic pressure. Study tips, motivation, and practical guidance in simple words. Purpose: stress, burnout, thesis, exams, and grades. Who can use it: ESSU-Guiuan students with an account. Languages: English, Tagalog, and Waray. Free for the campus.</p></div>
 <div class="card" style="margin-top:14px"><i class="fas fa-list-ol"></i><h3>How to Use</h3><p>1. Create an account and log in. 2. Type your academic concern. 3. Follow the study tips and log your mood daily.</p></div>
-<div class="cta" style="margin-top:22px"><a class="btn btn-p" href="#login-panel">Proceed to Login <i class="fas fa-arrow-right"></i></a></div>
-<p class="note" style="margin-top:14px">Reminder: this is a study guide only and not a replacement for professional counseling. In an emergency, contact a trusted person or crisis hotline immediately.</p>
+<p class="note" style="margin-top:18px">Reminder: this is a study guide only and not a replacement for professional counseling. In an emergency, contact a trusted person or crisis hotline immediately.</p>
 </section>
 
 </div>
@@ -197,21 +191,6 @@ body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.
                 }
             });
         }
-
-        // Kapag pinindot ang "Proceed to Login", i-scroll at i-focus ang login form
-        document.querySelectorAll('a[href="#login-panel"]').forEach(function (link) {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const panel = document.getElementById('login-panel');
-                if (panel) {
-                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    const email = document.getElementById('email');
-                    if (email && window.matchMedia('(min-width: 769px)').matches) {
-                        email.focus({ preventScroll: true });
-                    }
-                }
-            });
-        });
     });
 </script>
 
