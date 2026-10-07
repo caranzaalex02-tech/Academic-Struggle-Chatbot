@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f0fdf4"/>
+      <stop offset="0.5" stop-color="#fef9c3"/>
+      <stop offset="1" stop-color="#ecfdf5"/>
+    </linearGradient>
+    <linearGradient id="waveA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#4ade80" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#86efac" stop-opacity="0.25"/>
+    </linearGradient>
+    <linearGradient id="waveB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fde68a" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#facc15" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="waveC" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#86efac" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#fde68a" stop-opacity="0.35"/>
+    </linearGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="45"/>
+    </filter>
+  </defs>
+
+  <!-- Soft base gradient -->
+  <rect width="1440" height="900" fill="url(#bg)"/>
+
+  <!-- Abstract fluid blobs (blurred) -->
+  <g filter="url(#soft)">
+    <path d="M-140,140 C160,-60 440,200 360,420 C280,640 -40,560 -140,360 Z" fill="#86efac" opacity="0.6"/>
+    <path d="M1160,-100 C1420,-30 1540,240 1370,370 C1200,500 1020,300 1070,130 Z" fill="#fde68a" opacity="0.75"/>
+    <circle cx="700" cy="840" r="280" fill="#bbf7d0" opacity="0.5"/>
+    <circle cx="120" cy="760" r="200" fill="#fde68a" opacity="0.45"/>
+  </g>
+
+  <!-- Fluid waves -->
+  <path d="M0,90 C300,170 520,20 820,85 C1120,150 1260,45 1440,95 L1440,0 L0,0 Z" fill="url(#waveB)" opacity="0.65"/>
+  <path d="M0,540 C220,470 360,645 620,595 C880,545 1020,665 1440,565 L1440,900 L0,900 Z" fill="url(#waveC)"/>
+  <path d="M0,655 C260,575 420,745 700,685 C980,625 1180,765 1440,665 L1440,900 L0,900 Z" fill="url(#waveB)"/>
+  <path d="M0,765 C240,705 480,845 760,785 C1040,725 1240,855 1440,785 L1440,900 L0,900 Z" fill="url(#waveA)"/>
+</svg>
