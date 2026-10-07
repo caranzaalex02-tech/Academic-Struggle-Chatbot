@@ -9,99 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS for Modal Styling -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to top */
-            background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2560&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed; /* Keep background fixed on scroll */
-            perspective: 1200px; /* Add perspective for 3D effect */
-            font-family: 'Poppins', sans-serif;
-            padding: 5vh 20px; /* Add vertical padding */
-            position: relative;
-        }
-        body::before {
-            content: '';
-            position: fixed; /* Use fixed to cover the whole viewport */
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 32, 39, 0.7); /* Dark overlay */
-            z-index: 1;
-        }
-        .auth-box select option {
-            color: black !important; /* Para makita ang text sa dropdown */
-        }
-        .form-check {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 15px;
-            width: 100%;
-        }
-        .terms-text {
-            text-align: left;
-            margin-bottom: 8px;
-        }
-        .terms-text .form-check-label,
-        .form-check-label {
-            color: #ccc !important; /* Light gray para makita sa dark background */
-            font-size: 14px;
-            text-align: left;
-            margin: 0;
-            line-height: 1.4;
-        }
-        .form-check-input {
-            margin: 0;
-            flex-shrink: 0;
-        }
-        #accept_terms {
-            width: 16px !important;
-            height: 16px !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            flex-shrink: 0;
-            cursor: pointer;
-        }
-        .form-check-label a {
-            color: #00c6ff !important; /* Match the link color */
-        }
-        .form-group {
-            text-align: left;
-            margin-bottom: 10px;
-        }
-        .form-group label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #ccc;
-            margin-bottom: 4px;
-            display: block;
-        }
-        .auth-box {
-            width: 95%;
-            max-width: 700px; /* Pinalapad ang form */
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px rgba(0,255,255,0.2);
-            text-align: center;
-            color: white;
-            position: relative;
-            overflow: hidden;
-            position: relative;
-            z-index: 2;
-        }
-        .auth-box h2 { margin-bottom: 20px; font-weight: 600; }
-        .auth-box input:not([type="checkbox"]), .auth-box select {
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+  </head>
             width: 100%;
             padding: 12px;
             margin: 10px 0;
@@ -395,7 +304,6 @@
                 padding: 12px 18px;
             }
         }
-</style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 </head>
 

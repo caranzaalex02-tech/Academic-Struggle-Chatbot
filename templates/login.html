@@ -7,100 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Poppins', sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2560&q=80');
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 32, 39, 0.7); /* Dark overlay */
-            z-index: 1;
-        }
-        .auth-box {
-            position: relative;
-            z-index: 2;
-            width: 90%;
-            max-width: 400px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px rgba(0,255,255,0.2);
-            text-align: center;
-            color: white;
-        }
-        .form-group {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #ccc;
-            margin-bottom: 5px;
-            display: block;
-        }
-        .auth-box h2 { margin-bottom: 20px; font-weight: 600; }
-        .auth-box input {
-            width: 100%;
-            padding: 12px;
-            margin: 0;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: background-color 0.3s;
-        }
-        .auth-box input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
-        }
-        .auth-box input:focus {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        .password-wrapper {
-            position: relative;
-        }
-        .password-wrapper input {
-            padding-right: 50px;
-        }
-        .toggle-password {
-            position: absolute;
-            top: 64%;
-            right: 14px;
-            transform: translateY(-50%);
-            width: 26px;
-            height: 26px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 50%;
-            color: rgba(255, 255, 255, 0.95);
-            font-size: 16px;
-            line-height: 1;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-            user-select: none;
-        }
-        .toggle-password:hover {
-            background: rgba(255, 255, 255, 0.2);
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">ckground: rgba(255, 255, 255, 0.2);
             border-color: rgba(255, 255, 255, 0.28);
             color: #00c6ff;
             transform: translateY(-50%) scale(1.05);
@@ -136,7 +43,9 @@
 <body>
 
 <div class="auth-box">
-    <img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo" style="width: 80px; margin-bottom: 15px;">
+    <div class="logo-wrap">
+        <img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo">
+    </div>
     <h2>Academic Struggle Support ESSU-Guiuan</h2>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -166,16 +75,15 @@
                 </span>
             </div>
         </div>
-        <button type="submit">Sign In</button>
+        <button type="submit" class="btn btn-p">Sign In</button>
     </form>
 
     <p class="switch">
         Don't have an account? <a id="go-to-register" href="{{ url_for('register') }}">Create Account</a>
     </p>
-    <p class="switch" style="margin-top: 5px; font-size: 12px;">
+    <p class="switch">
         <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
     </p>
-    <!-- Admin login link is hidden for regular users -->
 </div>
 
 <script>
