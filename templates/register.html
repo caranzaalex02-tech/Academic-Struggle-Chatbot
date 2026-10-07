@@ -10,6 +10,60 @@
     <!-- Bootstrap CSS for Modal Styling -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <!-- Parehong design at green/yellow fluid waves background ng landing + login page -->
+    <style>
+        body {
+            font-family: 'Poppins', 'Inter', sans-serif;
+            background: #dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
+        }
+
+        body::before {
+            background: linear-gradient(160deg, rgba(220, 252, 231, 0.28), rgba(187, 247, 208, 0.20));
+        }
+
+        body::after {
+            background: none;
+        }
+
+        /* Card na kapareho ng login card sa landing page */
+        .auth-box {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(134, 239, 172, 0.5);
+            border-radius: 22px;
+            box-shadow: 0 24px 60px -24px rgba(20, 83, 45, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            max-width: 520px;
+        }
+
+        .auth-box .logo-wrap {
+            background: #fff;
+            border: none;
+            box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.4), 0 10px 26px rgba(20, 83, 45, 0.18);
+        }
+
+        .auth-box h2 {
+            color: var(--text-primary);
+        }
+
+        .form-group label {
+            font-family: inherit;
+        }
+
+        .form-group input,
+        .form-group select {
+            font-family: inherit;
+        }
+
+        /* Mobile: scroll ang background gaya ng landing page */
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll;
+                background-size: cover;
+                -webkit-text-size-adjust: 100%;
+            }
+        }
+    </style>
   </head>
 <body>
 
