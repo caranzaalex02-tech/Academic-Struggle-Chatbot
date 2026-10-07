@@ -22,8 +22,8 @@ overflow-x:hidden;
 overflow-y:auto;
 min-height:100vh;
 padding-top:0;
-/* Classy elegant green: deep forest to soft sage */
-background:linear-gradient(135deg,#0d2b1f 0%,#14532d 45%,#3f6212 100%);
+/* Green & yellow abstract fluid waves — pareho ng landing/login/register pages */
+background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
 background-attachment:fixed;
 -webkit-tap-highlight-color:transparent;
 display:flex;
@@ -240,16 +240,16 @@ max-width:960px;
 min-height:620px;
 height:min(85vh, 760px);
 max-height:85vh;
-background:rgba(255,255,255,0.35);
+background:rgba(255,255,255,0.55);
 backdrop-filter:blur(28px);
 -webkit-backdrop-filter:blur(28px);
 border-radius:20px;
 display:flex;
 flex-direction:column;
 color:#1a3a4a;
-box-shadow:0 8px 40px rgba(0,60,80,0.12), 0 2px 8px rgba(0,40,60,0.06), inset 0 1px 0 rgba(255,255,255,0.4);
+box-shadow:0 8px 40px rgba(20,83,45,0.18), 0 2px 8px rgba(20,83,45,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
 overflow:hidden;
-border:1px solid rgba(255,255,255,0.5);
+border:1px solid rgba(255,255,255,0.65);
 }
 
 /* ---- Chat Header — frosted glass ---- */
@@ -402,7 +402,7 @@ display:flex;
 flex-direction:column;
 gap:12px;
 padding:20px 22px;
-background:rgba(255,255,255,0.1);
+background:rgba(255,255,255,0.3);
 }
 
 /* Scrollbar */
@@ -723,10 +723,12 @@ transform:translateY(-1px);
     font-size:0.7rem;
   }
 
-  /* ---- body – no extra padding ---- */
+  /* ---- body – no extra padding; scroll ang background sa mobile ---- */
   body {
     padding-top: 52px;
     flex-direction: column;
+    background-attachment: scroll;
+    background-size: cover;
   }
 
   /* ---- main content – full width ---- */
