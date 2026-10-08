@@ -68,23 +68,36 @@ overflow-y:auto;
 overflow-x:hidden;
 }
 
-/* ---- SANC.AI wordmark (replaces logo at top of sidebar) ---- */
+/* ---- SANC.AI logo wordmark (replaces ESSU logo at top of sidebar) ---- */
 .sidebar-brand{
-padding:18px 14px 10px;
+padding:18px 14px 8px;
 text-align:center;
-font-family:'Poppins','Inter','Segoe UI',sans-serif;
-line-height:1.35;
-color:#7c4a0a;
-font-size:0.63rem;
-font-weight:600;
-letter-spacing:0.01em;
+line-height:1.2;
 }
 .sidebar-brand .brand-name{
-font-size:1.3rem;
+font-family:'Poppins','Inter','Segoe UI',sans-serif;
+font-size:1.55rem;
 font-weight:700;
+letter-spacing:0.045em;
 color:#3b2507;
-letter-spacing:0.03em;
-text-shadow:0 1px 0 rgba(255,255,255,0.6);
+text-shadow:0 1px 0 rgba(255,255,255,0.65);
+}
+.sidebar-brand .brand-ai{
+margin-left:2px;
+padding:1px 7px 2px;
+border-radius:7px;
+font-size:0.58em;
+letter-spacing:0.06em;
+vertical-align:0.28em;
+color:#fff8e7;
+background:linear-gradient(135deg,#f59e0b,#b45309);
+box-shadow:0 3px 8px rgba(180,83,9,0.45), inset 0 1px 0 rgba(255,255,255,0.45);
+}
+.sidebar-brand .brand-wave{
+display:block;
+width:118px;
+height:12px;
+margin:5px auto 0;
 }
 
 /* ---- User profile card at top ---- */
@@ -714,10 +727,10 @@ transform:translateY(-1px);
   }
   .sidebar-user { display: none; }
   .sidebar-divider { display: none; }
-  /* Compact SANC.AI wordmark sa mobile top bar — SANC.AI lang, tagline naka-hide */
+  /* Compact SANC.AI logo sa mobile top bar */
   .sidebar-brand { padding: 4px 8px; }
-  .sidebar-brand .brand-name { font-size: 0.92rem; }
-  .sidebar-brand .brand-tail { display: none; }
+  .sidebar-brand .brand-name { font-size: 1rem; }
+  .sidebar-brand .brand-wave { width: 74px; height: 8px; margin-top: 3px; }
   .sidebar nav {
     display: flex;
     flex-direction: row;
@@ -937,9 +950,13 @@ transform:translateY(-1px);
 <!-- SIDEBAR — Premium Professional -->
 <aside class="sidebar" id="sidebar">
 
-  <!-- SANC.AI wordmark (replaces ESSU logo) -->
+  <!-- SANC.AI logo wordmark -->
   <div class="sidebar-brand">
-    <span class="brand-name">SANC.AI</span><span class="brand-tail"> &ndash; Student Academic Navigation for Coping using AI</span>
+    <span class="brand-name">SANC<span class="brand-ai">.AI</span></span>
+    <svg class="brand-wave" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+    </svg>
   </div>
 
   <!-- User Profile Card -->
