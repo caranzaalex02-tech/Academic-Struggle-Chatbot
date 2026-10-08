@@ -203,6 +203,73 @@ def detect_language(text):
     return None
 
 
+# ---------------------------------------------------------------------------
+# POST-CHECK: output validation ng wika ng AI reply
+# ---------------------------------------------------------------------------
+# Kapag English ang hiningi pero Tagalog ang binigay ng AI (o kabaligtaran),
+# hindi ito ipapakita sa user. Magre-retry muna na may correction prompt,
+# at kapag mali pa rin, language-matched fallback ang gagamitin.
+# Tinitingnan lang ang unang N characters para hindi maapektuhan ng 1-2
+# hiram na salita sa mahabang reply.
+POST_CHECK_HEAD_CHARS = 500
+# Kailangan ng malinaw na kabaligtaran (hindi 1 salita lang) bago ituring na mali.
+POST_CHECK_MIN_OPPOSITE_MARKERS = 2
+
+
+def _head_text(text, limit=POST_CHECK_HEAD_CHARS):
+    return (text or "")[:limit]
+
+
+def ai_reply_matches_language(reply, expected):
+    """True kapag ang AI reply ay tumutugma sa hininging wika.
+
+    Mahigpit sa kabaligtaran (hal. hiningi English pero malinaw na Tagalog),
+    pero maluwag sa halo (Taglish na may English markers ay pasado sa English).
+    Kapag hindi malinaw (None), pasado — hindi natin pine-penalize ang AI
+    sa ambiguous na sagot.
+    """
+    expected = (expected or "tagalog").lower()
+    if expected not in LANGUAGE_CHOICES:
+        expected = "tagalog"
+    head = _head_text(reply)
+    english, tagalog, waray = score_languages(head)
+    content_hits = english_content_hits(head)
+    if expected == "english":
+        # Malinaw na Tagalog o Waray ang sagot kahit English ang hiningi.
+        if tagalog >= POST_CHECK_MIN_OPPOSITE_MARKERS and tagalog > english:
+            return False
+        if waray >= POST_CHECK_MIN_OPPOSITE_MARKERS and waray >= max(english, tagalog):
+            return False
+        return True
+    if expected == "tagalog":
+        if english >= POST_CHECK_MIN_OPPOSITE_MARKERS and english > tagalog and waray < 2:
+            # Purong English ang sagot kahit Tagalog ang hiningi.
+            # Pero kapag Taglish (may Tagalog markers din), pasado pa rin.
+            if tagalog == 0 and not is_taglish_borrowed_use(head, content_hits):
+                return False
+        if waray >= POST_CHECK_MIN_OPPOSITE_MARKERS and waray >= max(english, tagalog):
+            return False
+        return True
+    # expected == "waray"
+    if waray >= 1 and waray >= tagalog:
+        return True
+    if tagalog >= POST_CHECK_MIN_OPPOSITE_MARKERS and tagalog > max(english, waray):
+        return False
+    if english >= POST_CHECK_MIN_OPPOSITE_MARKERS and english > max(tagalog, waray):
+        return False
+    return True
+
+
+def _post_check_correction_prompt(user_input, expected):
+    """Correction prompt para sa retry kapag mali ang wika ng unang AI reply."""
+    lang_name = {"english": "English", "tagalog": "Tagalog/Taglish", "waray": "Waray"}.get(expected, "Tagalog/Taglish")
+    return (
+        f"You answered in the WRONG language. The user wrote: {user_input!r}. "
+        f"This message is {lang_name}. Rewrite your previous answer fully in {lang_name} only. "
+        f"Do not mix languages."
+    )
+
+
 def pick(language, english, tagalog, waray=None):
     """Pumipili ng string base sa language code (fallback sa Tagalog)."""
     if language == "english":

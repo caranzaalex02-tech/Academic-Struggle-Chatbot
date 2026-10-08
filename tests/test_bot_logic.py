@@ -63,14 +63,83 @@ class BotLogicTests(unittest.TestCase):
 
     def test_ai_first_answers_normal_questions_before_the_dataset(self):
         self._set_ai_first(True)
-        self._stub_ai_reply("Musna ini an akon AI nga baton para ha imo yana.")
+        self._stub_ai_reply("I hear you. Exam stress is tough, but you can handle it one step at a time.")
         response, intent, is_crisis, is_abusive = bot_logic.generate_response(
             "I am so stressed about my exam tomorrow", None, "tagalog"
         )
-        self.assertEqual(response, "Musna ini an akon AI nga baton para ha imo yana.")
+        self.assertEqual(response, "I hear you. Exam stress is tough, but you can handle it one step at a time.")
         self.assertIsNone(intent)
         self.assertEqual(is_crisis, 0)
         self.assertEqual(is_abusive, 0)
+
+    def test_post_check_retries_when_ai_reply_is_in_the_wrong_language(self):
+        from utils import bot_responses_i18n as i18n
+        self._set_ai_first(True)
+        calls = []
+
+        def fake_ai_chain(user_input, language="tagalog", *args, **kwargs):
+            calls.append((user_input, language))
+            return "Naiintindihan ko. Minsan ang bigat ng mga isip mo."
+
+        def fake_retry(user_input, language="tagalog", history=None):
+            calls.append(("RETRY:" + user_input, language))
+            return "I hear you. Your mind feels heavy, and that is normal.", True
+
+        self._original_ai_reply = bot_logic._call_ai_reply
+        self._original_retry = bot_logic._retry_ai_with_language_correction
+        bot_logic._call_ai_reply = fake_ai_chain
+        bot_logic._retry_ai_with_language_correction = fake_retry
+        self.addCleanup(self._restore_ai_reply)
+        self.addCleanup(setattr, bot_logic, "_retry_ai_with_language_correction", self._original_retry)
+        response, intent, is_crisis, is_abusive = bot_logic.generate_response(
+            "overthinker", None, "tagalog"
+        )
+        self.assertEqual(response, "I hear you. Your mind feels heavy, and that is normal.")
+        self.assertIsNone(intent)
+        self.assertTrue(any(call[0].startswith("RETRY:") for call in calls))
+        self.assertTrue(i18n.ai_reply_matches_language(response, "english"))
+
+    def test_post_check_uses_language_matched_fallback_when_retry_still_fails(self):
+        self._set_ai_first(False)
+        self.assertFalse(bot_logic.ai_reply_matches_language(
+            "Naiintindihan ko. Minsan ang bigat ng mga isip mo.", "english"))
+        self._set_ai_first(True)
+
+        def fake_ai_chain(user_input, language="tagalog", *args, **kwargs):
+            return "Naiintindihan ko. Minsan ang bigat ng mga isip mo."
+
+        def fake_retry(user_input, language="tagalog", history=None):
+            return "Naiintindihan pa rin kita kahit mali ang wika.", False
+
+        self._original_ai_reply = bot_logic._call_ai_reply
+        self._original_retry = bot_logic._retry_ai_with_language_correction
+        bot_logic._call_ai_reply = fake_ai_chain
+        bot_logic._retry_ai_with_language_correction = fake_retry
+        self.addCleanup(self._restore_ai_reply)
+        self.addCleanup(setattr, bot_logic, "_retry_ai_with_language_correction", self._original_retry)
+        # AI-first ON pero laging mali ang wika — dapat language-matched
+        # fallback (English) ang ibalik, hindi ang maling Tagalog reply.
+        response, intent, is_crisis, is_abusive = bot_logic.generate_response(
+            "overthinker", None, "tagalog"
+        )
+        from utils import bot_responses_i18n as i18n
+        self.assertTrue(i18n.ai_reply_matches_language(response, "english"))
+        self.assertNotIn("Naiintindihan ko. Minsan ang bigat", response)
+
+    def test_ai_reply_matches_language_allows_taglish_but_rejects_opposite(self):
+        from utils import bot_responses_i18n as i18n
+        # Malinaw na Tagalog kahit English ang hiningi -> bagsak.
+        self.assertFalse(i18n.ai_reply_matches_language(
+            "Naiintindihan ko. Minsan ang bigat ng mga isip mo at hindi ka mag-isa.", "english"))
+        # Malinaw na English kahit English ang hiningi -> pasado.
+        self.assertTrue(i18n.ai_reply_matches_language(
+            "I hear you. Overthinking feels heavy, but you are not alone.", "english"))
+        # Taglish na may English markers -> pasado pa rin sa English.
+        self.assertTrue(i18n.ai_reply_matches_language(
+            "I hear you. Normal lang ang overthinking, you are not alone.", "english"))
+        # Purong English kahit Tagalog ang hiningi -> bagsak.
+        self.assertFalse(i18n.ai_reply_matches_language(
+            "I hear you. Your mind feels heavy and you are not alone today.", "tagalog"))
 
     def test_ai_first_still_uses_dataset_when_the_ai_has_no_reply(self):
         self._set_ai_first(True)

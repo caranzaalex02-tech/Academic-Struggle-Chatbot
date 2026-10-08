@@ -20,6 +20,7 @@ try:  # Normal package import (Flask app / pytest)
         GENERIC_FALLBACKS_TL,
         LANGUAGE_CHOICES,
         TAGALOG_RESPONSES,
+        ai_reply_matches_language,
         detect_language,
         pick as _language_pick,
         score_languages,
@@ -36,6 +37,7 @@ except ImportError:  # pragma: no cover - kapag direktang pinatakbo bilang scrip
         GENERIC_FALLBACKS_TL,
         LANGUAGE_CHOICES,
         TAGALOG_RESPONSES,
+        ai_reply_matches_language,
         detect_language,
         pick as _language_pick,
         score_languages,
@@ -1789,6 +1791,64 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
 # ----------------------------
 
 
+def _language_matched_emergency_fallback(user_input, language):
+    """Emergency fallback kapag mali pa rin ang wika matapos ang AI retry.
+
+    Hindi ito ang dating dataset-first — naaabot lang ito kapag ang AI ay
+    sumagot na pero MALI ANG WIKA kahit matapos ang correction retry.
+    Laging tugma sa hininging wika ang ibabalik.
+    """
+    text = (user_input or "").lower().strip()
+    intent = detect_intent(text)
+    if intent:
+        intent_data = INTENTS.get(intent, {})
+        choices = _intent_response_choices(intent, language, intent_data)
+        if choices:
+            return (random.choice(choices), intent)
+    faq_answer = get_faq_answer(text, language)
+    if faq_answer:
+        return (faq_answer, None)
+    if language == "waray":
+        generic_fallbacks = WARAY_FALLBACKS
+    elif language == "english":
+        generic_fallbacks = GENERIC_FALLBACKS_EN
+    else:
+        generic_fallbacks = GENERIC_FALLBACKS_TL
+    return (random.choice(generic_fallbacks), None)
+
+
+def _retry_ai_with_language_correction(user_input, language, history=None):
+    """Isang retry na may correction prompt kapag mali ang wika ng AI reply.
+
+    Nagbabalik ng (reply, ok) — ok=True kapag tumutugma na ang wika.
+    """
+    try:
+        from .bot_responses_i18n import _post_check_correction_prompt
+    except ImportError:  # pragma: no cover - kapag direktang pinatakbo bilang script
+        from bot_responses_i18n import _post_check_correction_prompt
+    correction = _post_check_correction_prompt(user_input, language)
+    retry_input = f"{correction}\n\nOriginal message: {user_input}"
+    if _groq_available():
+        retry = _call_groq_api(retry_input, language, history=history)
+        if retry and ai_reply_matches_language(retry, language):
+            return retry, True
+        if retry:
+            return retry, False
+    if _openai_available():
+        retry = _run_openai_chat(retry_input, language=language, history=history)
+        if retry and ai_reply_matches_language(retry, language):
+            return retry, True
+        if retry:
+            return retry, False
+    if _gemini_available():
+        retry = _call_gemini_api(retry_input, language, history=history)
+        if retry and ai_reply_matches_language(retry, language):
+            return retry, True
+        if retry:
+            return retry, False
+    return None, False
+
+
 def _ai_first_enabled():
     """True kapag AI ang dapat sumagot muna (default ON)."""
     value = os.environ.get("MENTALHEALTHWEB_AI_FIRST", "true")
@@ -2015,7 +2075,27 @@ def generate_response(user_input, last_intent=None, language='tagalog', history=
     if not is_abusive and ai_first:
         ai_reply = _call_ai_reply(user_input, resp_lang, history=history)
         if ai_reply:
-            return (ai_reply, None, 0, is_abusive)
+            # POST-CHECK (output validation): siguraduhing tumutugma ang wika
+            # ng AI reply sa hiningi bago ito ipakita sa user.
+            if ai_reply_matches_language(ai_reply, resp_lang):
+                return (ai_reply, None, 0, is_abusive)
+            logging.warning(
+                "AI reply failed language post-check (expected=%s); retrying with correction.",
+                resp_lang,
+            )
+            retry_reply, retry_ok = _retry_ai_with_language_correction(
+                user_input, resp_lang, history=history
+            )
+            if retry_ok and retry_reply:
+                return (retry_reply, None, 0, is_abusive)
+            logging.warning(
+                "AI retry still mismatched language (expected=%s); using language-matched fallback.",
+                resp_lang,
+            )
+            fallback_reply, fallback_intent = _language_matched_emergency_fallback(
+                user_input, resp_lang
+            )
+            return (fallback_reply, fallback_intent, 0, is_abusive)
 
     # 4. Dataset path — ginagamit lang kapag:
     #    (a) naka-disable ang AI-first mode, o
