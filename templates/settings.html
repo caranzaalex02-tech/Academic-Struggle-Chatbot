@@ -19,15 +19,15 @@ overflow-x:hidden;
 overflow-y:auto;
 min-height:100vh;
 padding-top:140px;
-background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
-background-size: cover;
+/* Parehong background ng chatbot — light green fluid waves */
+background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
 }
 
 body::after{
 content:"";
 position:fixed;
 inset:0;
-background:rgba(0,0,0,0.4);
+background:linear-gradient(160deg,rgba(220,252,231,.30),rgba(187,247,208,.22));
 z-index:-1;
 }
 
@@ -39,12 +39,12 @@ left:50%;
 transform:translateX(-50%);
 display:flex;
 gap:10px;
-background:rgba(255,255,255,0.14);
+background:rgba(255,255,255,0.55);
 backdrop-filter:blur(22px);
-border:1px solid rgba(255,255,255,0.2);
+border:1px solid rgba(134,239,172,0.55);
 border-radius:999px;
 padding:12px 18px;
-box-shadow:0 18px 40px rgba(0,0,0,0.25);
+box-shadow:0 18px 40px rgba(20,83,45,0.15);
 z-index:50;
 }
 
@@ -53,7 +53,7 @@ display: flex;
 align-items: center;
 }
 .nav-link {
-color:#f8fafc;
+color:#14532d;
 text-decoration:none;
 font-size:0.98rem;
 font-weight:700;
@@ -67,34 +67,35 @@ border: 1px solid rgba(255, 255, 255, 0.2);
 transition:transform 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 .nav-link:hover {
-background: rgba(0, 255, 255, 0.1);
-color: #fff;
+background: rgba(34,197,94,0.12);
+color: #14532d;
 transform: translateY(-2px);
-box-shadow: 0 0 15px rgba(0, 255, 255, 0.3), 0 0 25px rgba(0, 255, 255, 0.2);
-border-color: rgba(0, 255, 255, 0.4);
+box-shadow: 0 0 15px rgba(34,197,94,0.25), 0 0 25px rgba(34,197,94,0.15);
+border-color: rgba(34,197,94,0.4);
 }
 .nav-link.active {
-background: rgba(0, 255, 255, 0.2);
-border-color: rgba(0, 255, 255, 0.6);
-box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+background: rgba(34,197,94,0.18);
+border-color: rgba(34,197,94,0.5);
+box-shadow: 0 0 20px rgba(34,197,94,0.3);
+color:#14532d;
 }
 
-/* Settings Container */
+/* Settings Container — light glass, kapareho ng chatbot feel */
 .settings-container{
 position:relative;
 margin:0 auto 40px;
 width:clamp(360px, 38vw, 820px);
 max-width:820px;
-background:rgba(255,255,255,0.10);
+background:rgba(255,255,255,0.55);
 backdrop-filter:blur(25px);
 border-radius:30px;
 padding:35px;
-color:white;
+color:#14532d;
 box-shadow:
-0 0 20px rgba(0,255,255,0.3),
-0 0 40px rgba(0,255,255,0.2),
-0 20px 60px rgba(0,0,0,0.5);
-border:1px solid rgba(0,255,255,0.4);
+0 8px 40px rgba(20,83,45,0.12),
+0 2px 8px rgba(20,83,45,0.06),
+inset 0 1px 0 rgba(255,255,255,0.5);
+border:1px solid rgba(134,239,172,0.55);
 }
 
 .settings-header{
@@ -137,8 +138,8 @@ color:#ff6b6b;
 
 /* Settings Sections */
 .settings-section{
-background:rgba(255,255,255,0.06);
-border:1px solid rgba(255,255,255,0.12);
+background:rgba(255,255,255,0.45);
+border:1px solid rgba(134,239,172,0.45);
 border-radius:16px;
 padding:22px;
 margin-bottom:20px;
@@ -152,7 +153,7 @@ margin-bottom:18px;
 display:flex;
 align-items:center;
 gap:10px;
-color:#00ffff;
+color:#15803d;
 }
 
 .settings-section h2 i{
@@ -188,21 +189,21 @@ position:relative;
 width:100%;
 padding:12px 50px 12px 16px;
 border-radius:12px;
-border:1px solid rgba(255,255,255,0.2);
-background:rgba(255,255,255,0.08);
-color:white;
+border:1px solid rgba(134,239,172,0.55);
+background:rgba(255,255,255,0.6);
+color:#14532d;
 font-size:0.95rem;
 outline:none;
 transition:border-color 0.3s, box-shadow 0.3s;
 }
 
 .password-wrapper input:focus{
-border-color:rgba(0,255,255,0.6);
-box-shadow:0 0 12px rgba(0,255,255,0.2);
+border-color:rgba(34,197,94,0.6);
+box-shadow:0 0 0 4px rgba(34,197,94,0.12);
 }
 
 .password-wrapper input::placeholder{
-color:rgba(255,255,255,0.4);
+color:rgba(20,83,45,0.45);
 }
 
 .toggle-password{
@@ -212,10 +213,10 @@ right:12px;
 transform:translateY(-50%);
 width:30px;
 height:30px;
-background:rgba(255,255,255,0.12);
-border:1px solid rgba(255,255,255,0.18);
+background:rgba(34,197,94,0.1);
+border:1px solid rgba(134,239,172,0.5);
 border-radius:50%;
-color:rgba(255,255,255,0.95);
+color:#15803d;
 font-size:16px;
 line-height:1;
 cursor:pointer;
@@ -227,9 +228,9 @@ user-select:none;
 }
 
 .toggle-password:hover{
-background:rgba(255,255,255,0.2);
-border-color:rgba(255,255,255,0.28);
-color:#00c6ff;
+background:rgba(34,197,94,0.18);
+border-color:rgba(34,197,94,0.5);
+color:#14532d;
 transform:translateY(-50%) scale(1.05);
 }
 
@@ -237,28 +238,28 @@ transform:translateY(-50%) scale(1.05);
 width:100%;
 padding:12px 16px;
 border-radius:12px;
-border:1px solid rgba(255,255,255,0.2);
-background:rgba(0,0,0,0.3);
-color:white;
+border:1px solid rgba(134,239,172,0.55);
+background:rgba(255,255,255,0.6);
+color:#14532d;
 font-size:0.95rem;
 outline:none;
 cursor:pointer;
 transition:border-color 0.3s, box-shadow 0.3s;
 appearance:none;
 -webkit-appearance:none;
-background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2314532d' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
 background-repeat:no-repeat;
 background-position:right 16px center;
 }
 
 .form-group select:focus{
-border-color:rgba(0,255,255,0.6);
-box-shadow:0 0 12px rgba(0,255,255,0.2);
+border-color:rgba(34,197,94,0.6);
+box-shadow:0 0 0 4px rgba(34,197,94,0.12);
 }
 
 .form-group select option{
-background:#1a1a2e;
-color:white;
+background:#f0fdf4;
+color:#14532d;
 }
 
 /* Toggle Switch */
@@ -305,7 +306,8 @@ top:0;
 left:0;
 right:0;
 bottom:0;
-background:rgba(255,255,255,0.2);
+background:rgba(20,83,45,0.18);
+border:1px solid rgba(134,239,172,0.5);
 border-radius:28px;
 transition:0.3s;
 }

@@ -9,11 +9,12 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
     min-height:100vh;
-    background:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
-    background-size:cover; color:#1a4a5a; font-family:'Segoe UI',sans-serif;
+    /* Parehong background ng chatbot — light green fluid waves */
+    background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
+    color:#1a4a5a; font-family:'Segoe UI',sans-serif;
     padding:20px; position:relative; display:flex; justify-content:center; align-items:flex-start;
 }
-body::after { content:""; position:fixed; inset:0; background:rgba(0,40,60,0.35); z-index:-1; pointer-events:none; }
+body::after { content:""; position:fixed; inset:0; background:linear-gradient(160deg,rgba(220,252,231,.30),rgba(187,247,208,.22)); z-index:-1; pointer-events:none; }
 .container {
     width:100%; max-width:640px; background:rgba(255,255,255,0.35); backdrop-filter:blur(28px);
     -webkit-backdrop-filter:blur(28px); border-radius:20px; padding:28px 24px;
