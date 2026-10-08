@@ -25,22 +25,24 @@
             background: linear-gradient(160deg,rgba(220,252,231,.28),rgba(187,247,208,.20));
             z-index: 1;
         }
-        /* ===== SPLIT: landing info sa KALIWA, admin login sa KANAN ===== */
-        .split{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:32px 20px 60px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login";gap:24px;align-items:start;min-height:100vh;align-content:center}
-        .landing-side{grid-area:landing;min-width:0}
-        .login-side{grid-area:login;min-width:0}
-        .hero{text-align:center;padding:30px 10px 6px}
-        .logo-frame{width:120px;height:120px;margin:0 auto 16px;border-radius:50%;padding:6px;background:#fff;box-shadow:0 0 0 4px rgba(74,222,128,.45),0 10px 30px rgba(20,83,45,.18)}
+        /* ===== SPLIT: landing info sa KALIWA, admin login sa KANAN — walang page scroll sa desktop ===== */
+        html,body{height:100%}
+        body{height:100vh;overflow:hidden}
+        .split{position:relative;z-index:2;max-width:1200px;height:100vh;margin:0 auto;padding:14px 20px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login";gap:12px 24px;align-items:center;overflow:hidden}
+        .landing-side{grid-area:landing;min-width:0;min-height:0}
+        .login-side{grid-area:login;min-width:0;min-height:0;max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:thin}
+        .hero{text-align:center;padding:6px 10px 0}
+        .logo-frame{width:64px;height:64px;margin:0 auto 8px;border-radius:50%;padding:5px;background:#fff;box-shadow:0 0 0 4px rgba(74,222,128,.45),0 10px 30px rgba(20,83,45,.18)}
         .logo-frame img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
-        .badge{display:inline-block;font-size:12px;letter-spacing:1px;font-weight:600;color:#166534;background:rgba(74,222,128,.16);border:1px solid rgba(74,222,128,.45);border-radius:999px;padding:6px 14px;margin-bottom:12px}
-        .hero h1{font-size:clamp(1.5rem,4vw,2.2rem);line-height:1.25;margin-bottom:12px;color:var(--ink)}
+        .badge{display:inline-block;font-size:10px;letter-spacing:.8px;font-weight:600;color:#166534;background:rgba(74,222,128,.16);border:1px solid rgba(74,222,128,.45);border-radius:999px;padding:4px 12px;margin-bottom:8px}
+        .hero h1{font-size:clamp(1.2rem,2.6vw,1.7rem);line-height:1.2;margin-bottom:6px;color:var(--ink)}
         .hero h1 span{color:#16a34a}
-        .sub{color:rgba(20,83,45,.82);max-width:640px;margin:0 auto 22px;line-height:1.7;font-size:clamp(.9rem,2.4vw,1.02rem)}
-        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:14px}
-        .card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:20px 16px;box-shadow:0 10px 26px -18px rgba(20,83,45,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-        .card i{font-size:1.4rem;color:#16a34a}
-        .card h3{font-size:.95rem;margin:10px 0 6px;color:var(--ink)}
-        .card p{font-size:.83rem;color:rgba(20,83,45,.75);line-height:1.65}
+        .sub{color:rgba(20,83,45,.82);max-width:640px;margin:0 auto;line-height:1.5;font-size:.82rem}
+        .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+        .card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px 10px;box-shadow:0 10px 26px -18px rgba(20,83,45,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+        .card i{font-size:1.1rem;color:#16a34a}
+        .card h3{font-size:.82rem;margin:6px 0 4px;color:var(--ink)}
+        .card p{font-size:.72rem;color:rgba(20,83,45,.75);line-height:1.5}
         /* ===== ADMIN LOGIN PANEL (kanan) — diagonal gold/green gaya ng user login ===== */
         .auth-box {
             position: relative;
@@ -78,8 +80,10 @@
             pointer-events: none;
         }
         .auth-box > * { position: relative; z-index: 2; }
-        .auth-box .logo-wrap { width: 84px; height: 84px; margin: 0 auto 14px; border-radius: 50%; padding: 5px; background: #fff; box-shadow: 0 0 0 4px rgba(248,113,113,.4), 0 10px 26px rgba(20,83,45,.18); }
-        .auth-box .logo-wrap img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; display: block; }
+        .auth-box .sanc-brand{padding:2px 8px 0;text-align:center;line-height:1.2;margin-bottom:12px}
+        .auth-box .sanc-brand .brand-name{font-family:'Poppins',sans-serif;font-size:1.65rem;font-weight:700;letter-spacing:.045em;color:#3b2507;text-shadow:0 1px 0 rgba(255,255,255,.65)}
+        .auth-box .sanc-brand .brand-ai{margin-left:2px;padding:1px 7px 2px;border-radius:7px;font-size:.58em;letter-spacing:.06em;vertical-align:.28em;color:#fff8e7;background:linear-gradient(135deg,#f59e0b,#b45309);box-shadow:0 3px 8px rgba(180,83,9,.45),inset 0 1px 0 rgba(255,255,255,.45)}
+        .auth-box .sanc-brand .brand-wave{display:block;width:118px;height:12px;margin:5px auto 0}
         .auth-box h2 { margin-bottom: 6px; font-weight: 700; font-size: 1.28rem; color: var(--ink); }
         .auth-box .subtitle { font-size: .86rem; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
         .form-group {
@@ -167,10 +171,12 @@
         .switch { margin-top: 16px; font-size: .87rem; color: var(--muted); text-align: center; }
         .switch a { color: #16a34a; font-weight: 600; text-decoration: none; }
         .switch a:hover { text-decoration: underline; }
-        /* ===== MOBILE / ANDROID RESPONSIVE (≤768px) ===== */
+        /* ===== MOBILE / ANDROID RESPONSIVE (≤768px) — dito puwedeng mag-scroll ===== */
         @media (max-width:768px){
+            body{height:auto;overflow:auto}
             body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}');background-size:cover;background-attachment:scroll;-webkit-text-size-adjust:100%}
-            .split{grid-template-columns:1fr;grid-template-areas:"landing" "login";gap:18px;padding:24px 16px 48px;align-content:start}
+            .split{height:auto;max-height:none;overflow:visible;grid-template-columns:1fr;grid-template-areas:"landing" "login";gap:18px;padding:24px 16px 48px;align-content:start;align-items:start}
+            .login-side{max-height:none;overflow:visible}
             .hero{padding:18px 0 6px}
             .logo-frame{width:104px;height:104px;margin-bottom:14px}
             .badge{font-size:11px;letter-spacing:.6px;max-width:100%;line-height:1.6}
@@ -210,7 +216,13 @@
 <!-- ===== KANANG SIDE: ADMIN LOGIN ===== -->
 <section class="login-side">
 <div class="auth-box">
-    <div class="logo-wrap"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo"></div>
+    <div class="sanc-brand">
+        <span class="brand-name">SANC<span class="brand-ai">.AI</span></span>
+        <svg class="brand-wave" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round"/>
+            <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+        </svg>
+    </div>
     <h2><i class="fas fa-user-shield" style="color:#ef4444;margin-right:8px;"></i>Admin Login</h2>
     <p class="subtitle">Sign in with your administrator account.</p>
 
