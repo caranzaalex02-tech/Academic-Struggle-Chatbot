@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffbeb"/>
+      <stop offset="0.5" stop-color="#fef3c7"/>
+      <stop offset="1" stop-color="#fde68a"/>
+    </linearGradient>
+    <linearGradient id="waveA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f59e0b" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#fbbf24" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="waveB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fde68a" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#fcd34d" stop-opacity="0.45"/>
+    </linearGradient>
+    <linearGradient id="waveC" x1="1" y1="0" x2="0" y2="0">
+      <stop offset="0" stop-color="#d97706" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#fbbf24" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="waveD" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#b45309" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#f59e0b" stop-opacity="0.4"/>
+    </linearGradient>
+    <filter id="soft" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="55"/>
+    </filter>
+  </defs>
+
+  <!-- Warm gold base gradient -->
+  <rect width="600" height="1200" fill="url(#bg)"/>
+
+  <!-- Abstract fluid blobs (blurred, gold-dominant) -->
+  <g filter="url(#soft)">
+    <path d="M-140,90 C60,-70 280,60 240,270 C200,480 -40,470 -130,300 Z" fill="#fbbf24" opacity="0.75"/>
+    <path d="M420,-60 C610,-20 690,170 560,300 C440,420 300,260 340,90 Z" fill="#f59e0b" opacity="0.5"/>
+    <path d="M-90,640 C70,540 270,700 210,880 C150,1060 -80,1010 -120,830 Z" fill="#fcd34d" opacity="0.6"/>
+    <circle cx="520" cy="760" r="230" fill="#fbbf24" opacity="0.55"/>
+    <circle cx="150" cy="1120" r="260" fill="#f59e0b" opacity="0.45"/>
+    <circle cx="600" cy="1150" r="180" fill="#fde68a" opacity="0.6"/>
+  </g>
+
+  <!-- Fluid waves: gold ang pangunahing kulay, cream ang highlight -->
+  <path d="M0,70 C120,120 260,20 380,60 C480,95 540,35 600,65 L600,0 L0,0 Z" fill="url(#waveB)" opacity="0.6"/>
+  <path d="M0,330 C110,285 200,390 330,355 C450,322 520,415 600,365 L600,0 L0,0 Z" fill="url(#waveC)" opacity="0.35"/>
+  <path d="M0,560 C100,510 210,620 340,580 C460,542 530,640 600,590 L600,1200 L0,1200 Z" fill="url(#waveC)" opacity="0.5"/>
+  <path d="M0,690 C120,630 230,755 360,710 C470,670 540,775 600,730 L600,1200 L0,1200 Z" fill="url(#waveB)" opacity="0.6"/>
+  <path d="M0,810 C110,765 240,875 370,830 C480,790 545,890 600,850 L600,1200 L0,1200 Z" fill="url(#waveA)" opacity="0.75"/>
+  <path d="M0,930 C130,885 250,990 390,945 C490,912 550,1000 600,965 L600,1200 L0,1200 Z" fill="url(#waveD)" opacity="0.7"/>
+  <path d="M0,1050 C140,1010 260,1105 400,1065 C500,1035 555,1110 600,1080 L600,1200 L0,1200 Z" fill="url(#waveA)" opacity="0.6"/>
+  <path d="M0,1150 C140,1125 280,1185 420,1155 C510,1135 560,1180 600,1160 L600,1200 L0,1200 Z" fill="#b45309" opacity="0.45"/>
+
+  <!-- Soft cream shimmer streaks -->
+  <path d="M0,205 C140,165 260,255 400,215 C500,185 560,245 600,225" fill="none" stroke="#fffbeb" stroke-width="14" stroke-linecap="round" opacity="0.5"/>
+  <path d="M0,470 C130,430 250,520 390,480 C495,450 555,510 600,490" fill="none" stroke="#fffbeb" stroke-width="10" stroke-linecap="round" opacity="0.4"/>
+</svg>
