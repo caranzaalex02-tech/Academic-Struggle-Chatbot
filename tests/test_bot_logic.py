@@ -271,6 +271,37 @@ class BotLogicTests(unittest.TestCase):
             self.assertIn("cortisol", prompt)
             self.assertIn("short sentences", prompt)
 
+    def test_system_prompt_treats_single_words_as_full_language(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("highest priority", prompt)
+            self.assertIn("single english word", prompt)
+            self.assertIn("single tagalog word", prompt)
+            self.assertIn("single waray word", prompt)
+            self.assertIn("never default to tagalog for an english-looking message", prompt)
+
+    def test_ai_first_returns_ai_reply_without_touching_dataset(self):
+        self._set_ai_first(True)
+        seen = {}
+
+        def fake_ai(user_input, language="tagalog", *args, **kwargs):
+            seen["language"] = language
+            return "AI reply in the requested language."
+
+        self._original_ai_reply = bot_logic._call_ai_reply
+        bot_logic._call_ai_reply = fake_ai
+        self.addCleanup(self._restore_ai_reply)
+        response, intent, is_crisis, is_abusive = bot_logic.generate_response(
+            "overthinker", None, "tagalog"
+        )
+        # AI-first: English ang na-detect kaya English ang hiningi sa AI,
+        # at ang AI reply ang ibinalik (hindi dataset/intent).
+        self.assertEqual(seen.get("language"), "english")
+        self.assertEqual(response, "AI reply in the requested language.")
+        self.assertIsNone(intent)
+        self.assertEqual(is_crisis, 0)
+        self.assertEqual(is_abusive, 0)
+
     # ---- MALINAW, ON-TOPIC, WALANG SPECIAL CHARACTERS ----
     def test_system_prompt_requires_plain_text_and_on_topic_replies(self):
         for language in ("tagalog", "english", "waray"):

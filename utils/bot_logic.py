@@ -1113,7 +1113,13 @@ def _call_groq_api(user_input, language='tagalog', history=None):
                 messages.append({"role": "user", "content": line[len("Earlier user:"):].strip()})
             else:
                 messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
-        messages.append({"role": "user", "content": user_input})
+        # Paalala sa dulo: ang WIKA ng huling mensahe ang masusunod — kahit
+        # single word lang. Hindi ito optional; HIGHEST PRIORITY ito.
+        lang_name = {"english": "English", "tagalog": "Tagalog/Taglish", "waray": "Waray"}.get(language, "Tagalog/Taglish")
+        messages.append({"role": "user", "content": (
+            f"[Reply in {lang_name}. The message below is {lang_name} — "
+            f"answer in {lang_name} only.]\n{user_input}"
+        )})
 
         for model in _groq_models():
             try:
@@ -1203,10 +1209,12 @@ def _call_gemini_api(user_input, language='tagalog', history=None):
                 model = genai_module.GenerativeModel(model_name)
                 system_prompt = _build_openai_system_prompt(language)
                 history_block = "\n".join(_history_to_prompt_lines(history))
+                lang_name = {"english": "English", "tagalog": "Tagalog/Taglish", "waray": "Waray"}.get(language, "Tagalog/Taglish")
+                lang_tag = f"[Reply in {lang_name}. The message below is {lang_name} — answer in {lang_name} only.]\n{user_input}"
                 if history_block:
-                    full_prompt = f"{system_prompt}\n\n{history_block}\nUser: {user_input}\nAssistant:"
+                    full_prompt = f"{system_prompt}\n\n{history_block}\nUser: {lang_tag}\nAssistant:"
                 else:
-                    full_prompt = f"{system_prompt}\n\nUser: {user_input}\nAssistant:"
+                    full_prompt = f"{system_prompt}\n\nUser: {lang_tag}\nAssistant:"
                 response = model.generate_content(contents=full_prompt)
                 if getattr(response, "parts", None):
                     text = response.text.strip()
@@ -1602,21 +1610,23 @@ def _build_openai_system_prompt(language='tagalog'):
         )
 
     language_rules = (
-        "\nLANGUAGE RULES (very important):\n"
-        "- Detect the language of the user's LAST message and reply in that SAME language.\n"
-        "- A single English word (for example 'overthinker', 'burnout', 'puyat' is NOT English)\n"
-        "  still counts as English: answer in English only.\n"
-        "- A single Tagalog word (for example 'puyat', 'pagod', 'pasaway')\n"
-        "  still counts as Tagalog: answer in Tagalog/Taglish only.\n"
+        "\nLANGUAGE RULES (very important — HIGHEST PRIORITY, overrides everything else):\n"
+        "- FIRST, look ONLY at the user's LAST message. Detect its language, then reply in that SAME language. No exceptions.\n"
+        "- A single English word (for example 'overthinker', 'burnout', 'time', 'thesis', 'hello')\n"
+        "  IS an English message: answer in English only. NEVER answer a lone English word in Tagalog.\n"
+        "- A single Tagalog word (for example 'puyat', 'pagod', 'kumusta', 'salamat')\n"
+        "  IS a Tagalog message: answer in Tagalog/Taglish only. NEVER answer a lone Tagalog word in English.\n"
         "- A single Waray word (for example 'maupay', 'bulig', 'pahuway')\n"
-        "  still counts as Waray: answer in Waray only.\n"
+        "  IS a Waray message: answer in Waray only. NEVER answer a lone Waray word in another language.\n"
         "- A lone borrowed English word inside a Tagalog sentence (for example 'overthinker'\n"
-        "  inside 'Na-overthinker ako') does NOT make the sentence English.\n"
+        "  inside 'Na-overthinker ako') does NOT make the sentence English: answer in Tagalog/Taglish.\n"
         "- English question -> answer in English only.\n"
         "- Tagalog/Taglish question -> answer in Tagalog/Taglish only.\n"
         "- Waray question -> answer in Waray only.\n"
         "- Never mix languages in one reply unless the user mixed them first.\n"
         "- Do not translate the user's message; just answer naturally in their language.\n"
+        "- If you are unsure of the language, answer in English when the message looks like English words,\n"
+        "  otherwise match the detected language. NEVER default to Tagalog for an English-looking message.\n"
     )
     return role + language_rules + "\n" + base_guidelines
 
@@ -1738,7 +1748,11 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
                 messages.append({"role": "user", "content": line[len("Earlier user:"):].strip()})
             else:
                 messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
-        messages.append({"role": "user", "content": user_input})
+        lang_name = {"english": "English", "tagalog": "Tagalog/Taglish", "waray": "Waray"}.get(language, "Tagalog/Taglish")
+        messages.append({"role": "user", "content": (
+            f"[Reply in {lang_name}. The message below is {lang_name} — "
+            f"answer in {lang_name} only.]\n{user_input}"
+        )})
         if intent:
             messages.append({"role": "assistant", "content": f"Detected intent: {intent}."})
 
@@ -1990,9 +2004,12 @@ def generate_response(user_input, last_intent=None, language='tagalog', history=
             abusive_response = "Naiintindihan ko na maaaring ikaw ay nadidismaya, pero panatilihin nating magalang ang ating pag-uusap. Paano kita matutulungan sa maayos na paraan ngayon?"
         return (abusive_response, new_intent, 0, 1)
 
-    # 3. AI-FIRST: lahat ng normal na tanong ay sinasagot ng API key AI.
+    # 3. AI-FIRST (pinaka-mahigpit): lahat ng normal na tanong ay sinasagot
+    # ng API key AI — English, Tagalog, o Waray man, kahit single word lang.
     # I-disable ito sa pamamagitan ng MENTALHEALTHWEB_AI_FIRST=false (default ON).
     # Crisis at abusive messages ay hindi dumadaan dito (nahuli na sila sa itaas).
+    # Ang dataset/intent path sa ibaba ay EMERGENCY FALLBACK lang — naaabot lang
+    # kapag walang available/magandang sagot ang AI (no keys, quota, error, empty).
     ai_first = AI_FIRST_ENABLED
     ai_reply = None
     if not is_abusive and ai_first:
