@@ -179,6 +179,7 @@ INTENT_PRIORITY = {
     "gratitude": 0,
     "grounding_request": 6,
     "stress": 4,
+    "overthinking": 4,
    
     "school_assignment": 4,
     "school_project": 4,
@@ -282,6 +283,13 @@ INTENTS = {
             "Ano ang pinaka-nakaka-stress sa’yo ngayon?",
             "Kailan mo huling binigyan ng pahinga ang sarili mo?"
         ]
+    },
+    "overthinking": {
+        "signals": ["overthink", "overthinker", "overthinking", "isip nang isip", "di matigil kakaisip", "hindi matigil kakaisip", "panay ang isip"],
+        "response": [
+            "Naiintindihan ko. Minsan, ang bigat ng mga isip na parang hindi na pwedeng hintayin. Normal lang 'to, at hindi ka mag-isa dito."
+        ],
+        "follow_up": []
     },
     
 
@@ -1596,6 +1604,14 @@ def _build_openai_system_prompt(language='tagalog'):
     language_rules = (
         "\nLANGUAGE RULES (very important):\n"
         "- Detect the language of the user's LAST message and reply in that SAME language.\n"
+        "- A single English word (for example 'overthinker', 'burnout', 'puyat' is NOT English)\n"
+        "  still counts as English: answer in English only.\n"
+        "- A single Tagalog word (for example 'puyat', 'pagod', 'pasaway')\n"
+        "  still counts as Tagalog: answer in Tagalog/Taglish only.\n"
+        "- A single Waray word (for example 'maupay', 'bulig', 'pahuway')\n"
+        "  still counts as Waray: answer in Waray only.\n"
+        "- A lone borrowed English word inside a Tagalog sentence (for example 'overthinker'\n"
+        "  inside 'Na-overthinker ako') does NOT make the sentence English.\n"
         "- English question -> answer in English only.\n"
         "- Tagalog/Taglish question -> answer in Tagalog/Taglish only.\n"
         "- Waray question -> answer in Waray only.\n"

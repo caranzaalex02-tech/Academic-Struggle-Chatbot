@@ -117,6 +117,11 @@ ENGLISH_CONTENT_WORDS = {
     "late", "absence", "notes", "review", "reviewer", "memorize",
     "difficult", "difficulty", "easy", "hard", "defense", "panel",
     "guidance", "clinic", "games", "gaming", "phone", "online",
+    "overthink", "overthinker", "overthinking", "thinker", "worrier",
+    "mind", "thoughts", "thought", "brain", "head", "heart",
+    "mood", "moody", "emotion", "emotions", "emotional", "feelings",
+    "feeling", "cope", "coping", "calm", "calmness", "relax", "relaxing",
+    "rest", "break", "pause", "breathe", "breathing", "grounding",
 }
 
 
@@ -124,6 +129,34 @@ def score_content_words(text):
     """Ibinalik ang bilang ng English content words sa isang text."""
     tokens = set(re.findall(r"[a-z]+(?:'[a-z]+)?", (text or "").lower()))
     return len(tokens & ENGLISH_CONTENT_WORDS)
+
+
+def english_content_hits(text):
+    """Ibinalik ang set ng English content words na nakita sa text."""
+    tokens = set(re.findall(r"[a-z]+(?:'[a-z]+)?", (text or "").lower()))
+    return tokens & ENGLISH_CONTENT_WORDS
+
+
+def is_taglish_borrowed_use(text, content_hits):
+    """True kapag ang English content word ay hiram lang sa Tagalog na pangungusap.
+
+    Hal. "Na-overthinker ako" -> Tagalog pa rin (hindi English).
+    """
+    lowered = (text or "").lower()
+    if not content_hits:
+        return False
+    for hit in content_hits:
+        # May Tagalog verb affix na nakadikit (hal. "na-overthinker", "nagpanic").
+        for prefix in ("na-", "nag-", "mag-", "nakaka-", "napaka-", "pinaka-",
+                       "na", "nag", "mag", "naka", "napa", "pina", "kina"):
+            if re.search(rf"(?<!\w){re.escape(prefix)}{re.escape(hit)}(?!\w)", lowered):
+                return True
+            if re.search(rf"(?<!\w){re.escape(prefix.rstrip('-'))}{re.escape(hit)}(?!\w)", lowered):
+                return True
+    for suffix in ("ako", "ka", "ko", "mo", "kami", "tayo", "siya"):
+        if re.search(rf"(?<!\w){re.escape(suffix)}(?!\w)", lowered):
+            return True
+    return False
 
 
 def score_languages(text):
@@ -153,9 +186,13 @@ def detect_language(text):
         if waray >= 1:
             # Kahit isang Waray marker (hal. "maupay", "bulig") ay sapat na.
             return "waray"
-        # Kahit isang English content word (hal. "burnout", "hello") ay sapat
-        # na para ituring na English — basta walang Tagalog/Waray marker.
-        if score_content_words(text) >= 1:
+        # Kahit isang English content word (hal. "burnout", "overthinker") ay sapat
+        # na para ituring na English — MALIBAN kung hiram lang ito sa Tagalog na
+        # pangungusap (hal. "Na-overthinker ako" -> Tagalog pa rin).
+        content_hits = english_content_hits(text)
+        if content_hits:
+            if is_taglish_borrowed_use(text, content_hits):
+                return "tagalog"
             return "english"
         return None
 
@@ -243,6 +280,15 @@ ENGLISH_RESPONSES = {
         "Help yourself by planning ahead. Use a planner, prioritize your top 3 tasks daily, and say 'no' to extra commitments.\n"
         "Time is your most valuable resource. Protect it fiercely. Even 10 minutes of planning saves hours of stress.\n"
         "\"The key is in not spending time, but in investing it.\" – Stephen R. Covey"
+    ],
+    "overthinking": [
+        "I hear you. Overthinking can feel so heavy, like your mind won't stop running. That's normal, and you're not alone here.\n\n"
+        "Here are a few simple ways to slow it down:\n"
+        "1. **Write it down.** Put everything on paper. When you see it written, it often looks clearer and less scary.\n"
+        "2. **5-4-3-2-1 grounding.** Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste. It pulls you back to the present.\n"
+        "3. **Give worry a time limit.** Tell yourself, \"I have 10 minutes to think about this.\" When time is up, switch to another task.\n"
+        "4. **Check the thought.** Ask yourself, \"Is my fear real, or is it just in my head?\" Often, it's just the mind exaggerating.\n"
+        "If it already affects your sleep or appetite, consider talking to your school counselor for deeper support. 💙"
     ],
     "failing_subject": [
         "Seeing a failing grade hurts, and what you feel is valid. But remember: this is not the end.\n\n"
@@ -362,6 +408,15 @@ TAGALOG_RESPONSES = {
         "Tulungan ang sarili mo sa pagpaplano. Gumamit ng planner, unahin ang tatlong pinakamahalagang gawain araw-araw, at mag-'no' sa dagdag na commitment.\n"
         "Ang oras ang pinakamahalagang resource mo. Protektahan mo ito. Kahit 10 minutong pagpaplano, nakakatipid ng oras at stress.\n"
         "\"Ang sikreto ay hindi sa paggastos ng oras, kundi sa pag-invest dito.\" – Stephen R. Covey"
+    ],
+    "overthinking": [
+        "Naiintindihan ko. Minsan, ang bigat ng mga isip na parang hindi na pwedeng hintayin. Normal lang 'to, at hindi ka mag-isa dito.\n\n"
+        "Narito ang ilang simpleng paraan para mapababa ang overthinking:\n"
+        "1. **Ibura sa papel.** Isulat ang lahat ng nakaliligalig sa isip mo. Kapag nakita mo ito sa papel, madalas mas malinaw at mas mababa ang takot.\n"
+        "2. **5-4-3-2-1 grounding.** Hanapin 5 bagay na nakikita mo, 4 na nararamdaman mo, 3 na naririnig mo, 2 na amoy, at 1 na lasa. Ito ay tumutulong upang bumalik ka sa kasalukuyan.\n"
+        "3. **Limitado ang oras ng pag-iisip.** Sabihin sa sarili mo, \"May 10 minutes lang ako para mag-isip dito.\" Pag tapos ang oras, gawin ang ibang gawain.\n"
+        "4. **Kumustahan ang sarili.** Tanungin mo ang sarili, \"Totoo ba ang takot ko, o kaya lang ba ito sa isip ko?\" Minsan, kaya lang ito sa isip.\n"
+        "Kung sobrang lala na at nakakaapekto sa pagtulog o pagkain, maaari kang kumonsulta sa school counselor para sa mas malalim na tulong. 💙"
     ],
     "imposter_syndrome": [
         "Sobrang karaniwan ang imposter syndrome, lalo na sa mga mahuhusay. Tunay at pinaghirapan mo ang mga naabot mo.\n"

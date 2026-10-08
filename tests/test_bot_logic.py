@@ -120,6 +120,26 @@ class BotLogicTests(unittest.TestCase):
         self.assertEqual(intent, "time_management")
         self.assertIn(response, bot_logic.ENGLISH_RESPONSES["time_management"])
 
+    def test_single_english_word_gets_english_response(self):
+        # "overthinker" lang ang type (walang function words) -> English pa rin.
+        self._set_ai_first(False)
+        self.assertEqual(bot_logic.detect_language("overthinker"), "english")
+        response, intent, _, _ = bot_logic.generate_response(
+            "overthinker", None, "tagalog"
+        )
+        self.assertEqual(intent, "overthinking")
+        self.assertIn(response, bot_logic.ENGLISH_RESPONSES["overthinking"])
+
+    def test_taglish_borrowed_word_stays_tagalog(self):
+        # Hiram lang ang English word sa Tagalog na pangungusap -> Tagalog pa rin.
+        self._set_ai_first(False)
+        self.assertEqual(bot_logic.detect_language("Na-overthinker ako"), "tagalog")
+        response, intent, _, _ = bot_logic.generate_response(
+            "Na-overthinker ako", None, "english"
+        )
+        self.assertEqual(intent, "overthinking")
+        self.assertIn(response, bot_logic.TAGALOG_RESPONSES["overthinking"])
+
     def test_resolve_response_language_follows_the_question(self):
         # Waray ang setting ng user pero English ang tanong -> English ang sagot.
         self.assertEqual(bot_logic.resolve_response_language("I am tired and stressed", "waray"), "english")
