@@ -136,7 +136,7 @@
                 </span>
             </div>
         </div>
-        <div class="password-footer">
+        <div class="password-footer" id="passwordFooter" hidden>
             <p id="passwordHint">Use 8+ characters with letters, numbers & symbols.</p>
             <button type="button" id="suggestBtn">Suggest</button>
         </div>
@@ -232,6 +232,13 @@
     const eyeClosed = document.getElementById('eye-closed');
     const passwordHint = document.getElementById('passwordHint');
     const suggestBtn = document.getElementById('suggestBtn');
+    const passwordFooter = document.getElementById('passwordFooter');
+
+    // Ipakita lang ang hint + Suggest kapag nagsimulang mag-type ng password.
+    const togglePasswordFooter = () => {
+        passwordFooter.hidden = passwordInput.value.length === 0;
+    };
+    togglePasswordFooter();
 
     loginLink.addEventListener('click', function(event) {
         event.preventDefault();
@@ -250,6 +257,8 @@
 
     passwordInput.addEventListener('input', () => {
         const val = passwordInput.value;
+        // Ipakita lang ang hint + Suggest habang may laman; itago kapag binura lahat.
+        togglePasswordFooter();
         if (val.length === 0) {
             passwordHint.textContent = 'Use 8+ characters with letters, numbers & symbols.';
             passwordHint.style.color = '#aaa';
