@@ -1,77 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Login</title>
+    <title>Admin Login | Academic Struggle Support System Chatbot ESSU-Guiuan</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* ===== Parehong design system ng landing + login page ===== */
+        :root{--ink:#14532d;--ink-2:#4d7c0f;--muted:#64715a;--green:#22c55e;--green-2:#4ade80;--yellow:#facc15;--card:rgba(255,255,255,.78);--card-border:rgba(134,239,172,.45)}
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            min-height: 100vh;
             font-family: 'Poppins', sans-serif;
-            background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2560&q=80');
-            background-size: cover;
-            background-position: center;
-            position: relative;
+            color: var(--ink);
+            background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
         }
         body::before {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 32, 39, 0.7); /* Dark overlay */
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(160deg,rgba(220,252,231,.28),rgba(187,247,208,.20));
             z-index: 1;
         }
+        /* ===== SPLIT: landing info sa KALIWA, admin login sa KANAN ===== */
+        .split{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:32px 20px 60px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login";gap:24px;align-items:start;min-height:100vh;align-content:center}
+        .landing-side{grid-area:landing;min-width:0}
+        .login-side{grid-area:login;min-width:0}
+        .hero{text-align:center;padding:30px 10px 6px}
+        .logo-frame{width:120px;height:120px;margin:0 auto 16px;border-radius:50%;padding:6px;background:#fff;box-shadow:0 0 0 4px rgba(74,222,128,.45),0 10px 30px rgba(20,83,45,.18)}
+        .logo-frame img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
+        .badge{display:inline-block;font-size:12px;letter-spacing:1px;font-weight:600;color:#166534;background:rgba(74,222,128,.16);border:1px solid rgba(74,222,128,.45);border-radius:999px;padding:6px 14px;margin-bottom:12px}
+        .hero h1{font-size:clamp(1.5rem,4vw,2.2rem);line-height:1.25;margin-bottom:12px;color:var(--ink)}
+        .hero h1 span{color:#16a34a}
+        .sub{color:rgba(20,83,45,.82);max-width:640px;margin:0 auto 22px;line-height:1.7;font-size:clamp(.9rem,2.4vw,1.02rem)}
+        .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:14px}
+        .card{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:20px 16px;box-shadow:0 10px 26px -18px rgba(20,83,45,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+        .card i{font-size:1.4rem;color:#16a34a}
+        .card h3{font-size:.95rem;margin:10px 0 6px;color:var(--ink)}
+        .card p{font-size:.83rem;color:rgba(20,83,45,.75);line-height:1.65}
+        /* ===== ADMIN LOGIN PANEL (kanan) — diagonal gold/green gaya ng user login ===== */
         .auth-box {
             position: relative;
-            z-index: 2;
-            width: 90%;
-            max-width: 400px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 0 25px rgba(0,255,255,0.2);
+            overflow: hidden;
+            background-color: #fffbeb;
+            background-image: url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            border: 1px solid rgba(180,130,20,.35);
+            border-radius: 22px;
+            padding: 30px 26px 26px;
+            box-shadow: 0 24px 60px -24px rgba(20,83,45,.4);
             text-align: center;
-            color: white;
         }
+        .auth-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: #fffbeb;
+            background-image: url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            clip-path: polygon(0 0,100% 0,0 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .auth-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.82));
+            z-index: 1;
+            pointer-events: none;
+        }
+        .auth-box > * { position: relative; z-index: 2; }
+        .auth-box .logo-wrap { width: 84px; height: 84px; margin: 0 auto 14px; border-radius: 50%; padding: 5px; background: #fff; box-shadow: 0 0 0 4px rgba(248,113,113,.4), 0 10px 26px rgba(20,83,45,.18); }
+        .auth-box .logo-wrap img { width: 100%; height: 100%; object-fit: contain; border-radius: 50%; display: block; }
+        .auth-box h2 { margin-bottom: 6px; font-weight: 700; font-size: 1.28rem; color: var(--ink); }
+        .auth-box .subtitle { font-size: .86rem; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
         .form-group {
             text-align: left;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
         .form-group label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #ccc;
-            margin-bottom: 5px;
             display: block;
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--ink-2);
+            margin-bottom: 6px;
+            letter-spacing: .01em;
         }
-        .auth-box h2 { margin-bottom: 20px; font-weight: 600; }
         .auth-box input {
             width: 100%;
-            padding: 12px;
-            margin: 0;
-            border-radius: 8px;
-            border: none;
+            padding: 13px 15px;
+            border-radius: 12px;
+            border: 1.5px solid rgba(134,239,172,.55);
             outline: none;
-            font-size: 14px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: background-color 0.3s;
+            font-size: .94rem;
+            font-family: 'Poppins', sans-serif;
+            background: #fff;
+            color: var(--ink);
+            transition: border-color .2s ease, box-shadow .2s ease;
         }
         .auth-box input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--muted);
         }
         .auth-box input:focus {
-            background-color: rgba(255, 255, 255, 0.2);
+            border-color: var(--green-2);
+            box-shadow: 0 0 0 4px rgba(74,222,128,.25);
         }
         .password-wrapper {
             position: relative;
@@ -81,62 +121,98 @@
         }
         .toggle-password {
             position: absolute;
-            top: 64%;
-            right: 14px;
+            top: 50%;
+            right: 12px;
             transform: translateY(-50%);
-            width: 26px;
-            height: 26px;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 30px;
+            height: 30px;
+            background: rgba(255,255,255,.9);
+            border: 1px solid rgba(134,239,172,.55);
             border-radius: 50%;
-            color: rgba(255, 255, 255, 0.95);
-            font-size: 16px;
+            color: var(--ink-2);
+            font-size: 15px;
             line-height: 1;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
             user-select: none;
+            transition: background .2s ease, border-color .2s ease;
         }
         .toggle-password:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.28);
-            color: #00c6ff;
-            transform: translateY(-50%) scale(1.05);
+            background: #fff;
+            border-color: var(--green);
         }
-        .auth-box button {
+        .toggle-password svg { width: 17px; height: 17px; }
+        .auth-box button[type="submit"] {
             width: 100%;
-            padding: 12px;
-            background: #d9534f; /* Red color for admin */
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #f87171, #ef4444); /* Red = admin identity */
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             color: white;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
             cursor: pointer;
             margin-top: 10px;
-            transition: background-color 0.3s;
+            transition: filter .2s ease, box-shadow .2s ease;
+            box-shadow: 0 12px 28px -10px rgba(239, 68, 68, 0.5);
         }
-        .auth-box button:hover { background: #c9302c; }
-        .flash-message { padding: 12px; margin-bottom: 15px; border-radius: 10px; font-size: 14px; text-align: left; }
-        .flash-success { background-color: rgba(46, 213, 115, 0.18); color: #2ed573; }
-        .flash-error { background-color: rgba(255, 107, 107, 0.18); color: #ff6b6b; }
-        .error { color: #ff6b6b; margin-bottom: 10px; font-size: 14px; }
-        .switch { margin-top: 15px; font-size: 14px; }
-        .switch a { color: #00c6ff; text-decoration: none; font-weight: 500; }
-    </style>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-    <style>
-        /* Preserve the red "admin" identity on top of the shared design. */
-        .auth-box button[type="submit"] { background: linear-gradient(135deg, #f87171, #ef4444); box-shadow: 0 12px 28px -10px rgba(239, 68, 68, 0.5); }
-        .auth-box button[type="submit"]:hover { box-shadow: 0 16px 34px -10px rgba(239, 68, 68, 0.6); }
+        .auth-box button[type="submit"]:hover { filter: brightness(1.05); box-shadow: 0 16px 34px -10px rgba(239, 68, 68, 0.6); }
+        .flash-message { padding: 12px 14px; margin-bottom: 14px; border-radius: 12px; font-size: .86rem; text-align: left; line-height: 1.5; word-break: break-word; background: rgba(74,222,128,.16); color: #166534; border: 1px solid rgba(74,222,128,.4); }
+        .flash-success { background: rgba(74,222,128,.2); color: #15803d; border: 1px solid rgba(74,222,128,.5); }
+        .flash-error { background: rgba(248,113,113,.14); color: #b91c1c; border: 1px solid rgba(248,113,113,.4); }
+        .error { color: #b91c1c; background: rgba(248,113,113,.14); border: 1px solid rgba(248,113,113,.35); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: .86rem; text-align: left; }
+        .switch { margin-top: 16px; font-size: .87rem; color: var(--muted); text-align: center; }
+        .switch a { color: #16a34a; font-weight: 600; text-decoration: none; }
+        .switch a:hover { text-decoration: underline; }
+        /* ===== MOBILE / ANDROID RESPONSIVE (≤768px) ===== */
+        @media (max-width:768px){
+            body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}');background-size:cover;background-attachment:scroll;-webkit-text-size-adjust:100%}
+            .split{grid-template-columns:1fr;grid-template-areas:"landing" "login";gap:18px;padding:24px 16px 48px;align-content:start}
+            .hero{padding:18px 0 6px}
+            .logo-frame{width:104px;height:104px;margin-bottom:14px}
+            .badge{font-size:11px;letter-spacing:.6px;max-width:100%;line-height:1.6}
+            .card{padding:18px 14px}
+            .auth-box{padding:24px 18px 22px}
+        }
+        @media (max-width:480px){
+            .split{padding:18px 12px 40px}
+            .hero{padding:12px 0 4px}
+            .logo-frame{width:92px;height:92px;margin-bottom:12px}
+            .badge{font-size:10px;letter-spacing:.4px;padding:5px 10px}
+            .hero h1{font-size:1.42rem}
+            .sub{font-size:.92rem;line-height:1.65;margin-bottom:18px}
+            .auth-box h2{font-size:1.14rem}
+        }
     </style>
 </head>
 <body>
 
+<div class="split">
+
+<!-- ===== KALIWANG SIDE: LANDING INFO ===== -->
+<section class="landing-side">
+<div class="hero">
+<div class="logo-frame"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Guiuan Logo"></div>
+<div class="badge">ESSU-GUIUAN &bull; ADMIN PORTAL</div>
+<h1>Academic Struggle Support <span>Admin Panel</span></h1>
+<p class="sub">Para sa mga administrator ng ESSU-Guiuan — i-manage ang users, bantayan ang community, at i-review ang system logs nang ligtas.</p>
+</div>
+<div class="cards">
+<div class="card"><i class="fas fa-users-gear"></i><h3>User Management</h3><p>View, verify, and manage student accounts and access.</p></div>
+<div class="card"><i class="fas fa-comments"></i><h3>Community Oversight</h3><p>Monitor group rooms and peer chats for a safe campus space.</p></div>
+<div class="card"><i class="fas fa-shield-heart"></i><h3>Safe and Private</h3><p>Admin actions are logged. Student data stays protected.</p></div>
+</div>
+</section>
+
+<!-- ===== KANANG SIDE: ADMIN LOGIN ===== -->
+<section class="login-side">
 <div class="auth-box">
-    <img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo" style="width: 80px; margin-bottom: 15px;">
-    <h2>Admin Login</h2>
+    <div class="logo-wrap"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo"></div>
+    <h2><i class="fas fa-user-shield" style="color:#ef4444;margin-right:8px;"></i>Admin Login</h2>
+    <p class="subtitle">Sign in with your administrator account.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -180,6 +256,9 @@
         Not an admin? <a href="{{ url_for('login') }}">Go to User Login</a>
     </p>
 </div>
+</section>
+
+</div> <!-- /split -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
