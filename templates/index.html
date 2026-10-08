@@ -68,6 +68,25 @@ overflow-y:auto;
 overflow-x:hidden;
 }
 
+/* ---- SANC.AI wordmark (replaces logo at top of sidebar) ---- */
+.sidebar-brand{
+padding:18px 14px 10px;
+text-align:center;
+font-family:'Poppins','Inter','Segoe UI',sans-serif;
+line-height:1.35;
+color:#7c4a0a;
+font-size:0.63rem;
+font-weight:600;
+letter-spacing:0.01em;
+}
+.sidebar-brand .brand-name{
+font-size:1.3rem;
+font-weight:700;
+color:#3b2507;
+letter-spacing:0.03em;
+text-shadow:0 1px 0 rgba(255,255,255,0.6);
+}
+
 /* ---- User profile card at top ---- */
 .sidebar-user{
 display:flex;
@@ -695,6 +714,10 @@ transform:translateY(-1px);
   }
   .sidebar-user { display: none; }
   .sidebar-divider { display: none; }
+  /* Compact SANC.AI wordmark sa mobile top bar — SANC.AI lang, tagline naka-hide */
+  .sidebar-brand { padding: 4px 8px; }
+  .sidebar-brand .brand-name { font-size: 0.92rem; }
+  .sidebar-brand .brand-tail { display: none; }
   .sidebar nav {
     display: flex;
     flex-direction: row;
@@ -914,9 +937,9 @@ transform:translateY(-1px);
 <!-- SIDEBAR — Premium Professional -->
 <aside class="sidebar" id="sidebar">
 
-  <!-- ESSU Logo -->
-  <div style="text-align:center; padding:20px 16px 12px;">
-    <img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Logo" style="width:64px;height:64px;object-fit:contain;">
+  <!-- SANC.AI wordmark (replaces ESSU logo) -->
+  <div class="sidebar-brand">
+    <span class="brand-name">SANC.AI</span><span class="brand-tail"> &ndash; Student Academic Navigation for Coping using AI</span>
   </div>
 
   <!-- User Profile Card -->
