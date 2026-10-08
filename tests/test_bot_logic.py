@@ -101,6 +101,25 @@ class BotLogicTests(unittest.TestCase):
     def test_detect_language_returns_none_for_ambiguous_text(self):
         self.assertIsNone(bot_logic.detect_language("zzz qqq"))
 
+    def test_detect_language_recognizes_short_english_words(self):
+        # Kahit words lang (walang function words) — English pa rin.
+        self.assertEqual(bot_logic.detect_language("time management"), "english")
+        self.assertEqual(bot_logic.detect_language("burnout"), "english")
+        self.assertEqual(bot_logic.detect_language("thesis"), "english")
+
+    def test_detect_language_recognizes_short_tagalog_words(self):
+        # Kahit isang Tagalog word lang — Tagalog pa rin.
+        self.assertEqual(bot_logic.detect_language("puyat"), "tagalog")
+        self.assertEqual(bot_logic.detect_language("pagod"), "tagalog")
+
+    def test_short_english_word_gets_english_response(self):
+        self._set_ai_first(False)
+        response, intent, _, _ = bot_logic.generate_response(
+            "time management", None, "tagalog"
+        )
+        self.assertEqual(intent, "time_management")
+        self.assertIn(response, bot_logic.ENGLISH_RESPONSES["time_management"])
+
     def test_resolve_response_language_follows_the_question(self):
         # Waray ang setting ng user pero English ang tanong -> English ang sagot.
         self.assertEqual(bot_logic.resolve_response_language("I am tired and stressed", "waray"), "english")

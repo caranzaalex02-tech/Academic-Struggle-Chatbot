@@ -38,7 +38,6 @@ ENGLISH_MARKERS = {
     "again", "now", "today", "tomorrow", "if", "then", "than", "as",
     "might", "must", "there's",
 }
-
 TAGALOG_MARKERS = {
     "ang", "ng", "mga", "ako", "ko", "mo", "kami", "namin", "natin",
     "ninyo", "niya", "siya", "sila", "nila", "ito", "iyan", "iyon",
@@ -52,6 +51,14 @@ TAGALOG_MARKERS = {
     "aking", "naku", "grabe", "ano", "nasaan", "sabi", "buong",
     "lahat", "iba", "dapat", "kailangan", "ayoko", "yata", "mahirap",
     "napaka", "araw", "gabi", "umaga", "pagod", "tulong", "aral",
+    "walang", "kong", "bukas", "kahapon", "hapon", "tanghali", "oras",
+    "panahon", "klase", "problema", "puyat", "hirap", "nahihirapan",
+    "takot", "natatakot", "lungkot", "malungkot", "galit", "kaba",
+    "tulog", "iyak", "umiiyak", "masaya", "sakit", "masakit",
+    "eksam", "grado", "bagsak", "bumagsak", "pumasa", "guro",
+    "kaklase", "kaibigan", "magulang", "pamilya", "trabaho", "pera",
+    "baon", "utang", "aralin", "proyekto", "paaralan", "eskwela",
+    "pasukan", "depensa",
 }
 
 WARAY_MARKERS = {
@@ -63,6 +70,60 @@ WARAY_MARKERS = {
     "ha", "hito", "sugad", "tungod", "hin-o", "oman", "liwat", "la",
     "kabug-at", "mga", "hini",
 }
+
+
+# ---------------------------------------------------------------------------
+# ENGLISH CONTENT WORDS (single-word / short-phrase fallback)
+# ---------------------------------------------------------------------------
+# Mga karaniwang English na content words (academic + mental health + general).
+# Ginagamit LANG ito kapag walang Tagalog/Waray o English function-word marker
+# (hal. "time management", "burnout", "hello") para hindi ma-contaminate ang
+# Taglish na tanong (hal. "Na-stress ako sa exam") — kapag may Tagalog/Waray
+# marker, marker path pa rin ang masusunod.
+ENGLISH_CONTENT_WORDS = {
+    "time", "management", "exam", "exams", "quiz", "quizzes", "thesis",
+    "dissertation", "assignment", "assignments", "homework", "deadline",
+    "deadlines", "grades", "grade", "failed", "failure", "fail", "study",
+    "studies", "studying", "student", "students", "school", "college",
+    "university", "class", "classes", "course", "courses", "subject",
+    "subjects", "lesson", "lessons", "lecture", "lectures", "semester",
+    "scholarship", "tuition", "enrollment", "attendance", "absent",
+    "stress", "stressed", "stressful", "struggle", "struggles",
+    "struggling", "anxiety", "anxious", "depressed", "depression", "sad",
+    "sadness", "lonely", "loneliness", "tired", "tiredness", "fatigue",
+    "exhausted", "exhaustion", "overwhelmed", "burnout", "pressure",
+    "pressured", "worry", "worried", "fear", "afraid", "nervous", "panic",
+    "crying", "hopeless", "worthless", "perfectionism", "perfectionist",
+    "homesick", "confused", "confusion", "confusing", "angry", "anger",
+    "frustrated", "frustration", "procrastination", "procrastinate",
+    "procrastinating", "motivation", "motivated", "unmotivated", "motivate",
+    "focus", "focused", "concentrate", "concentration", "distracted",
+    "distraction", "sleep", "sleepy", "sleepless", "insomnia", "headache",
+    "health", "healthy", "sick", "illness", "hospital", "doctor",
+    "therapy", "therapist", "counselor", "counseling", "psychologist",
+    "hello", "hey", "hi", "morning", "afternoon", "evening", "friend",
+    "friends", "family", "parents", "teacher", "teachers", "adviser",
+    "mentor", "advice", "support", "supportive", "happy", "happiness",
+    "excited", "grateful", "thankful", "sorry", "goodbye", "bye",
+    "project", "projects", "presentation", "presentations", "workload",
+    "balance", "routine", "habit", "habits", "goal", "goals", "future",
+    "career", "job", "jobs", "interview", "allowance", "budget",
+    "dorm", "roommate", "bully", "bullying", "cheating", "plagiarism",
+    "graduate", "graduation", "freshman", "relationship", "relationships",
+    "partner", "boyfriend", "girlfriend", "crush", "love", "heartbreak",
+    "breakup", "challenge", "challenges", "challenging", "overcome",
+    "improve", "improvement", "progress", "success", "successful",
+    "perfect", "mistake", "mistakes", "forget", "forgetful", "remember",
+    "late", "absence", "notes", "review", "reviewer", "memorize",
+    "difficult", "difficulty", "easy", "hard", "defense", "panel",
+    "guidance", "clinic", "games", "gaming", "phone", "online",
+}
+
+
+def score_content_words(text):
+    """Ibinalik ang bilang ng English content words sa isang text."""
+    tokens = set(re.findall(r"[a-z]+(?:'[a-z]+)?", (text or "").lower()))
+    return len(tokens & ENGLISH_CONTENT_WORDS)
 
 
 def score_languages(text):
@@ -88,6 +149,14 @@ def detect_language(text):
         return "waray"
 
     if english == 0 and tagalog == 0:
+        # Walang function-word marker (hal. "time management" lang ang type).
+        if waray >= 1:
+            # Kahit isang Waray marker (hal. "maupay", "bulig") ay sapat na.
+            return "waray"
+        # Kahit isang English content word (hal. "burnout", "hello") ay sapat
+        # na para ituring na English — basta walang Tagalog/Waray marker.
+        if score_content_words(text) >= 1:
+            return "english"
         return None
 
     if english > tagalog:
@@ -169,6 +238,11 @@ ENGLISH_RESPONSES = {
         "• **Say \"no\"** to things you can no longer carry.\n"
         "• **Sleep.** Sleep is the most effective cure.\n\n"
         "Rest isn't laziness. It's what you need to keep going. 🔋"
+    ],
+    "time_management": [
+        "Help yourself by planning ahead. Use a planner, prioritize your top 3 tasks daily, and say 'no' to extra commitments.\n"
+        "Time is your most valuable resource. Protect it fiercely. Even 10 minutes of planning saves hours of stress.\n"
+        "\"The key is in not spending time, but in investing it.\" – Stephen R. Covey"
     ],
     "failing_subject": [
         "Seeing a failing grade hurts, and what you feel is valid. But remember: this is not the end.\n\n"
