@@ -725,8 +725,9 @@ ABUSIVE_RESPONSE_EN = (
 )
 
 ACADEMIC_REFERRAL_EN = (
-    "I can help most with academic struggles such as assignments, projects, exam stress, "
-    "and time management. For other topics, try another AI like ChatGPT or Google Bard."
+    "I can help with school and college subjects — lessons, homework, and step-by-step "
+    "solutions — and with academic struggles such as exam stress and time management. "
+    "Ask me anything about your classes!"
 )
 
 

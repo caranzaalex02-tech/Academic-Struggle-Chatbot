@@ -415,6 +415,38 @@ class BotLogicTests(unittest.TestCase):
         # Walang pinapapilitang Tagalog kapag auto ang mode.
         self.assertNotIn("always answer in tagalog", prompt)
 
+    # ---- ACADEMIC SUBJECT / LESSON QUESTIONS (kaya ng sagutan) ----
+    def test_system_prompt_answers_subject_and_lesson_questions(self):
+        for language in ("tagalog", "english", "waray", "auto"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            # Kasama ang mga subject/lesson/homework sa sakop...
+            self.assertIn("subject", prompt)
+            self.assertIn("lesson", prompt)
+            self.assertIn("homework", prompt)
+            self.assertIn(
+                "never decline a school, subject, lesson, homework, or research question",
+                prompt,
+            )
+            self.assertIn(
+                "never refuse a school, subject, lesson, homework, or research question",
+                prompt,
+            )
+            self.assertIn("proper term for that subject", prompt)
+            # ...at hindi na tinuturong tumanggi sa mga academic na tanong.
+            self.assertNotIn("cannot answer", prompt)
+
+    def test_system_prompt_keeps_safety_guardrails(self):
+        for language in ("tagalog", "english", "waray"):
+            prompt = bot_logic._build_openai_system_prompt(language).lower()
+            self.assertIn("never diagnose", prompt)
+            self.assertIn("in crisis, always direct them", prompt)
+
+    def test_academic_referral_no_longer_points_to_other_ai(self):
+        for language in ("tagalog", "english", "waray"):
+            text = bot_logic.academic_referral(language).lower()
+            self.assertNotIn("chatgpt", text)
+            self.assertNotIn("google bard", text)
+
     def test_english_reply_choices_never_fall_back_to_tagalog(self):
         tagalog_only = {"response": ["Tagalog na sagot ito lamang."]}
         self.assertEqual(
