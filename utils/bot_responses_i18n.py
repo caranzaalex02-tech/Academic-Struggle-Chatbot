@@ -44,6 +44,13 @@ ENGLISH_MARKERS = {
     "welcome", "agree", "same", "later", "soon", "already", "ever",
     "something", "anything", "everything", "nothing", "someone", "anyone",
     "everyone",
+    # Contractions at English internet-slang — dati ay walang marker kaya
+    # napapadali sa Tagalog ang English na mensahe (hal. "I'll try", "thx").
+    "i'll", "i'd", "we're", "we'll", "we've", "you'll", "you'd", "you've",
+    "they're", "they'll", "they've", "that's", "what's", "who's", "he's",
+    "she's", "isn't", "aren't", "wasn't", "weren't", "couldn't", "wouldn't",
+    "shouldn't", "haven't", "hasn't", "hadn't", "ain't",
+    "pls", "thx", "ty", "btw", "idk", "ngl", "tbh", "ikr", "lmao", "brb",
 }
 TAGALOG_MARKERS = {
     "ang", "ng", "mga", "ako", "ko", "mo", "kami", "namin", "natin",
@@ -216,6 +223,14 @@ def detect_language(text):
         return "english"
     if tagalog > english:
         return "tagalog"
+    # Tie (parehong ≥1): madalas English sentence ito na may Taglish particle
+    # (hal. "I'm tired po", "can't sleep po") kaya laging Tagalog ang dating
+    # default. Kung may English content words na hindi hiram sa Tagalog,
+    # English ang sagot. Kapag walang content word, walang paborito —
+    # None pa rin at ang preference ng user ang masusunod.
+    content_hits = english_content_hits(text)
+    if content_hits and not is_taglish_borrowed_use(text, content_hits):
+        return "english"
     return None
 
 
@@ -251,13 +266,14 @@ def ai_reply_matches_language(reply, expected):
     english, tagalog, waray = score_languages(head)
     content_hits = english_content_hits(head)
     if expected == "english":
-        # Mas mahigpit kapag English ang hiningi: kahit ISANG malinaw na
-        # Tagalog/Waray marker lang na nangunguna sa English markers ay
-        # sapat na para ituring na mali ang wika (hal. "Salamat!",
-        # "Oo nga, tama ka.", "Maupay!"). Dati ay kailangan ng 2 markers kaya
-        # napapalampas ang mga maikling Tagalog na sagot sa English na tanong.
-        # Pinapayagan pa rin ang Taglish (mas mataas ang English marker count).
-        if tagalog >= 1 and tagalog > english:
+        if tagalog >= 1 and (tagalog > english or (tagalog >= 2 and tagalog >= english)):
+            # Kahit ISANG malinaw na Tagalog marker lang na nangunguna sa
+            # English markers ay sapat na (hal. "Salamat!", "Oo nga, tama ka."),
+            # at tatanggihin din ang kahit 2 Tagalog marker na patas o
+            # nangunguna (hal. "I understand you. Kailangan mo lang
+            # magpahinga.") — Tagalog-bodied pa rin iyon. Pinapayagan pa rin
+            # ang Taglish na English ang lamang ("...Normal lang ang
+            # overthinking, you are not alone.").
             return False
         if waray >= 1 and waray > english and waray >= tagalog:
             return False

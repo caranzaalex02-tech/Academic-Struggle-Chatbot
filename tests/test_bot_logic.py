@@ -347,11 +347,27 @@ class BotLogicTests(unittest.TestCase):
         self.assertFalse(i18n.ai_reply_matches_language("Salamat!", "english"))
         self.assertFalse(i18n.ai_reply_matches_language("Oo nga, tama ka.", "english"))
         self.assertFalse(i18n.ai_reply_matches_language("Maupay!", "english"))
-        # Malinaw na English at Taglish — dapat pasado pa rin.
+        # Tagalog-bodied kahit may kaunting English words -> bagsak pa rin.
+        self.assertFalse(i18n.ai_reply_matches_language(
+            "I understand you. Kailangan mo lang magpahinga.", "english"))
+        # Malinaw na English at Taglish (English ang lamang) — dapat pasado pa rin.
         self.assertTrue(i18n.ai_reply_matches_language("I hear you. Take a deep breath first.", "english"))
         self.assertTrue(i18n.ai_reply_matches_language(
             "I hear you. Normal lang ang overthinking, you are not alone.", "english"
         ))
+
+    def test_detect_language_tie_with_english_content_word_prefers_english(self):
+        # English sentence + Tagalog particle ("po") dating TIE -> Tagalog setting.
+        self.assertEqual(bot_logic.detect_language("I'm tired po"), "english")
+        self.assertEqual(bot_logic.detect_language("can't sleep po"), "english")
+        # Walang content word -> walang paborito; preference ng user ang susunod.
+        self.assertIsNone(bot_logic.detect_language("okay po"))
+        self.assertEqual(bot_logic.resolve_response_language("okay po", "english"), "english")
+        self.assertEqual(bot_logic.resolve_response_language("okay po", "tagalog"), "tagalog")
+
+    def test_detect_language_recognizes_contractions_and_english_slang(self):
+        for text in ("i'll try", "that's fine", "thx", "idk"):
+            self.assertEqual(bot_logic.detect_language(text), "english")
 
     def test_english_reply_choices_never_fall_back_to_tagalog(self):
         tagalog_only = {"response": ["Tagalog na sagot ito lamang."]}
