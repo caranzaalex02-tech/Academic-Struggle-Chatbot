@@ -1951,6 +1951,16 @@ def _intent_response_choices(intent, language, intent_data):
         choices = WARAY_RESPONSES.get(intent, [])
     elif language == 'english':
         choices = ENGLISH_RESPONSES.get(intent, [])
+        if not choices:
+            # Built-in na sagot lang ang gamitin kapag English din ito —
+            # hindi puwedeng ibalik ang Tagalog/Waray na sagot sa English
+            # na tanong (hal. "how to manage stress" na may Tagalog na
+            # built-in response). Kapag hindi English, generic English na lang.
+            built_in = intent_data.get("response", [])
+            if built_in and detect_language(" ".join(built_in)) == 'english':
+                choices = built_in
+            else:
+                choices = GENERIC_FALLBACKS_EN
     else:
         choices = TAGALOG_RESPONSES.get(intent, [])
     if not choices:
@@ -1964,6 +1974,12 @@ def _intent_follow_ups(intent, language, intent_data):
         choices = ENGLISH_FOLLOW_UPS.get(intent, [])
         if choices:
             return choices
+        # Huwag mag-append ng Tagalog/Waray follow-up sa English na sagot —
+        # isa ito sa paraan kung paano nai-mix ang wika ng reply.
+        built_in = intent_data.get("follow_up", [])
+        if built_in and detect_language(" ".join(built_in)) == 'english':
+            return built_in
+        return []
     return intent_data.get("follow_up", [])
 
 

@@ -37,6 +37,13 @@ ENGLISH_MARKERS = {
     "too", "more", "some", "any", "all", "always", "never", "still",
     "again", "now", "today", "tomorrow", "if", "then", "than", "as",
     "might", "must", "there's",
+    # Maikling English replies at particles — dating "0 marker" kaya napupunta
+    # sa Tagalog na setting kapag puro ito ang laman ng mensahe ("okay", "yes").
+    "ok", "okay", "yes", "yeah", "yep", "no", "nope", "maybe", "sure", "fine",
+    "right", "exactly", "actually", "definitely", "probably", "honestly",
+    "welcome", "agree", "same", "later", "soon", "already", "ever",
+    "something", "anything", "everything", "nothing", "someone", "anyone",
+    "everyone",
 }
 TAGALOG_MARKERS = {
     "ang", "ng", "mga", "ako", "ko", "mo", "kami", "namin", "natin",
@@ -122,6 +129,15 @@ ENGLISH_CONTENT_WORDS = {
     "mood", "moody", "emotion", "emotions", "emotional", "feelings",
     "feeling", "cope", "coping", "calm", "calmness", "relax", "relaxing",
     "rest", "break", "pause", "breathe", "breathing", "grounding",
+    # Karaniwang English content words na madalas maging buong mensahe
+    # (dating walang marker kaya nakikita itong ambiguous -> Tagalog setting).
+    "research", "paper", "papers", "report", "reports", "essay", "essays",
+    "module", "modules", "requirement", "requirements", "reading", "readings",
+    "library", "laboratory", "experiment", "experiments", "argument",
+    "question", "questions", "answer", "answers", "explain", "understand",
+    "understood", "problem", "problems", "issue", "issues", "tip", "tips",
+    "guide", "guides", "practice", "alone", "proud", "brave", "miss",
+    "final", "finals", "midterm", "seatwork", "quarter", "grading",
 }
 
 
@@ -235,10 +251,15 @@ def ai_reply_matches_language(reply, expected):
     english, tagalog, waray = score_languages(head)
     content_hits = english_content_hits(head)
     if expected == "english":
-        # Malinaw na Tagalog o Waray ang sagot kahit English ang hiningi.
-        if tagalog >= POST_CHECK_MIN_OPPOSITE_MARKERS and tagalog > english:
+        # Mas mahigpit kapag English ang hiningi: kahit ISANG malinaw na
+        # Tagalog/Waray marker lang na nangunguna sa English markers ay
+        # sapat na para ituring na mali ang wika (hal. "Salamat!",
+        # "Oo nga, tama ka.", "Maupay!"). Dati ay kailangan ng 2 markers kaya
+        # napapalampas ang mga maikling Tagalog na sagot sa English na tanong.
+        # Pinapayagan pa rin ang Taglish (mas mataas ang English marker count).
+        if tagalog >= 1 and tagalog > english:
             return False
-        if waray >= POST_CHECK_MIN_OPPOSITE_MARKERS and waray >= max(english, tagalog):
+        if waray >= 1 and waray > english and waray >= tagalog:
             return False
         return True
     if expected == "tagalog":
@@ -436,6 +457,27 @@ ENGLISH_RESPONSES = {
         "It's normal to feel anxious about what happens after college. You're not alone in that.\n"
         "Use this time to explore your interests. Talk to your school's career services; they have many resources for you.\n"
         "\"Your career is a journey, not a destination. It's okay to not have it all figured out.\" – Unknown"
+    ],
+    # English bersyon ng dalawang Tagalog-default na _tl intent — may English
+    # signals ang mga ito kaya umaabot dito ang English na tanong (dating
+    # Tagalog ang naibibigay kasi wala silang entry dito).
+    "stress_management_tl": [
+        "Ongoing stress affects your body and mind—but there are ways to lighten it.\n"
+        "Try these:\n"
+        "- Write down what's stressing you (a brain dump clears your head)\n"
+        "- Move your body for 10 minutes (walk, stretch, breathe deeply)\n"
+        "- Cut screen time 30 minutes before sleeping\n"
+        "- Talk to a trusted friend, mentor, or school counselor\n\n"
+        "If the stress continues and it's already affecting your studies, talk to your guidance counselor or doctor."
+    ],
+    "motivation_tl": [
+        "Motivation follows action—you don't have to feel it first. In the brain, movement comes before the feeling.\n\n"
+        "Do this:\n"
+        "1. Start with just 2 minutes of the task (the hardest part is starting)\n"
+        "2. Put your phone in another room while studying\n"
+        "3. Set a small reward for yourself after you finish\n"
+        "4. Review your progress every night—one step forward is still progress\n\n"
+        "If you've felt no drive to do things you used to enjoy for a long time now, talk to a guidance counselor or doctor. Sometimes it's more than just motivation—and that's okay."
     ],
 }
 

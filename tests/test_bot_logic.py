@@ -303,6 +303,82 @@ class BotLogicTests(unittest.TestCase):
         self.assertEqual(intent, "gratitude")
         self.assertIn(response, bot_logic.ENGLISH_RESPONSES["gratitude"])
 
+    # ---- REGRESSION: English na chat ay dapat English ang sagot ----
+
+    def test_detect_language_recognizes_common_english_short_replies(self):
+        # Dati ay None ang mga ito kaya bumabalik sa Tagalog na setting ng user.
+        for text in ("okay", "yes", "maybe", "sure"):
+            self.assertEqual(bot_logic.detect_language(text), "english")
+
+    def test_detect_language_recognizes_english_academic_content_words(self):
+        self.assertEqual(bot_logic.detect_language("research paper"), "english")
+        self.assertEqual(bot_logic.detect_language("module requirements"), "english")
+
+    def test_short_english_message_gets_english_response(self):
+        self._set_ai_first(False)
+        response, _, _, _ = bot_logic.generate_response("okay", None, "tagalog")
+        self.assertEqual(bot_logic.detect_language(response), "english")
+
+    def test_english_academic_phrase_gets_english_response(self):
+        self._set_ai_first(False)
+        response, intent, _, _ = bot_logic.generate_response("research paper", None, "tagalog")
+        self.assertEqual(intent, "school_project")
+        # Maaaring may naka-append na English follow-up, kaya startswith ang tinitingnan.
+        self.assertTrue(
+            response.startswith(tuple(bot_logic.ENGLISH_RESPONSES["school_project"]))
+        )
+        self.assertEqual(bot_logic.detect_language(response), "english")
+
+    def test_english_question_matching_tl_intent_gets_english_response(self):
+        # Dati: walang ENGLISH_RESPONSES entry ang mga _tl intent kaya Tagalog
+        # ang naibibigay kahit English ang tanong.
+        self._set_ai_first(False)
+        response, intent, _, _ = bot_logic.generate_response("how to manage stress", None, "tagalog")
+        self.assertEqual(intent, "stress_management_tl")
+        self.assertIn(response, bot_logic.ENGLISH_RESPONSES["stress_management_tl"])
+
+        response, intent, _, _ = bot_logic.generate_response("how to stay motivated", None, "tagalog")
+        self.assertEqual(intent, "motivation_tl")
+        self.assertIn(response, bot_logic.ENGLISH_RESPONSES["motivation_tl"])
+
+    def test_ai_reply_rejects_short_tagalog_replies_for_english(self):
+        from utils import bot_responses_i18n as i18n
+        # Dati ay pasok pa ang mga ito dahil kailangan ng 2 marker.
+        self.assertFalse(i18n.ai_reply_matches_language("Salamat!", "english"))
+        self.assertFalse(i18n.ai_reply_matches_language("Oo nga, tama ka.", "english"))
+        self.assertFalse(i18n.ai_reply_matches_language("Maupay!", "english"))
+        # Malinaw na English at Taglish — dapat pasado pa rin.
+        self.assertTrue(i18n.ai_reply_matches_language("I hear you. Take a deep breath first.", "english"))
+        self.assertTrue(i18n.ai_reply_matches_language(
+            "I hear you. Normal lang ang overthinking, you are not alone.", "english"
+        ))
+
+    def test_english_reply_choices_never_fall_back_to_tagalog(self):
+        tagalog_only = {"response": ["Tagalog na sagot ito lamang."]}
+        self.assertEqual(
+            bot_logic._intent_response_choices("unknown_intent", "english", tagalog_only),
+            bot_logic.GENERIC_FALLBACKS_EN,
+        )
+        english_built_in = {"response": ["You can do this. Keep going!"]}
+        self.assertEqual(
+            bot_logic._intent_response_choices("unknown_intent", "english", english_built_in),
+            english_built_in["response"],
+        )
+
+    def test_english_reply_never_appends_tagalog_follow_up(self):
+        self.assertEqual(
+            bot_logic._intent_follow_ups(
+                "unknown_intent", "english", {"follow_up": ["Gusto mo bang mag-usap pa?"]}
+            ),
+            [],
+        )
+        self.assertEqual(
+            bot_logic._intent_follow_ups(
+                "unknown_intent", "english", {"follow_up": ["Do you want to talk more?"]}
+            ),
+            ["Do you want to talk more?"],
+        )
+
     def test_tagalog_faq_answer_is_used_for_tagalog_question(self):
         self._set_ai_first(False)
         response, intent, _, _ = bot_logic.generate_response("para saan ang app na ito", None, "tagalog")
