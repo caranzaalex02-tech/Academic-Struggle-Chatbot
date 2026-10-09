@@ -21,39 +21,81 @@ Notes:
 import os
 import sys
 
-import requests
+import json
+import urllib.request
+import urllib.error
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+
+def env(name: str, default: str = "") -> str:
+    # Minimal .env reader — walang dotenv dependency.
+    # Checks the script's own folder, then the repo root (in case the script
+    # lives in scripts/ and .env sits at the project root).
+    candidates = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            with open(path, encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if line.startswith(name + "="):
+                        return line.split("=", 1)[1].strip().strip('"').strip("'")
+    return os.environ.get(name, default)
+
+GROQ_API_KEY = env("GROQ_API_KEY")
 if not GROQ_API_KEY:
     print("ERROR: set GROQ_API_KEY in .env (or export GROQ_API_KEY) first.")
     sys.exit(1)
 
 URL = "https://api.groq.com/openai/v1/chat/completions"
-HEADERS = {
-    "Authorization": f"Bearer {GROQ_API_KEY}",
-    "Content-Type": "application/json",
-}
-PAYLOAD = {
-    "model": os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b"),
-    "messages": [{"role": "user", "content": "Say this once: quota probe ok."}],
-    "max_tokens": 4,
-}
 
 
 def main() -> int:
-    try:
-        resp = requests.post(URL, headers=HEADERS, json=PAYLOAD, timeout=60)
-    except requests.RequestException as exc:
-        print(f"NETWORK ERROR: {exc}")
+    key = GROQ_API_KEY
+    model = os.environ.get("GROQ_MODEL", "qwen/qwen3.8-27b")
+    if not key:
+        print("ERROR: set GROQ_API_KEY in .env (or export GROQ_API_KEY) first.")
         return 1
 
-    print(f"HTTP status: {resp.status_code}")
-    print(f"model: {PAYLOAD['model']}")
+    body = json.dumps({
+        "model": model,
+        "messages": [{"role": "user", "content": "Say this once: quota probe ok."}],
+        "max_tokens": 4,
+    }).encode("utf-8")
 
-    rate = resp.headers
-    if resp.status_code == 200:
+    req = urllib.request.Request(
+        URL,
+        data=body,
+        headers={
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/124.0 Safari/537.36",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            status = resp.status
+            headers = {k.lower(): v for k, v in resp.headers.items()}
+    except urllib.error.HTTPError as e:
+        status = e.code
+        headers = {k.lower(): v for k, v in e.headers.items()}
+        print(f"HTTP {status} error")
+        print((e.read()[:300].decode("utf-8", "replace")))
+    except Exception as e:  # noqa: BLE001
+        print(f"NETWORK ERROR: {type(e).__name__}: {e}")
+        return 1
+
+    print(f"HTTP status: {status}")
+    print(f"model: {model}")
+
+    if status == 200:
         print("\n--- rate limit headers (OK) ---")
         for key in (
             "x-ratelimit-limit-requests",
@@ -63,15 +105,13 @@ def main() -> int:
             "x-ratelimit-reset-requests",
             "x-ratelimit-reset-tokens",
         ):
-            print(f"{key}: {rate.get(key)}")
+            print(f"{key}: {headers.get(key)}")
         return 0
 
-    print("\n--- error body (first 500 chars) ---")
-    print(resp.text[:500])
     print("\n--- rate limit headers (if any) ---")
-    for key, value in rate.items():
-        if "ratelimit" in key.lower():
-            print(f"{key}: {value}")
+    for name, value in sorted(headers.items()):
+        if "ratelimit" in name:
+            print(f"{name}: {value}")
     return 1
 
 
