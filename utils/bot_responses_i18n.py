@@ -145,6 +145,10 @@ ENGLISH_CONTENT_WORDS = {
     "understood", "problem", "problems", "issue", "issues", "tip", "tips",
     "guide", "guides", "practice", "alone", "proud", "brave", "miss",
     "final", "finals", "midterm", "seatwork", "quarter", "grading",
+    "milestone", "milestones", "schedule", "chapter", "chapters", "outline",
+    "abstract", "objective", "objectives", "criteria", "rubric", "synthesis",
+    "article", "articles", "reference", "references", "source", "sources",
+    "database", "internet", "website", "portfolio", "citation", "survey",
 }
 
 
@@ -310,6 +314,10 @@ def _post_check_correction_prompt(user_input, expected):
 def pick(language, english, tagalog, waray=None):
     """Pumipili ng string base sa language code (fallback sa Tagalog)."""
     if language == "english":
+        return english
+    if language == "auto":
+        # Walang signal ang mensahe — English ang pinakaligtas na fallback
+        # para hindi Tagalog ang makita ng English na user (lalo na sa error).
         return english
     if language == "waray":
         return waray if waray is not None else tagalog

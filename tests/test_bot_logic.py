@@ -369,6 +369,52 @@ class BotLogicTests(unittest.TestCase):
         for text in ("i'll try", "that's fine", "thx", "idk"):
             self.assertEqual(bot_logic.detect_language(text), "english")
 
+    def test_milestone_and_common_academic_words_detect_as_english(self):
+        for text in ("milestone", "schedule", "chapter"):
+            self.assertEqual(bot_logic.detect_language(text), "english")
+
+    def test_auto_language_passed_to_ai_when_detection_is_uncertain(self):
+        self._set_ai_first(True)
+        seen = {}
+
+        def fake_ai(user_input, language="tagalog", *args, **kwargs):
+            seen["language"] = language
+            return "I hear you. Take it one step at a time."
+
+        self._original_ai_reply = bot_logic._call_ai_reply
+        bot_logic._call_ai_reply = fake_ai
+        self.addCleanup(self._restore_ai_reply)
+        self.assertIsNone(bot_logic.detect_language("hmmp"))
+        response, _, _, _ = bot_logic.generate_response("hmmp", None, "tagalog")
+        # Auto mode: ang AI ang magdedekta ng wika. Tinatanggap ang reply
+        # kahit anong wika — walang post-check na pumipilit sa Tagalog.
+        self.assertEqual(seen["language"], "auto")
+        self.assertEqual(response, "I hear you. Take it one step at a time.")
+
+    def test_confident_detection_still_controls_the_ai_language(self):
+        self._set_ai_first(True)
+        seen = {}
+
+        def fake_ai(user_input, language="tagalog", *args, **kwargs):
+            seen["language"] = language
+            return "I hear you. Exam stress is tough, but you can handle it."
+
+        self._original_ai_reply = bot_logic._call_ai_reply
+        bot_logic._call_ai_reply = fake_ai
+        self.addCleanup(self._restore_ai_reply)
+        bot_logic.generate_response("I am stressed about my exam", None, "tagalog")
+        self.assertEqual(seen["language"], "english")
+        bot_logic.generate_response("pagod na ako sa requirements", None, "english")
+        self.assertEqual(seen["language"], "tagalog")
+
+    def test_language_directive_and_prompt_support_auto(self):
+        self.assertIn("Reply in English", bot_logic._language_directive("english"))
+        self.assertIn("Detect the language", bot_logic._language_directive("auto"))
+        prompt = bot_logic._build_openai_system_prompt("auto").lower()
+        self.assertIn("same language as the user's last message", prompt)
+        # Walang pinapapilitang Tagalog kapag auto ang mode.
+        self.assertNotIn("always answer in tagalog", prompt)
+
     def test_english_reply_choices_never_fall_back_to_tagalog(self):
         tagalog_only = {"response": ["Tagalog na sagot ito lamang."]}
         self.assertEqual(

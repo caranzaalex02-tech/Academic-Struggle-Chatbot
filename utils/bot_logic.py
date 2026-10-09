@@ -1117,10 +1117,8 @@ def _call_groq_api(user_input, language='tagalog', history=None):
                 messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
         # Paalala sa dulo: ang WIKA ng huling mensahe ang masusunod — kahit
         # single word lang. Hindi ito optional; HIGHEST PRIORITY ito.
-        lang_name = {"english": "English", "tagalog": "Tagalog/Taglish", "waray": "Waray"}.get(language, "Tagalog/Taglish")
         messages.append({"role": "user", "content": (
-            f"[Reply in {lang_name}. The message below is {lang_name} — "
-            f"answer in {lang_name} only.]\n{user_input}"
+            f"{_language_directive(language)}\n{user_input}"
         )})
 
         for model in _groq_models():
@@ -1211,8 +1209,7 @@ def _call_gemini_api(user_input, language='tagalog', history=None):
                 model = genai_module.GenerativeModel(model_name)
                 system_prompt = _build_openai_system_prompt(language)
                 history_block = "\n".join(_history_to_prompt_lines(history))
-                lang_name = {"english": "English", "tagalog": "Tagalog/Taglish", "waray": "Waray"}.get(language, "Tagalog/Taglish")
-                lang_tag = f"[Reply in {lang_name}. The message below is {lang_name} — answer in {lang_name} only.]\n{user_input}"
+                lang_tag = f"{_language_directive(language)}\n{user_input}"
                 if history_block:
                     full_prompt = f"{system_prompt}\n\n{history_block}\nUser: {lang_tag}\nAssistant:"
                 else:
@@ -1552,6 +1549,32 @@ def _clean_ai_text(text):
     return cleaned.strip()
 
 
+def _language_directive(language):
+    """Instruction na inilalagay bago ang huling mensahe ng user sa AI.
+
+    Kapag 'auto' (hindi sigurado ang detector — hal. unfamiliar na salita
+    gaya ng "milestone" o typo), ang AI na mismo ang magdedekta ng wika ng
+    mensahe — parang ChatGPT. Hindi ito kailanman pinapapilitang sumagot
+    sa ibang wika kaysa sa ginamit ng user.
+    """
+    if language == 'auto':
+        return (
+            "[Detect the language of the message below yourself and reply ONLY "
+            "in that same language — English, Tagalog/Taglish, or Waray. "
+            "Do not translate the message; just answer naturally in the "
+            "language the user used.]"
+        )
+    lang_name = {
+        "english": "English",
+        "tagalog": "Tagalog/Taglish",
+        "waray": "Waray",
+    }.get(language, "Tagalog/Taglish")
+    return (
+        f"[Reply in {lang_name}. The message below is {lang_name} — "
+        f"answer in {lang_name} only.]"
+    )
+
+
 def _build_openai_system_prompt(language='tagalog'):
     base_guidelines = (
         "SAFETY RULES (follow strictly):\n"
@@ -1604,6 +1627,14 @@ def _build_openai_system_prompt(language='tagalog'):
         role = (
             "You are a compassionate academic struggle support chatbot for students. "
             "Always answer in English. "
+        )
+    elif language == 'auto':
+        # Hindi sigurado ang detector — walang pinapilitang wika. Ang AI
+        # ang susunod sa mismong wika ng huling mensahe ng user (parang ChatGPT).
+        role = (
+            "You are a compassionate academic struggle support chatbot for students. "
+            "Always answer in the SAME language as the user's last message "
+            "(English, Tagalog/Taglish, or Waray). "
         )
     else:
         role = (
@@ -1750,10 +1781,8 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
                 messages.append({"role": "user", "content": line[len("Earlier user:"):].strip()})
             else:
                 messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
-        lang_name = {"english": "English", "tagalog": "Tagalog/Taglish", "waray": "Waray"}.get(language, "Tagalog/Taglish")
         messages.append({"role": "user", "content": (
-            f"[Reply in {lang_name}. The message below is {lang_name} — "
-            f"answer in {lang_name} only.]\n{user_input}"
+            f"{_language_directive(language)}\n{user_input}"
         )})
         if intent:
             messages.append({"role": "assistant", "content": f"Detected intent: {intent}."})
@@ -2055,6 +2084,7 @@ def generate_response(user_input, last_intent=None, language='tagalog', history=
     new_intent = None
 
     # 0. Language of the REPLY (matching the user's question)
+    detected_lang = detect_language(user_input)
     resp_lang = resolve_response_language(user_input, language)
 
     # 1. Crisis Check (Highest Priority — NEVER bypassed, even in AI-first mode)
@@ -2089,11 +2119,17 @@ def generate_response(user_input, last_intent=None, language='tagalog', history=
     ai_first = AI_FIRST_ENABLED
     ai_reply = None
     if not is_abusive and ai_first:
-        ai_reply = _call_ai_reply(user_input, resp_lang, history=history)
+        # Auto mode: kapag hindi sigurado ang detector (hal. "milestone",
+        # typo, o unfamiliar na salita), ang AI ang magdedekta ng wika ng
+        # mensahe — parang ChatGPT. Walang post-check doon kasi nga hindi
+        # namin alam ang tamang wika; ang AI ang sumusunod sa mensahe.
+        ai_lang = resp_lang if detected_lang else 'auto'
+        ai_reply = _call_ai_reply(user_input, ai_lang, history=history)
         if ai_reply:
             # POST-CHECK (output validation): siguraduhing tumutugma ang wika
-            # ng AI reply sa hiningi bago ito ipakita sa user.
-            if ai_reply_matches_language(ai_reply, resp_lang):
+            # ng AI reply sa hiningi bago ito ipakita sa user. Hindi kinakailangan
+            # kapag auto — wala tayong alam na tamang wika na paghahambingan.
+            if ai_lang == 'auto' or ai_reply_matches_language(ai_reply, resp_lang):
                 return (ai_reply, None, 0, is_abusive)
             logging.warning(
                 "AI reply failed language post-check (expected=%s); retrying with correction.",
