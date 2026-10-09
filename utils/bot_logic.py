@@ -920,6 +920,19 @@ def get_faq_answer(text, language='tagalog'):
 def _get_openai_api_key():
     key = os.environ.get("OPENAI_API_KEY") or os.environ.get("MENTALHEALTHWEB_OPENAI_API_KEY")
     return key if key else None
+def _get_openrouter_api_key():
+    """Fetches the OpenRouter API key from environment variables."""
+    return os.environ.get("OPENROUTER_API_KEY")
+
+
+def _get_openrouter_model():
+    """Model ID used for OpenRouter. Default: 8B instruct model (free on OpenRouter)."""
+    return os.environ.get("MENTALHEALTHWEB_OPENROUTER_MODEL", "meta/llama-3.1-8b-instant")
+
+
+def _openrouter_available():
+    """Checks if the openai SDK is importable and an API key is available."""
+    return _import_openai() is not None and _get_openrouter_api_key() is not None
 
 def _get_gemini_api_key():
     """Fetches the Gemini API key from environment variables."""
@@ -1817,20 +1830,68 @@ def _run_openai_chat(user_input, intent=None, language='tagalog', history=None):
 
         logging.warning("OpenAI response was empty or malformed.")
         return None
-
     except Exception as e:
-        # Dati: `except openai_module.RateLimitError` — nagiging NameError iyon
-        # kapag hindi ma-import ang openai bago pa nangyari ang error, kaya
-        # napupunta ang lahat ng error sa generic handler.
         kind = _classify_ai_error(e)
         if kind:
             logging.error("OpenAI %s error: %s", kind, e)
-            # Ipagpatuloy sa susunod na provider (Gemini) imbes na agad na
-            # sabihing "masyadong mabilis" ang user.
             _note_ai_error(kind)
             return None
         logging.exception(f"OpenAI API call failed: {e}")
         return None
+
+def _run_openrouter_chat(user_input, intent=None, language='tagalog', history=None):
+    """OpenRouter chat completion call (OpenAI-compatible API)."""
+    try:
+        api_key = _get_openrouter_api_key()
+        if not api_key:
+            logging.error("OpenRouter API key not found. Please set OPENROUTER_API_KEY in the .env file.")
+            return None
+
+        openai_module = _import_openai()
+        if openai_module is None:
+            logging.error("OpenRouter skipped: 'openai' SDK is not installed.")
+            return None
+
+        client = openai_module.OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
+        model = _get_openrouter_model()
+
+        messages = [
+            {"role": "system", "content": _build_openai_system_prompt(language)},
+        ]
+        for line in _history_to_prompt_lines(history):
+            if line.startswith("Earlier user:"):
+                messages.append({"role": "user", "content": line[len("Earlier user:"):].strip()})
+            else:
+                messages.append({"role": "assistant", "content": line[len("Earlier assistant:"):].strip()})
+        messages.append({"role": "user", "content": f"{_language_directive(language)}\n{user_input}"})
+        if intent:
+            messages.append({"role": "assistant", "content": f"Detected intent: {intent}."})
+
+        completion = _create_chat_completion(client, model, messages)
+
+        if completion.choices and completion.choices[0].message:
+            choice = completion.choices[0]
+            partial = (choice.message.content or "").strip()
+            if partial and "length" in str(getattr(choice, "finish_reason", "")).lower():
+                logging.info("OpenRouter reply was cut off (finish_reason=length); requesting a continuation.")
+                extra = _request_chat_continuation(client, model, messages, partial)
+                if extra:
+                    partial = partial + extra
+            if partial:
+                return _clean_ai_text(partial)
+
+        logging.warning("OpenRouter response was empty or malformed.")
+        return None
+
+    except Exception as e:
+        kind = _classify_ai_error(e)
+        if kind:
+            logging.error("OpenRouter %s error: %s", kind, e)
+            _note_ai_error(kind)
+            return None
+        logging.exception(f"OpenRouter API call failed: {e}")
+        return None
+
 
 # ----------------------------
 
@@ -1924,7 +1985,13 @@ def _call_ai_reply(user_input, language='tagalog', history=None, **kwargs):
         if openai_reply:
             return openai_reply
 
-    # Fallback 2: Gemini (kung may valid key)
+    # Fallback 2: OpenRouter (optional; OPENROUTER_API_KEY sa .env)
+    if _openrouter_available():
+        openrouter_reply = _run_openrouter_chat(user_input, language=language, history=history)
+        if openrouter_reply:
+            return openrouter_reply
+
+    # Fallback 3: Gemini (kung may valid key)
     if _gemini_available():
         gemini_reply = _call_gemini_api(user_input, language, history=history)
         if gemini_reply:

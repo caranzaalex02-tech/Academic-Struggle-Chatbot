@@ -54,6 +54,8 @@ Set these under Web Service → Environment:
 | `GROQ_MODEL` | No | Groq model (default: `qwen/qwen3.8-27b`) |
 | `GEMINI_API_KEY` | No | Your Gemini API key (optional fallback). NOTE: hindi naka-install ang `google-generativeai` sa `requirements.txt` para mabilis ang Render build. Kung gagamitin mo ito, i-uncomment ang linya at mag-redeploy |
 | `OPENAI_API_KEY` | No | Your OpenAI API key (optional fallback) |
+| `OPENROUTER_API_KEY` | No | OpenRouter API key (optional fallback; i-skip kung wala) |
+| `MENTALHEALTHWEB_OPENROUTER_MODEL` | No | OpenRouter model (default: `meta/llama-3.1-8b-instant`) |
 | `DATABASE_URL` | Yes (prod) | PostgreSQL connection URL from Render |
 | `MENTALHEALTHWEB_OPENAI_MODEL` | No | OpenAI model (default: `gpt-4o-mini`) |
 | `REDIS_URL` | No | Redis URL for rate limiting (optional) |
