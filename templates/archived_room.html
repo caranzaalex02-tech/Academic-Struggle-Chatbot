@@ -384,7 +384,24 @@ tr{
     background:rgba(255,255,255,0.35);
     border-bottom:1px solid rgba(134,239,172,0.35);
     color:#14532d;
-    display:flex;
+    display:table-row;
+    vertical-align:top;
+}
+
+/* Desktop: fixed layout para aligned ang columns at hindi lumusot ang mahahabang text */
+#archived-table{
+    table-layout:fixed;
+}
+#archived-table th, #archived-table td{
+    overflow-wrap:anywhere;
+    word-break:break-word;
+    vertical-align:top;
+}
+#archived-table th:nth-child(1), #archived-table td:nth-child(1){width:130px;}
+#archived-table th:nth-child(4), #archived-table td:nth-child(4){width:92px;text-align:center;}
+#archived-table th:nth-child(5), #archived-table td:nth-child(5){width:92px;text-align:center;}
+#archived-table td:nth-child(2), #archived-table td:nth-child(3){
+    white-space:normal;
 }
 
 tr:hover{

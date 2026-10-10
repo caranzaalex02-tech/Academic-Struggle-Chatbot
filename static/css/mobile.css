@@ -76,7 +76,7 @@
     overflow: visible !important;
     max-width: 100%;
   }
-  th, td { padding: 10px 12px !important; font-size: 0.8rem !important; }
+  th:not(#archived-table th), td:not(#archived-table td) { padding: 10px 12px !important; font-size: 0.8rem !important; }
 
   /* ---- modals fit small screens ---- */
   .modal-content { width: 92% !important; max-width: 420px; margin: 12% auto; }
