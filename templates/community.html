@@ -337,6 +337,47 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
     .container{padding:20px 14px;}
     .search-container input{font-size:16px;}
 }
+/* ---- MOBILE: stable layout, walang galaw/jitter kapag nag-scroll ---- */
+@media (max-width: 768px){
+  html{
+    height:100%;
+    overscroll-behavior-y:none;
+  }
+  body{
+    background-attachment:scroll !important;
+    background-size:cover !important;
+    min-height:100dvh;
+    overflow-x:hidden;
+    overscroll-behavior-y:none;
+  }
+  .sidebar{
+    /* hindi nag-scroll nang mag-isa, kaya hindi gumagalaw ang top bar */
+    overflow-x:hidden !important;
+    overflow-y:hidden !important;
+    overscroll-behavior:none;
+    -webkit-overflow-scrolling:auto;
+    touch-action:pan-x;
+  }
+  .sidebar nav{
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .sidebar nav::-webkit-scrollbar{display:none;}
+  .sidebar-page{
+    min-height:100dvh;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom, 0px));
+    overscroll-behavior-y:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .container{
+    transform:translateZ(0);
+    -webkit-transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+  }
+}
 @media (max-width:480px){
     .container { padding:18px 14px; }
     .user-card { gap:10px; }
