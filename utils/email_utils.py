@@ -290,12 +290,21 @@ GMAIL_SEND_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
 
 def _get_gmail_api_config():
     """Fetch Gmail API OAuth2 settings from environment variables."""
+    # Sanitize: tanggalin ang newline/whitespace na nadikit (hal. kapag
+    # nadagdag ang trailing newline sa env var sa Render). Ang newline sa
+    # header (From/Reply-To) ay nagdudulot ng "folded header contains newline"
+    # at bumabagsak ang pagpapadala.
+    sender = (os.environ.get("GMAIL_SENDER") or os.environ.get("EMAIL_SENDER") or "").strip()
+    # Collapse lahat ng whitespace (kabilang ang newline) sa display name.
+    display_name = " ".join(
+        os.environ.get("EMAIL_DISPLAY_NAME", "Academic Struggle Chatbot").split()
+    ) or "Academic Struggle Chatbot"
     return {
         "client_id": os.environ.get("GMAIL_CLIENT_ID"),
         "client_secret": os.environ.get("GMAIL_CLIENT_SECRET"),
         "refresh_token": os.environ.get("GMAIL_REFRESH_TOKEN"),
-        "sender": os.environ.get("GMAIL_SENDER") or os.environ.get("EMAIL_SENDER"),
-        "display_name": os.environ.get("EMAIL_DISPLAY_NAME", "Academic Struggle Chatbot").strip(),
+        "sender": sender,
+        "display_name": display_name,
     }
 
 
@@ -363,8 +372,13 @@ def _send_via_gmail_api(to_email, subject, plain_body, html_body):
     # Buuin ang MIME message
     msg = _build_html_message(subject, plain_body, html_body)
     msg["To"] = to_email
-    msg["From"] = f"{cfg['display_name']} <{cfg['sender']}>"
-    msg["Reply-To"] = cfg["sender"]
+    # Sanitize ang From/Reply-To — alisin ang kahit anong newline/CR para
+    # hindi mag-"folded header contains newline" ang email library.
+    sender_addr = "".join(str(cfg["sender"]).split())
+    display_name = " ".join(str(cfg.get("display_name") or "").split())
+    from_header = f"{display_name} <{sender_addr}>" if display_name else sender_addr
+    msg["From"] = "".join(from_header.splitlines())
+    msg["Reply-To"] = sender_addr
 
     raw = base64.urlsafe_b64encode(msg.as_bytes()).decode("ascii")
 
