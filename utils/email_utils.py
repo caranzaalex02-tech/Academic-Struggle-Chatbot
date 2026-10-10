@@ -290,20 +290,22 @@ GMAIL_SEND_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
 
 def _get_gmail_api_config():
     """Fetch Gmail API OAuth2 settings from environment variables."""
-    # Sanitize: tanggalin ang newline/whitespace na nadikit (hal. kapag
-    # nadagdag ang trailing newline sa env var sa Render). Ang newline sa
-    # header (From/Reply-To) ay nagdudulot ng "folded header contains newline"
-    # at bumabagsak ang pagpapadala.
-    sender = (os.environ.get("GMAIL_SENDER") or os.environ.get("EMAIL_SENDER") or "").strip()
+    # Sanitize LAHAT ng value: tanggalin ang newline/whitespace na nadikit
+    # (hal. kapag nadagdag ang trailing newline sa env var sa Render nung
+    # na-paste). Ang newline ay sumisira ng OAuth token exchange
+    # ("invalid_grant") at ng email header ("folded header contains newline").
+    def _clean(val):
+        return "".join(str(val or "").split())
+
     # Collapse lahat ng whitespace (kabilang ang newline) sa display name.
     display_name = " ".join(
         os.environ.get("EMAIL_DISPLAY_NAME", "Academic Struggle Chatbot").split()
     ) or "Academic Struggle Chatbot"
     return {
-        "client_id": os.environ.get("GMAIL_CLIENT_ID"),
-        "client_secret": os.environ.get("GMAIL_CLIENT_SECRET"),
-        "refresh_token": os.environ.get("GMAIL_REFRESH_TOKEN"),
-        "sender": sender,
+        "client_id": _clean(os.environ.get("GMAIL_CLIENT_ID")),
+        "client_secret": _clean(os.environ.get("GMAIL_CLIENT_SECRET")),
+        "refresh_token": _clean(os.environ.get("GMAIL_REFRESH_TOKEN")),
+        "sender": _clean(os.environ.get("GMAIL_SENDER") or os.environ.get("EMAIL_SENDER")),
         "display_name": display_name,
     }
 
