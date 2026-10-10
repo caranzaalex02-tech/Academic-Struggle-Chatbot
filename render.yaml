@@ -74,6 +74,12 @@ services:
         value: "false"
       - key: EMAIL_TIMEOUT
         value: "15"
+      # --- Public Base URL (rename-safe) ---
+      # Kapag nagpalit ka ng Render service name (hal. sanc-ai), kusang
+      # susunod ang RENDER_EXTERNAL_URL. Itong APP_BASE_URL ay manual
+      # override lang kung kailangan — iwanang blanko para auto.
+      - key: APP_BASE_URL
+        sync: false
       # Resend HTTP API key (alternative sa SendGrid). Render blocks outbound SMTP, so use Resend to
       # actually deliver emails from production.
       - key: RESEND_API_KEY

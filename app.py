@@ -793,7 +793,12 @@ def register():
             if error is None:
                 # Send a welcome email (best effort) - never fail registration because of email.
                 try:
-                    send_registration_email(first_name, email)
+                    # _external=True = tunay na domain mula sa request (rename-safe sa Render).
+                    try:
+                        _login_url = url_for("login", _external=True)
+                    except Exception:
+                        _login_url = None
+                    send_registration_email(first_name, email, login_url=_login_url)
                 except Exception as e:
                     app.logger.error("Failed to send registration email to %s: %s", email, e)
                 flash("Registration successful! Please log in.", "success")

@@ -79,6 +79,21 @@ def is_email_blocked_on_render():
     return get_email_backend() == "smtp"
 
 
+def _get_app_base_url():
+    """Public base URL ng app — rename-safe kapag nagpalit ng Render service name.
+
+    Priority:
+      1. APP_BASE_URL env var (manual override, hal. https://sanc-ai.onrender.com)
+      2. RENDER_EXTERNAL_URL (auto-set ng Render, kusang sumusunod sa rename)
+      3. Fallback sa lumang URL para hindi masira ang local/dev.
+    """
+    for key in ("APP_BASE_URL", "RENDER_EXTERNAL_URL"):
+        val = (os.environ.get(key) or "").strip().rstrip("/")
+        if val:
+            return val
+    return "https://academic-struggle-support-essu-guiuan.onrender.com"
+
+
 def get_email_status():
     """Safe diagnostics (walang secrets) para sa /health/email endpoint."""
     backend = get_email_backend()
@@ -479,10 +494,19 @@ Immediate attention required.
     except Exception as e:
         logging.error(f"Failed to send crisis email: {e}")
 
-def send_registration_email(username, user_email):
-    """Sends a welcome email to a newly registered user."""
+def send_registration_email(username, user_email, login_url=None):
+    """Sends a welcome email to a newly registered user.
+
+    Args:
+        username: Display name ng user.
+        user_email: Recipient email address.
+        login_url: Opsiyonal na full login URL (hal. mula sa url_for("login",
+            _external=True)). Kapag wala, kukunin mula sa _get_app_base_url()
+            kaya rename-safe sa Render.
+    """
     config = _get_email_config()
     backend = get_email_backend()
+    login_link = (login_url or "").strip() or (_get_app_base_url() + "/login")
 
     formatted_sender = _format_sender(config)
     if backend == 'console':
@@ -555,7 +579,7 @@ Academic Struggle Chatbot Team
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin:22px 0 10px;">
                 <tr>
                   <td align="center">
-                    <a href="https://academic-struggle-support-essu-guiuan.onrender.com/login" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#00c6ff,#0072ff);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:8px;">Log In Now</a>
+                    <a href="{login_link}" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#00c6ff,#0072ff);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:13px 36px;border-radius:8px;">Log In Now</a>
                   </td>
                 </tr>
               </table>
