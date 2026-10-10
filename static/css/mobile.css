@@ -14,20 +14,26 @@
   }
   img, svg, canvas, video { max-width: 100%; height: auto; }
 
-  /* ---- chat + card pages: full-bleed on phones ---- */
-  .chat-container, .container, .settings-container,
+  /* ---- chat + card pages: full-bleed on phones ----
+     NOTE: .chat-container / .main-content ng chatbot (index.html) hindi
+     dito naka-!important — may sariling exact-fit (100dvh, no page scroll). */
+  .container, .settings-container,
   .dashboard-container, .auth-box, .game-container,
-  .card, .main-content {
+  .card {
     width: 100% !important;
     max-width: 100% !important;
   }
-  .chat-container, .container, .settings-container,
+  .chat-container { width: 100% !important; max-width: 100% !important; }
+  .container, .settings-container,
   .dashboard-container, .auth-box, .game-container { border-radius: 14px; }
-  .main-content { padding: 16px !important; }
+  /* .main-content padding: walang !important para manalo ang page-level exact-fit */
+  .main-content { padding: 16px; }
   .main-header h2 { font-size: 1.35rem !important; }
 
-  /* ---- tap targets (min 44px) ---- */
-  button, .btn, .chat-btn, .create-btn, .rooms-toggle,
+  /* ---- tap targets (min 44px) ----
+     EXCLUDE compact chat controls para hindi lumobo ang chatbot footer. */
+  button:not(.mood-btn):not(.star):not(.menu-btn):not(.msg-options-btn),
+  .btn, .chat-btn, .create-btn, .rooms-toggle,
   .members-toggle, .action-btn, .view-btn, a.back-btn {
     min-height: 44px;
   }

@@ -762,7 +762,13 @@ transform:translateY(-1px);
     font-size:0.7rem;
   }
 
-  /* ---- body – no extra padding; scroll ang background sa mobile ---- */
+  /* ---- body – lock sa isang screen, walang page scroll sa mobile ---- */
+  html, body {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
   body {
     padding-top: 52px;
     flex-direction: column;
@@ -770,29 +776,36 @@ transform:translateY(-1px);
     background-size: cover;
   }
 
-  /* ---- main content – full width ---- */
+  /* ---- main content – exact fit sa natitirang screen ---- */
   .main-content {
     margin-left: 0;
-    padding: 10px 6px 6px;
-    align-items: flex-start;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+    align-items: stretch;
+    justify-content: stretch;
+    min-height: 0;
+    height: calc(100vh - 52px);
+    height: calc(100dvh - 52px);
+    max-height: calc(100vh - 52px);
+    max-height: calc(100dvh - 52px);
+    overflow: hidden;
   }
 
-  /* ---- chat container – full width, full height ---- */
+  /* ---- chat container – punuin ang screen, walang labis ---- */
   .chat-container {
     width: 100% !important;
     max-width: 100% !important;
-    min-height: auto;
-    height: calc(100vh - 62px);
-    max-height: calc(100vh - 62px);
-    margin: 0 auto 6px;
-    border-radius: 12px 12px 0 0;
+    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   }
 
   /* ---- chat header – compact ---- */
   .chat-header {
-    padding: 10px 14px;
-    gap: 10px;
+    padding: 8px 12px;
+    gap: 8px;
   }
   .chat-header-title {
     font-size: 0.9rem;
@@ -810,14 +823,22 @@ transform:translateY(-1px);
 
   /* ---- quote strip ---- */
   .quote {
-    font-size: 11px;
-    padding: 6px 12px;
+    font-size: 10px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  /* ---- chat body – more compact ---- */
+  /* ---- chat body – dito lang ang scroll, hindi ang page ---- */
   #chat-box {
-    padding: 14px 12px;
+    padding: 10px;
     gap: 8px;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* ---- messages – wider bubbles on small screens ---- */
@@ -853,22 +874,23 @@ transform:translateY(-1px);
     font-size: 14px;
   }
 
-  /* ---- mood & rating ---- */
+  /* ---- mood & rating – compact para kasya sa isang screen ---- */
   .mood-section {
-    font-size: 11px;
-    margin-top: 10px;
+    font-size: 10px;
+    margin-top: 6px;
+    line-height: 1.5;
   }
   .mood-btn {
-    font-size: 11px;
-    padding: 6px 11px;
-    margin: 3px 2px 0;
+    font-size: 10px;
+    padding: 5px 9px;
+    margin: 2px 1px 0;
   }
   .rating-section {
-    font-size: 11px;
-    margin-top: 10px;
+    font-size: 10px;
+    margin-top: 6px;
   }
   .rating-stars .star {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   /* ---- modals ---- */
@@ -886,7 +908,8 @@ transform:translateY(-1px);
 @media (max-width: 400px) {
 
   body {
-    padding-top: 46px;
+    padding-top: 40px;
+    overflow: hidden;
   }
 
   .sidebar {
@@ -908,9 +931,18 @@ transform:translateY(-1px);
     font-size:0.62rem;
   }
 
+  .main-content {
+    height: calc(100vh - 40px);
+    height: calc(100dvh - 40px);
+    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+  }
+
   .chat-container {
-    height: calc(100vh - 56px);
-    max-height: calc(100vh - 56px);
+    height: 100%;
+    max-height: 100%;
   }
 
   .chat-header {
