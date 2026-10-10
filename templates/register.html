@@ -85,6 +85,15 @@
             font-family: inherit;
         }
 
+        /* Maliit na hint sa ilalim ng email field */
+        .email-hint {
+            display: block;
+            margin-top: 4px;
+            font-size: 0.78rem;
+            color: #15803d;
+            font-weight: 500;
+        }
+
         /* Mobile: scroll ang background gaya ng landing page */
         @media (max-width: 768px) {
             body {
@@ -123,8 +132,9 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            <label for="email">ESSU-Guiuan Email Address</label>
+            <input type="email" id="email" name="email" placeholder="you@essu.edu.ph" required>
+            <small class="email-hint">Only ESSU-Guiuan students (@essu.edu.ph) may register.</small>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
