@@ -6,13 +6,273 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <style>
+
+/* ============================================================
+   SIDEBAR — premium professional, modern SaaS style
+   ============================================================ */
+.sidebar{
+position:fixed;
+top:0;
+left:0;
+bottom:0;
+width:272px;
+/* Gold fluid wavy abstract background — gold_fluid_waves_bg.svg */
+background:#fef3c7 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
+color:#3b2507;
+display:flex;
+flex-direction:column;
+z-index:50;
+box-shadow:4px 0 24px rgba(80,53,10,0.35), 1px 0 0 rgba(255,255,255,0.18);
+border-right:1px solid rgba(120,80,15,0.25);
+overflow-y:auto;
+overflow-x:hidden;
+}
+
+/* ---- SANC.AI logo wordmark (replaces ESSU logo at top of sidebar) ---- */
+.sidebar-brand{
+padding:18px 14px 8px;
+text-align:center;
+line-height:1.2;
+}
+.sidebar-brand .brand-name{
+font-family:'Poppins','Inter','Segoe UI',sans-serif;
+font-size:1.55rem;
+font-weight:700;
+letter-spacing:0.045em;
+color:#3b2507;
+text-shadow:0 1px 0 rgba(255,255,255,0.65);
+}
+.sidebar-brand .brand-ai{
+margin-left:2px;
+padding:1px 7px 2px;
+border-radius:7px;
+font-size:0.58em;
+letter-spacing:0.06em;
+vertical-align:0.28em;
+color:#fff8e7;
+background:linear-gradient(135deg,#f59e0b,#b45309);
+box-shadow:0 3px 8px rgba(180,83,9,0.45), inset 0 1px 0 rgba(255,255,255,0.45);
+}
+.sidebar-brand .brand-wave{
+display:block;
+width:118px;
+height:12px;
+margin:5px auto 0;
+}
+
+/* ---- User profile card at top ---- */
+.sidebar-user{
+display:flex;
+align-items:center;
+gap:12px;
+padding:24px 20px 20px;
+border-bottom:1px solid rgba(120,80,15,0.18);
+margin:0 4px 20px;
+}
+.sidebar-avatar{
+flex-shrink:0;
+width:44px;
+height:44px;
+border-radius:14px;
+background:linear-gradient(135deg,#f59e0b,#d97706);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+color:#fffbea;
+box-shadow:0 8px 20px rgba(217,119,6,0.45);
+position:relative;
+}
+.sidebar-avatar::after{
+content:'';
+position:absolute;
+bottom:-2px;
+right:-2px;
+width:12px;
+height:12px;
+border-radius:50%;
+background:#16a34a;
+border:2px solid #fde68a;
+}
+.sidebar-user-info{
+min-width:0;
+}
+.sidebar-user-name{
+font-size:0.88rem;
+font-weight:700;
+color:#422006;
+letter-spacing:-0.01em;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+.sidebar-user-email{
+font-size:0.68rem;
+color:#92600c;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+margin-top:1px;
+}
+
+/* ---- Section labels ---- */
+.sidebar-section-label{
+padding:0 20px;
+margin:18px 0 8px;
+font-size:0.65rem;
+font-weight:700;
+text-transform:uppercase;
+letter-spacing:0.08em;
+color:#8a5a0b;
+}
+
+/* ---- Navigation nav ---- */
+.sidebar nav{
+flex:1;
+padding:0 12px;
+display:flex;
+flex-direction:column;
+}
+
+.sidebar a{
+display:flex;
+align-items:center;
+gap:12px;
+color:#6b4407;
+text-decoration:none;
+padding:10px 14px;
+border-radius:10px;
+margin-bottom:2px;
+transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+font-weight:600;
+font-size:0.85rem;
+position:relative;
+letter-spacing:0.01em;
+}
+.sidebar a i{
+width:20px;
+text-align:center;
+font-size:16px;
+transition:color 0.2s ease, transform 0.2s ease;
+}
+.sidebar a:hover{
+background:rgba(255,255,255,0.55);
+color:#422006;
+box-shadow:inset 0 0 0 1px rgba(217,119,6,0.25);
+}
+.sidebar a:hover i{
+color:#b45309;
+transform:translateX(2px);
+}
+.sidebar a.active{
+background:linear-gradient(135deg,rgba(245,158,11,0.35),rgba(253,230,138,0.55));
+color:#422006;
+box-shadow:inset 0 0 0 1px rgba(180,83,9,0.45);
+}
+.sidebar a.active i{
+color:#92400e;
+}
+
+/* ---- Sidebar footer ---- */
+.sidebar-footer{
+padding:12px 16px 20px;
+border-top:1px solid rgba(120,80,15,0.2);
+margin:12px 12px 0;
+}
+.sidebar-footer a{
+display:flex;
+align-items:center;
+gap:10px;
+color:#7c2d12;
+text-decoration:none;
+padding:8px 10px;
+border-radius:8px;
+font-size:0.82rem;
+font-weight:600;
+transition:all 0.2s ease;
+}
+.sidebar-footer a:hover{
+background:rgba(255,255,255,0.55);
+color:#b91c1c;
+}
+.sidebar-footer a:hover i{
+color:#dc2626;
+}
+.sidebar-footer a i{
+font-size:15px;
+transition:color 0.2s ease;
+}
+
+/* ---- Sidebar separator divider ---- */
+.sidebar-divider{
+height:1px;
+background:rgba(120,80,15,0.22);
+margin:8px 16px;
+}
+.sidebar-page{margin-left:272px;flex:1;min-height:100vh;min-width:0;display:flex;justify-content:center;align-items:flex-start;}
+/* ---- sidebar – collapse to top bar ---- */
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 8px;
+    z-index: 55;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    background:#fef3c7 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
+    box-shadow:0 4px 16px rgba(80,53,10,0.35);
+  }
+  .sidebar-user { display: none; }
+  .sidebar-divider { display: none; }
+  /* Compact SANC.AI logo sa mobile top bar */
+  .sidebar-brand { padding: 4px 8px; }
+  .sidebar-brand .brand-name { font-size: 1rem; }
+  .sidebar-brand .brand-wave { width: 74px; height: 8px; margin-top: 3px; }
+  .sidebar nav {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    flex: 1;
+  }
+  .sidebar a {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    margin-bottom: 0;
+    border-radius: 8px;
+  }
+  .sidebar a i {
+    font-size:14px;
+    width:16px;
+  }
+  .sidebar a:hover { transform: none; }
+  .sidebar a:hover i { transform: none; }
+  .sidebar-footer {
+    margin: 0;
+    padding: 0 0 0 6px;
+    border-top: none;
+    border-left: 1px solid rgba(120,80,15,0.35);
+  }
+  .sidebar-footer a {
+    padding:6px 8px;
+    font-size:0.7rem;
+  }
+@media (max-width:768px){.sidebar-page{margin-left:0;padding-top:64px;width:100%;}}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@600;700&display=swap');
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
     min-height:100vh;
     /* Parehong background ng chatbot — light green fluid waves */
     background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
     color:#1a4a5a; font-family:'Segoe UI',sans-serif;
-    padding:20px; position:relative; display:flex; justify-content:center; align-items:flex-start;
+    padding:20px; position:relative; display:flex; justify-content:flex-start; align-items:stretch; padding:0;
 }
 body::after { content:""; position:fixed; inset:0; background:linear-gradient(160deg,rgba(220,252,231,.30),rgba(187,247,208,.22)); z-index:-1; pointer-events:none; }
 .container {
@@ -74,7 +334,40 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
 </style>
 </head>
 <body>
-<div class="container">
+<!-- SIDEBAR — same design as chatbot (SANC.AI) -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-name">SANC<span class="brand-ai">.AI</span></span>
+    <svg class="brand-wave" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+    </svg>
+  </div>
+  <div class="sidebar-user">
+    <div class="sidebar-avatar">
+      <i class="fas fa-user-graduate"></i>
+    </div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">{{ session.get('user', 'Student') }}</div>
+      <div class="sidebar-user-email">Online</div>
+    </div>
+  </div>
+  <nav>
+    {% if session.get('role') == 'admin' %}
+    <a href="/admin_dashboard"><i class="fas fa-shield-alt"></i> Admin Dashboard</a>
+    <div class="sidebar-divider"></div>
+    {% endif %}
+    <a href="{{ url_for('chatbot') }}" ><i class="fas fa-comments"></i> Chatbot</a>
+    <a href="{{ url_for('community') }}" class="active"><i class="fas fa-users"></i> Group Study</a>
+    <a href="{{ url_for('user_settings') }}" ><i class="fas fa-sliders-h"></i> Settings</a>
+    <a href="{{ url_for('archived_room') }}" ><i class="fas fa-box-archive"></i> Archived</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="/logout"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+  </div>
+</aside>
+
+<div class="sidebar-page"><div class="container" style="margin:20px auto;">
     <a href="/chatbot" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Chatbot</a>
     <h1>👥 Group Study</h1>
     <p class="subtitle">Connect with fellow students. You are not alone.</p>
@@ -123,6 +416,7 @@ h1 { text-align:center; margin-bottom:6px; color:#1a4a5a; font-size:1.4rem; font
     </div>
 </div>
 
+</div>
 <div id="uploadModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeUploadModal()">&times;</span>
