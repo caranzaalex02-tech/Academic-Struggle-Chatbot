@@ -451,7 +451,7 @@ mark {
       <i class="fas fa-user-graduate"></i>
     </div>
     <div class="sidebar-user-info">
-      <div class="sidebar-user-name">{{ session.get('user', 'Student') }}</div>
+      <div class="sidebar-user-name">{{ session.get('display_name', session.get('user', 'Student')) }}</div>
       <div class="sidebar-user-email">Online</div>
     </div>
   </div>

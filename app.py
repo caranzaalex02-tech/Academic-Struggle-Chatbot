@@ -512,7 +512,42 @@ def get_profile_pic_url(pic_url):
 
     return url_for('static', filename='images/default_avatar.svg')
 
+def get_display_name(user_email):
+    """Return 'First Last' username for sidebar; fallback to email."""
+    try:
+        db = get_db()
+        c = db.cursor()
+        if is_postgres_db():
+            c.execute("SELECT first_name, last_name FROM users WHERE email=%s", (user_email,))
+        else:
+            c.execute("SELECT first_name, last_name FROM users WHERE email=?", (user_email,))
+        row = c.fetchone()
+        if row:
+            try:
+                fn = (row['first_name'] or '').strip()
+                ln = (row['last_name'] or '').strip()
+            except (TypeError, KeyError, IndexError):
+                fn, ln = (row[0] or '').strip(), (row[1] or '').strip()
+            full = ("%s %s" % (fn, ln)).strip()
+            if full:
+                return full
+    except Exception:
+        pass
+    return user_email
+
 # ================= ROUTES =================
+@app.before_request
+def _refresh_display_name():
+    # Para sa mga naka-login NA bago pa nadagdag ang display_name:
+    # i-backfill mula sa first_name + last_name (username), hindi email.
+    try:
+        if request.endpoint == "static":
+            return
+        if "user" in session and not session.get("display_name"):
+            session["display_name"] = get_display_name(session["user"])
+    except Exception:
+        pass
+
 @app.route("/")
 def home():
     # LANDING PAGE PALAGI ang unang bubungad sa pag-open ng link — kahit naka-login.
@@ -538,9 +573,9 @@ def login():
         c = db.cursor()
         # Use %s for PostgreSQL compatibility
         if is_postgres_db():
-            c.execute("SELECT email, password, role, ban_expires_at FROM users WHERE email=%s", (email,))
+            c.execute("SELECT email, password, role, ban_expires_at, first_name, last_name FROM users WHERE email=%s", (email,))
         else:
-            c.execute("SELECT email, password, role, ban_expires_at FROM users WHERE email=?", (email,))
+            c.execute("SELECT email, password, role, ban_expires_at, first_name, last_name FROM users WHERE email=?", (email,))
         user = c.fetchone()
         if user and check_password_hash(user['password'], password):
             # STRICT SEPARATION: Regular users only. Admins must use the admin login page.
@@ -549,6 +584,9 @@ def login():
             else:
                 session["user"] = user['email']
                 session["role"] = user['role']
+                _fn = (user['first_name'] or '').strip() if 'first_name' in user.keys() else ''
+                _ln = (user['last_name'] or '').strip() if 'last_name' in user.keys() else ''
+                session["display_name"] = ("%s %s" % (_fn, _ln)).strip() or user['email']
                 return redirect(url_for("chatbot"))
         else:
             if not user:
