@@ -80,11 +80,6 @@ services:
       # override lang kung kailangan — iwanang blanko para auto.
       - key: APP_BASE_URL
         sync: false
-      # --- ESSU-Guiuan student gate ---
-      # ESSU-Guiuan students LANG (@essu.edu.ph) ang puwedeng mag-register.
-      # Iwanang blangko ("") para i-disable ang gate (testing/demo).
-      - key: REQUIRED_EMAIL_DOMAIN
-        value: essu.edu.ph
       # Resend HTTP API key (alternative sa SendGrid). Render blocks outbound SMTP, so use Resend to
       # actually deliver emails from production.
       - key: RESEND_API_KEY

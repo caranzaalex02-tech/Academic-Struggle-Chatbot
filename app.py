@@ -54,15 +54,6 @@ if not ADMIN_REGISTRATION_CODE:
     app.logger.warning("ADMIN_REGISTRATION_CODE is not set! Admin registration is UNPROTECTED.")
 else:
     app.logger.info("ADMIN_REGISTRATION_CODE is configured. Admin registration is protected.")
-# --- ESSU-Guiuan student gate ---
-# ESSU-Guiuan students LANG ang puwedeng mag-register. Dapat naka-@essu.edu.ph
-# ang email. Configurable via REQUIRED_EMAIL_DOMAIN; iwanang blangko ("") para
-# i-disable ang gate (hal. para sa testing/demo kapag walang ESSU email).
-REQUIRED_EMAIL_DOMAIN = os.environ.get("REQUIRED_EMAIL_DOMAIN", "essu.edu.ph").strip().lower().lstrip("@")
-if REQUIRED_EMAIL_DOMAIN:
-    app.logger.info("Registration restricted to @%s emails (ESSU-Guiuan students only).", REQUIRED_EMAIL_DOMAIN)
-else:
-    app.logger.warning("REQUIRED_EMAIL_DOMAIN is empty — registration email gate is DISABLED.")
 DATABASE = os.environ.get("MENTALHEALTHWEB_DB", "database.db")
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -743,11 +734,6 @@ def register():
             error = "Password must be at least 6 characters long."
         elif not email:
             error = "Email address is required."
-        elif REQUIRED_EMAIL_DOMAIN and not email.endswith("@" + REQUIRED_EMAIL_DOMAIN):
-            error = (
-                "Only ESSU-Guiuan students can register. "
-                "Please use your school email (@%s)." % REQUIRED_EMAIL_DOMAIN
-            )
         elif not student_id:
             error = "Student ID is required."
         elif not re.match(r'^\d{2}-\d{4}$', student_id):
