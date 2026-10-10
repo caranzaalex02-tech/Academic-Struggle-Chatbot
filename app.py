@@ -4,6 +4,7 @@ import hashlib
 import os
 import random
 import re
+import secrets
 import sqlite3
 import urllib.parse
 from datetime import datetime, timedelta, timezone
@@ -409,6 +410,10 @@ def init_db():
     add_column("peer_messages", "is_read", "INTEGER DEFAULT 0")
     add_column("group_messages", "room_id", "INTEGER")
 
+    # Brute-force protection for password reset codes (per-account lockout).
+    add_column("password_reset_codes", "attempts", "INTEGER DEFAULT 0")
+    add_column("password_reset_codes", "locked_until", f"{ban_expires_type} DEFAULT NULL")
+
     # --- Normalize existing emails to lowercase ---
     # Login/register now lowercase emails, so migrate older rows so they match.
     try:
@@ -811,14 +816,108 @@ def register():
     return render_template("register.html", error=error)
 
 # ---- PASSWORD RESET HELPERS ----
+# Brute-force protection for reset codes (per-account lockout).
+RESET_MAX_ATTEMPTS = 5           # maling code bago mag-lockout
+RESET_LOCKOUT_MINUTES = 15       # tagal ng lockout
 def _generate_reset_code():
-    """Generate a 6-digit verification code."""
-    return ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    """Generate a cryptographically-secure 6-digit verification code."""
+    return ''.join(secrets.choice('0123456789') for _ in range(6))
 
-def _store_reset_code(email, code):
-    """Store a verification code with 10-minute expiry. Invalidate previous codes."""
+def _get_latest_reset_row(email):
+    """Return the most recent reset-code row for an email (used or not).
+
+    Ito ang 'current state' row para sa isang email — dito naka-track ang
+    attempts at locked_until para sa brute-force protection.
+    """
     db = get_db()
     c = db.cursor()
+    if is_postgres_db():
+        c.execute(
+            "SELECT id, attempts, locked_until FROM password_reset_codes "
+            "WHERE email = %s ORDER BY created_at DESC LIMIT 1",
+            (email,)
+        )
+    else:
+        c.execute(
+            "SELECT id, attempts, locked_until FROM password_reset_codes "
+            "WHERE email = ? ORDER BY created_at DESC LIMIT 1",
+            (email,)
+        )
+    return c.fetchone()
+
+def _parse_dt(value):
+    """Normalize a datetime from DB (Postgres datetime or SQLite string)."""
+    if value is None:
+        return None
+    if isinstance(value, str):
+        try:
+            value = datetime.fromisoformat(value)
+        except ValueError:
+            return None
+    if isinstance(value, datetime) and value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value
+
+def _is_reset_locked(email):
+    """True kung naka-lockout ang email dahil sa sobrang maling code."""
+    row = _get_latest_reset_row(email)
+    if not row:
+        return False
+    locked_until = _parse_dt(row[2])
+    if not locked_until:
+        return False
+    return locked_until > datetime.now(timezone.utc)
+
+def _record_failed_reset_attempt(email):
+    """I-increment ang maling attempts; i-lock kung lumampas sa limit."""
+    row = _get_latest_reset_row(email)
+    if not row:
+        return
+    row_id, attempts = row[0], (row[1] or 0)
+    attempts += 1
+    db = get_db()
+    c = db.cursor()
+    if attempts >= RESET_MAX_ATTEMPTS:
+        locked_until = datetime.now(timezone.utc) + timedelta(minutes=RESET_LOCKOUT_MINUTES)
+        if is_postgres_db():
+            c.execute("UPDATE password_reset_codes SET attempts = %s, locked_until = %s WHERE id = %s",
+                      (attempts, locked_until, row_id))
+        else:
+            c.execute("UPDATE password_reset_codes SET attempts = ?, locked_until = ? WHERE id = ?",
+                      (attempts, locked_until, row_id))
+    else:
+        if is_postgres_db():
+            c.execute("UPDATE password_reset_codes SET attempts = %s WHERE id = %s", (attempts, row_id))
+        else:
+            c.execute("UPDATE password_reset_codes SET attempts = ? WHERE id = ?", (attempts, row_id))
+    db.commit()
+
+def _clear_reset_attempts(email):
+    """I-reset ang attempts/lockout matapos ang matagumpay na verification."""
+    row = _get_latest_reset_row(email)
+    if not row:
+        return
+    db = get_db()
+    c = db.cursor()
+    if is_postgres_db():
+        c.execute("UPDATE password_reset_codes SET attempts = 0, locked_until = NULL WHERE id = %s", (row[0],))
+    else:
+        c.execute("UPDATE password_reset_codes SET attempts = 0, locked_until = NULL WHERE id = ?", (row[0],))
+    db.commit()
+
+def _store_reset_code(email, code):
+    """Store a verification code (60-min expiry). Invalidate previous codes
+    but PRESERVE any active lockout so requesting a new code doesn't reset
+    the brute-force protection."""
+    db = get_db()
+    c = db.cursor()
+    # Preserve an active lockout across code regeneration.
+    carried_lock = None
+    prev = _get_latest_reset_row(email)
+    if prev:
+        locked_until = _parse_dt(prev[2])
+        if locked_until and locked_until > datetime.now(timezone.utc):
+            carried_lock = locked_until
     # Invalidate all previous unused codes for this email
     if is_postgres_db():
         c.execute("UPDATE password_reset_codes SET used = 1 WHERE email = %s AND used = 0", (email,))
@@ -828,13 +927,13 @@ def _store_reset_code(email, code):
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=60)
     if is_postgres_db():
         c.execute(
-            "INSERT INTO password_reset_codes (email, code, expires_at) VALUES (%s, %s, %s)",
-            (email, code, expires_at)
+            "INSERT INTO password_reset_codes (email, code, expires_at, attempts, locked_until) VALUES (%s, %s, %s, 0, %s)",
+            (email, code, expires_at, carried_lock)
         )
     else:
         c.execute(
-            "INSERT INTO password_reset_codes (email, code, expires_at) VALUES (?, ?, ?)",
-            (email, code, expires_at)
+            "INSERT INTO password_reset_codes (email, code, expires_at, attempts, locked_until) VALUES (?, ?, ?, 0, ?)",
+            (email, code, expires_at, carried_lock)
         )
     db.commit()
 
@@ -951,14 +1050,22 @@ def verify_reset_code():
             flash("Please enter your email and the verification code.", "error")
             return render_template("verify_reset_code.html", email=email)
 
+        # Brute-force protection: per-account lockout
+        if _is_reset_locked(email):
+            app.logger.warning("Reset code attempt blocked (locked out) for: %s", email)
+            flash("Too many incorrect attempts. Please wait a few minutes and try again, or request a new code.", "error")
+            return render_template("verify_reset_code.html", email=email)
+
         # Verify the code
         if not _verify_reset_code(email, code):
+            _record_failed_reset_attempt(email)
             app.logger.warning("Invalid/expired reset code attempt for: %s", email)
             flash("Invalid or expired verification code. Please request a new one.", "error")
             return render_template("verify_reset_code.html", email=email)
 
         # Code is valid — consume it and allow password reset
         _consume_reset_code(email, code)
+        _clear_reset_attempts(email)
         app.logger.info("Reset code verified for user: %s", email)
 
         # Generate a signed token for the password reset phase
@@ -1100,12 +1207,20 @@ def admin_verify_reset_code():
             flash("Please enter your admin email and the verification code.", "error")
             return render_template("admin_verify_reset_code.html", email=email)
 
+        # Brute-force protection: per-account lockout
+        if _is_reset_locked(email):
+            app.logger.warning("Admin reset code attempt blocked (locked out) for: %s", email)
+            flash("Too many incorrect attempts. Please wait a few minutes and try again, or request a new code.", "error")
+            return render_template("admin_verify_reset_code.html", email=email)
+
         if not _verify_reset_code(email, code):
+            _record_failed_reset_attempt(email)
             app.logger.warning("Invalid/expired admin reset code attempt for: %s", email)
             flash("Invalid or expired verification code. Please request a new one.", "error")
             return render_template("admin_verify_reset_code.html", email=email)
 
         _consume_reset_code(email, code)
+        _clear_reset_attempts(email)
         app.logger.info("Admin reset code verified for: %s", email)
 
         token = s.dumps(email, salt='admin-password-reset-salt')
