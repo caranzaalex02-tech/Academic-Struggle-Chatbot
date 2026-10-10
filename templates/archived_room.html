@@ -425,35 +425,83 @@ mark {
     padding:0 2px;
 }
 
-/* Responsive */
+/* Responsive - Android: card-style, walang sideways scroll, kita lahat */
 @media(max-width:600px){
     .container{
-        height:90vh;
-        height:90dvh;
-        padding:15px;
+        height:auto;
+        max-height:none;
+        padding:14px 12px 20px;
+        width:100%;
+        max-width:100%;
+        box-sizing:border-box;
+        overflow-x:hidden;
+        border-radius:14px;
     }
-    th, td{
-        font-size:12px;
+    .top-bar{
+        flex-direction:column;
+        align-items:stretch;
+        gap:10px;
     }
+    .back{text-align:center;}
     #search-input{
         width:100%;
-        margin-top:8px;
+        max-width:100%;
+        box-sizing:border-box;
+        margin-top:0;
         font-size:16px;
     }
-    /* Android: card-style rows imbes na siksikang table */
-    .container{overflow-x:hidden;}
-    table, thead, tbody, th, td, tr{display:block;width:100%;}
-    thead{display:none;}
-    tr{margin-bottom:12px;border-radius:12px;padding:6px 4px;}
-    td{padding:8px 12px;font-size:13px;border-bottom:none;}
-    td:last-child{display:flex;flex-wrap:wrap;gap:8px;}
-    a.action-btn{min-height:44px;line-height:32px;display:inline-block;}
+    h2{font-size:1.2rem;text-align:center;}
 }
 @media (max-width:768px){
     body{-webkit-text-size-adjust:100%;}
-    .table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    table{min-width:560px;}
-    .action-btn{min-height:44px;}
+    .table-wrapper{overflow-x:visible;}
+    table, thead, tbody, th, td, tr{
+        display:block;
+        width:100%;
+        max-width:100%;
+        box-sizing:border-box;
+        min-width:0;
+    }
+    table{min-width:0;}
+    thead{display:none;}
+    tbody tr{
+        background:rgba(255,255,255,0.65);
+        border:1px solid rgba(14,165,185,0.25);
+        border-radius:12px;
+        margin-bottom:12px;
+        padding:10px 12px;
+        box-shadow:0 2px 8px rgba(26,74,90,0.08);
+    }
+    tbody td{
+        padding:5px 0;
+        font-size:0.85rem;
+        border-bottom:none;
+        white-space:normal;
+        word-break:break-word;
+        overflow-wrap:anywhere;
+        text-align:left;
+    }
+    tbody td:nth-child(1){font-size:0.75rem;color:#5a8a9a;padding-bottom:2px;}
+    tbody td:nth-child(2)::before{content:"You: ";font-weight:700;color:#0e7490;}
+    tbody td:nth-child(3)::before{content:"SANC.AI: ";font-weight:700;color:#1a4a5a;}
+    tbody td:nth-child(3){border-bottom:1px dashed rgba(14,165,185,0.3);padding-bottom:10px;margin-bottom:10px;}
+    tbody td:nth-child(4), tbody td:nth-child(5){
+        display:inline-block;
+        width:calc(50% - 5px);
+        vertical-align:top;
+        padding:2px 0;
+    }
+    tbody td:nth-child(4){margin-right:10px;}
+    tbody td:nth-child(5){margin-right:0;}
+    .action-btn{
+        min-height:44px;
+        width:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-sizing:border-box;
+        margin:0;
+    }
 }
 </style>
 </head>

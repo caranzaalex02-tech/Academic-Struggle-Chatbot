@@ -65,10 +65,17 @@
   .dashboard-layout .sidebar a { padding: 10px 12px !important; margin-bottom: 0 !important; }
   .dashboard-layout .sidebar .logout-btn { margin-top: 0 !important; padding-top: 10px !important; }
 
-  /* ---- tables scroll instead of breaking ---- */
+  /* ---- tables scroll instead of breaking ----
+     EXCLUDE #archived-table: may sariling card layout sa archived_room.html */
   .card { overflow-x: auto !important; }
-  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  thead, tbody { min-width: 560px; }
+  table:not(#archived-table) { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  thead:not(#archived-table thead), tbody:not(#archived-table tbody) { min-width: 560px; }
+  #archived-table, #archived-table thead, #archived-table tbody,
+  #archived-table tr, #archived-table th, #archived-table td {
+    min-width: 0 !important;
+    overflow: visible !important;
+    max-width: 100%;
+  }
   th, td { padding: 10px 12px !important; font-size: 0.8rem !important; }
 
   /* ---- modals fit small screens ---- */
@@ -88,6 +95,6 @@
   h2 { font-size: 1.15rem !important; }
   .user-card { flex-direction: column !important; align-items: stretch !important; }
   .chat-btn { justify-content: center !important; }
-  thead, tbody { min-width: 500px; }
+  thead:not(#archived-table thead), tbody:not(#archived-table tbody) { min-width: 500px; }
 }
 
