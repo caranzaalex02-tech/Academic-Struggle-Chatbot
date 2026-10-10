@@ -553,7 +553,7 @@ Academic Struggle Chatbot Team
     if config['logo_url']:
         logo_html = f"<div style='margin-bottom:18px;'><img src=\"{config['logo_url']}\" alt=\"Academic Struggle Chatbot\" style=\"max-width:180px;height:auto;display:block;margin:0 auto;\"></div>"
 
-    html_body = f"""\\<!DOCTYPE html>
+    html_body = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -695,7 +695,7 @@ Academic Struggle Chatbot Team
     if config['logo_url']:
         logo_html = f"<div style='margin-bottom:18px;'><img src=\"{config['logo_url']}\" alt=\"Academic Struggle Chatbot\" style=\"max-width:180px;height:auto;display:block;margin:0 auto;\"></div>"
 
-    html_body = f"""\\<!DOCTYPE html>
+    html_body = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
