@@ -215,7 +215,9 @@ margin:8px 16px;
 /* ---- sidebar – collapse to top bar ---- */
   .sidebar {
     width: 100%;
-    height: auto;
+    height: 56px;
+    min-height: 56px;
+    max-height: 56px;
     position: fixed;
     top: 0;
     left: 0;
@@ -266,7 +268,10 @@ margin:8px 16px;
     font-size:0.7rem;
   }
 }
-@media (max-width:768px){.sidebar-page{margin-left:0;padding-top:64px;width:100%;}}
+@media (max-width:768px){
+  .sidebar-page{margin-left:0;width:100%;padding-top:calc(64px + env(safe-area-inset-top, 0px));}
+  .sidebar-page > .container{margin-top:12px !important;}
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@600;700&display=swap');
 * { margin:0; padding:0; box-sizing:border-box; }

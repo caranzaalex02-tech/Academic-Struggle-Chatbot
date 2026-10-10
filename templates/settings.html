@@ -210,12 +210,14 @@ height:1px;
 background:rgba(120,80,15,0.22);
 margin:8px 16px;
 }
-.sidebar-page{margin-left:272px;flex:1;min-height:100vh;min-width:0;display:flex;justify-content:center;align-items:flex-start;}
+.sidebar-page{margin-left:272px;flex:1;min-height:100vh;min-width:0;display:flex;justify-content:center;align-items:flex-start;padding:20px;}
 @media (max-width: 768px){
 /* ---- sidebar – collapse to top bar ---- */
   .sidebar {
     width: 100%;
-    height: auto;
+    height: 56px;
+    min-height: 56px;
+    max-height: 56px;
     position: fixed;
     top: 0;
     left: 0;
@@ -266,7 +268,10 @@ margin:8px 16px;
     font-size:0.7rem;
   }
 }
-@media (max-width:768px){.sidebar-page{margin-left:0;padding-top:64px;width:100%;}}
+@media (max-width:768px){
+  .sidebar-page{margin-left:0;width:100%;padding-top:calc(64px + env(safe-area-inset-top, 0px));}
+  .sidebar-page > .settings-container{margin-top:12px !important;}
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@600;700&display=swap');
 *{
@@ -724,7 +729,7 @@ padding:8px 10px;
 
 </div>
 
-<div class="sidebar-page" style="padding:20px;"><div class="settings-container" style="margin:0 auto; flex:1;">
+<div class="sidebar-page"><div class="settings-container" style="margin:0 auto; flex:1;">
 
 <div class="settings-header">
 <h1>⚙️ Settings</h1>
