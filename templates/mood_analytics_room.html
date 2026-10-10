@@ -3,6 +3,14 @@
 <head>
 <title>Mood Analytics</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;padding:16px;font-family:Arial,sans-serif;background:#f4f6f8;color:#1a3a4a;}
+canvas{max-width:100%;}
+a{display:inline-block;margin-top:12px;min-height:44px;line-height:44px;}
+@media (max-width:480px){body{padding:12px;}h2{font-size:1.15rem;}}
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 </head>
 <body>
 

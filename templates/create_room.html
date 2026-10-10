@@ -5,6 +5,7 @@
 <title>Create Group Room</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
 body {
@@ -42,6 +43,12 @@ label.room-label { display:block; font-size:0.8rem; font-weight:700; color:#1a4a
 .create-btn:hover { transform:translateY(-1px); }
 .create-btn:disabled { opacity:0.6; cursor:not-allowed; }
 .no-users { text-align:center; color:#5a8a9a; font-size:0.85rem; padding:20px; }
+@media (max-width: 768px){
+body{background-attachment:scroll;padding:12px;-webkit-text-size-adjust:100%;}
+.container{padding:20px 16px;border-radius:16px;}
+#room-name{font-size:16px;}
+.user-list{max-height:40vh;}
+}
 </style>
 </head>
 <body>

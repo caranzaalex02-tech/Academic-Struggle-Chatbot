@@ -1,0 +1,87 @@
+/* ============================================================
+   SANC.AI — Global Mobile / Android Responsive Layer (<=768px, <=480px)
+   Shared across all pages. This file is auto-linked BEFORE </head>
+   (after each page's <style>), so it wins on small screens
+   without touching desktop design.
+   ============================================================ */
+@media (max-width: 768px) {
+  /* ---- safe, fluid base ---- */
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background-attachment: scroll !important;
+    overflow-x: hidden !important;
+    min-width: 0;
+  }
+  img, svg, canvas, video { max-width: 100%; height: auto; }
+
+  /* ---- chat + card pages: full-bleed on phones ---- */
+  .chat-container, .container, .settings-container,
+  .dashboard-container, .auth-box, .game-container,
+  .card, .main-content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .chat-container, .container, .settings-container,
+  .dashboard-container, .auth-box, .game-container { border-radius: 14px; }
+  .main-content { padding: 16px !important; }
+  .main-header h2 { font-size: 1.35rem !important; }
+
+  /* ---- tap targets (min 44px) ---- */
+  button, .btn, .chat-btn, .create-btn, .rooms-toggle,
+  .members-toggle, .action-btn, .view-btn, a.back-btn {
+    min-height: 44px;
+  }
+  input, select, textarea {
+    font-size: 16px !important; /* iwas auto-zoom sa Android/iOS */
+    max-width: 100%;
+  }
+
+  /* ---- generic cards / grids collapse ---- */
+  .cards { grid-template-columns: repeat(2, 1fr) !important; }
+  .info-row { grid-template-columns: 1fr !important; }
+  .games { grid-template-columns: repeat(2, 1fr) !important; }
+  .score-board-content { grid-template-columns: 1fr 1fr !important; }
+  .grid-container { grid-template-columns: 1fr !important; }
+  .grid-col-span-1, .grid-col-span-2, .grid-col-span-3 { grid-column: span 1 / span 1 !important; }
+
+  /* ---- admin + dashboard layouts stack ---- */
+  .dashboard-layout { flex-direction: column !important; }
+  .dashboard-layout .sidebar {
+    width: 100% !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px 10px !important;
+    padding: 12px !important;
+  }
+  .dashboard-layout .sidebar-header { margin-bottom: 0 !important; padding-bottom: 0 !important; border-bottom: none !important; }
+  .dashboard-layout .sidebar nav { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
+  .dashboard-layout .sidebar a { padding: 10px 12px !important; margin-bottom: 0 !important; }
+  .dashboard-layout .sidebar .logout-btn { margin-top: 0 !important; padding-top: 10px !important; }
+
+  /* ---- tables scroll instead of breaking ---- */
+  .card { overflow-x: auto !important; }
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  thead, tbody { min-width: 560px; }
+  th, td { padding: 10px 12px !important; font-size: 0.8rem !important; }
+
+  /* ---- modals fit small screens ---- */
+  .modal-content { width: 92% !important; max-width: 420px; margin: 12% auto; }
+
+  /* ---- group study user cards stack ---- */
+  .user-card { flex-wrap: wrap !important; }
+  .current-user-profile { flex-direction: column !important; text-align: center !important; }
+}
+
+@media (max-width: 480px) {
+  body { font-size: 15px; }
+  .cards { grid-template-columns: 1fr !important; }
+  .games { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+  .game-btn { min-height: 72px; font-size: 13px; padding: 12px 8px; }
+  h1 { font-size: 1.35rem !important; }
+  h2 { font-size: 1.15rem !important; }
+  .user-card { flex-direction: column !important; align-items: stretch !important; }
+  .chat-btn { justify-content: center !important; }
+  thead, tbody { min-width: 500px; }
+}
+

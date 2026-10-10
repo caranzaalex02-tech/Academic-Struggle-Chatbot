@@ -5,6 +5,7 @@
 <title>{{ room_name }}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 body {
@@ -59,6 +60,19 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
 }
 .input-area input { flex: 1; padding: 12px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); font-size: 0.9rem; background: rgba(255,255,255,0.5); color: #1a4a5a; outline: none; }
 .input-area button { width: 46px; height: 46px; border-radius: 50%; border: none; background: #0ea5b9; color: #fff; font-size: 16px; cursor: pointer; }
+@media (max-width: 768px){
+body{background-attachment:scroll;-webkit-text-size-adjust:100%;}
+.header{padding:10px 12px;}
+.header-title{font-size:0.9rem;}
+.chat-box{padding:12px 10px;}
+.message{max-width:85%;font-size:0.85rem;}
+.input-area{padding:10px 10px calc(10px + env(safe-area-inset-bottom));}
+.input-area input{font-size:16px;}
+}
+@media (max-width: 480px){
+.message{max-width:92%;}
+.members-toggle{font-size:12px;}
+}
 </style>
 </head>
 <body>

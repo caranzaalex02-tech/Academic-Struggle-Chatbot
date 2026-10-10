@@ -5,7 +5,7 @@
 <title>Chat History</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 <style>
 
 /* ============================================================
@@ -424,6 +424,7 @@ mark {
 @media(max-width:600px){
     .container{
         height:90vh;
+        height:90dvh;
         padding:15px;
     }
     th, td{
@@ -432,7 +433,22 @@ mark {
     #search-input{
         width:100%;
         margin-top:8px;
+        font-size:16px;
     }
+    /* Android: card-style rows imbes na siksikang table */
+    .container{overflow-x:hidden;}
+    table, thead, tbody, th, td, tr{display:block;width:100%;}
+    thead{display:none;}
+    tr{margin-bottom:12px;border-radius:12px;padding:6px 4px;}
+    td{padding:8px 12px;font-size:13px;border-bottom:none;}
+    td:last-child{display:flex;flex-wrap:wrap;gap:8px;}
+    a.action-btn{min-height:44px;line-height:32px;display:inline-block;}
+}
+@media (max-width:768px){
+    body{-webkit-text-size-adjust:100%;}
+    .table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    table{min-width:560px;}
+    .action-btn{min-height:44px;}
 }
 </style>
 </head>

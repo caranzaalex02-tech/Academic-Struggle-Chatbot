@@ -89,7 +89,15 @@ font-size:13px;
 background:#ffcc00;
 color:black;
 }
+@media (max-width:768px){
+body{height:auto;min-height:100vh;overflow:auto;-webkit-text-size-adjust:100%;}
+.overlay{position:static;min-height:100vh;padding:16px 12px;}
+.charts{flex-direction:column;width:100%;}
+.chart-box{width:100%;height:auto;min-height:220px;}
+.buttons a{min-height:44px;line-height:32px;font-size:14px;}
+}
 </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 </head>
 
 <body>
