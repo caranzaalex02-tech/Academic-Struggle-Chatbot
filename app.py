@@ -35,7 +35,13 @@ if load_dotenv is not None:
     load_dotenv()
 
 # Local Application Imports
-from utils.bot_logic import generate_response, resolve_response_language
+from utils.bot_logic import (
+    generate_response,
+    resolve_response_language,
+    save_message_to_db,
+    get_conversation_history,
+    get_conversation_recap,
+)
 from utils.email_utils import (
     send_crisis_email,
     send_registration_email,
@@ -1389,13 +1395,14 @@ def chat():
 
     # Generate bot response and check for abuse
     last_intent = session.get('last_intent')
-    # Kunin ang huling 3 palitan para manatiling on-topic ang AI sa follow-ups.
+    # Kunin ang huling 10 palitan para maalala ng AI ang dating usapan
+    # (follow-ups, recall, at recap) — history ang pinapasa sa AI prompt.
     history = []
     try:
         if is_postgres_db():
-            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=%s ORDER BY id DESC LIMIT 3", (session["user"],))
+            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=%s ORDER BY id DESC LIMIT 10", (session["user"],))
         else:
-            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=? ORDER BY id DESC LIMIT 3", (session["user"],))
+            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=? ORDER BY id DESC LIMIT 10", (session["user"],))
         for row in (c.fetchall() or []):
             try:
                 history.append((row["user_message"], row["bot_response"]))
@@ -1467,6 +1474,31 @@ def chat():
         pass
 
     return jsonify({"response":reply, "message_id": message_id})
+
+
+@app.route("/chat/history", methods=["POST"])
+def chat_history():
+    """Return the user's conversation history as [(user_text, bot_text), ...]."""
+    if "user" not in session:
+        return jsonify({"status": "Unauthorized"}), 401
+    try:
+        history = get_conversation_history(session["user"], limit=50)
+        pairs = [[u or "", b or ""] for (u, b) in history]
+        return jsonify({"status": "ok", "history": pairs})
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+@app.route("/chat/recap", methods=["POST"])
+def chat_recap():
+    """Return a recap of the user's conversation history."""
+    if "user" not in session:
+        return jsonify({"status": "Unauthorized"}), 401
+    try:
+        recap = get_conversation_recap(session["user"], max_messages=10)
+        return jsonify({"status": "ok", "recap": recap})
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
 
 # ---- DELETE (UNSEND) MESSAGE ----
 @app.route("/delete_message", methods=["POST"])

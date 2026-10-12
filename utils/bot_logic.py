@@ -6,6 +6,7 @@ import re
 import sqlite3
 import logging
 import time
+import datetime
 from pathlib import Path
 
 try:  # Normal package import (Flask app / pytest)
@@ -102,6 +103,125 @@ conversation_memory = {}
 
 def _get_db_path():
     return os.environ.get("MENTALHEALTHWEB_DB", "database.db")
+
+
+def _is_postgres_db():
+    """Detect if the app is using PostgreSQL (for cross-DB compatibility)."""
+    return os.environ.get("DATABASE_URL") is not None
+
+
+def _get_memory_conn():
+    """Open a DB connection for conversation-memory helpers.
+
+    Uses PostgreSQL when DATABASE_URL is set (Render/production),
+    otherwise falls back to the local SQLite file. Returns
+    (conn, is_postgres) so callers can pick the right placeholder.
+    """
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url:
+        try:
+            import psycopg2
+            from psycopg2.extras import DictCursor
+            conn = psycopg2.connect(db_url, cursor_factory=DictCursor)
+            return conn, True
+        except Exception:
+            logging.exception("Postgres memory connection failed; falling back to SQLite.")
+    db_path = _get_db_path()
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn, False
+
+
+def save_message_to_db(user_email, user_message, bot_response, is_crisis=0, is_abusive=0):
+    """Save one user-bot exchange to the messages table."""
+    conn, is_postgres = _get_memory_conn()
+    c = conn.cursor()
+    ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if is_postgres:
+        c.execute(
+            "INSERT INTO messages (user_email, user_message, bot_response, is_crisis, is_abusive, timestamp) VALUES (%s,%s,%s,%s,%s,%s)",
+            (user_email, user_message, bot_response, is_crisis, is_abusive, ts),
+        )
+    else:
+        c.execute(
+            "INSERT INTO messages (user_email, user_message, bot_response, is_crisis, is_abusive, timestamp) VALUES (?,?,?,?,?,?)",
+            (
+                user_email,
+                user_message,
+                bot_response,
+                is_crisis,
+                is_abusive,
+                ts,
+            ),
+        )
+    conn.commit()
+    conn.close()
+
+
+def get_conversation_history(user_email, limit=20):
+    """Fetch conversation history for a user as [(user_text, bot_text), ...] ordered oldest to newest."""
+    conn, is_postgres = _get_memory_conn()
+    c = conn.cursor()
+    ph = "%s" if is_postgres else "?"
+    c.execute(
+        f"SELECT user_message, bot_response FROM messages WHERE user_email={ph} ORDER BY id DESC LIMIT {ph}",
+        (user_email, limit),
+    )
+    rows = c.fetchall()
+    conn.close()
+    out = []
+    for row in reversed(rows):
+        try:
+            out.append((row["user_message"], row["bot_response"]))
+        except (TypeError, KeyError, IndexError):
+            out.append((row[0], row[1]))
+    return out
+
+
+def get_conversation_recap(user_email, max_messages=10):
+    """
+    Build a structured recap of a conversation for the user.
+    Returns a dict ready to be JSON-serialized.
+    """
+    history = get_conversation_history(user_email, limit=max_messages)
+    if not history:
+        return {
+            "user_email": user_email,
+            "has_history": False,
+            "summary": "Walang nabago pang usapan sa chat ngayon.",
+            "messages": [],
+            "total_turns": 0,
+        }
+
+    messages = []
+    for user_text, bot_text in history:
+        messages.append(
+            {
+                "role": "user",
+                "content": str(user_text)[:500],
+                "bot_response": str(bot_text)[:500],
+            }
+        )
+
+    total_turns = len(messages)
+    if total_turns <= 4:
+        captured = messages
+    else:
+        captured = messages[:2] + messages[-2:]
+
+    summary_lines = [f"Total turns: {total_turns} | "]
+    if captured:
+        last_user = captured[-1]["content"]
+        summary_lines.append(f'Last topic: "{last_user[:100]}"')
+
+    return {
+        "user_email": user_email,
+        "has_history": True,
+        "summary": " ".join(summary_lines),
+        "messages": messages,
+        "total_turns": total_turns,
+    }
+
 
 # ----------------------------
 # CRISIS KEYWORDS & RESPONSE
@@ -1688,11 +1808,16 @@ def _build_openai_system_prompt(language='tagalog'):
         "- Do not translate the user's message; just answer naturally in their language.\n"
         "- If you are unsure of the language, answer in English when the message looks like English words,\n"
         "  otherwise match the detected language. NEVER default to Tagalog for an English-looking message.\n"
+        "\nCONVERSATION MEMORY (very important):\n"
+        "- An 'Earlier user / Earlier assistant' transcript is provided before the new message.\n"
+        "- ALWAYS use that transcript to stay on-topic across follow-ups.\n"
+        "- When the user asks to recall, summarize, continue, or repeat what was discussed, answer ONLY from that transcript — never say you forgot or that you cannot remember.\n"
+        "- If the transcript is empty, say so honestly in the user's language.\n"
     )
     return role + language_rules + "\n" + base_guidelines
 
 
-def _history_to_prompt_lines(history, limit=6):
+def _history_to_prompt_lines(history, limit=10):
     """Gawing prompt lines ang huling usapan para manatiling on-topic ang AI.
 
     ``history`` ay list ng (user_text, bot_text) tuples. Kinukuha lang ang
@@ -1703,10 +1828,86 @@ def _history_to_prompt_lines(history, limit=6):
     lines = []
     for user_text, bot_text in list(history)[-limit:]:
         if user_text:
-            lines.append(f"Earlier user: {str(user_text).strip()[:300]}")
+            lines.append(f"Earlier user: {str(user_text).strip()[:400]}")
         if bot_text:
-            lines.append(f"Earlier assistant: {str(bot_text).strip()[:300]}")
+            lines.append(f"Earlier assistant: {str(bot_text).strip()[:400]}")
     return lines
+
+
+_RECALL_PATTERNS = (
+    "naaalala mo",
+    "naalala mo",
+    "natatandaan mo",
+    "naaalala mo ba",
+    "naalala mo ba",
+    "maalala mo",
+    "maaalala mo",
+    "do you remember",
+    "can you remember",
+    "can you recall",
+    "recall",
+    "recap",
+    "summarize our",
+    "summarise our",
+    "summarize what",
+    "what did we talk",
+    "what did i say",
+    "what did i tell",
+    "pinag-usapan natin",
+    "pinag usapan natin",
+    "ano pinag-usapan",
+    "ano ang pinag-usapan",
+    "ano yung pinag-usapan",
+    "ano sinabi ko",
+    "anong sinabi ko",
+    "balikan natin",
+    "napag-usapan",
+    "ibuod",
+    "buod",
+    "mga napag-usapan",
+)
+
+
+def _is_recall_request(text):
+    lowered = (text or "").lower().strip()
+    if not lowered:
+        return False
+    return any(p in lowered for p in _RECALL_PATTERNS)
+
+
+def _build_recall_response(history, resp_lang):
+    if not history:
+        if resp_lang == "waray":
+            return "Waray pa kita magkaistorya hin maiha, pero aadi ako yana. Ano an karuyag mo pag-istoryahan?"
+        if resp_lang == "english":
+            return "We haven't talked much yet, but I'm here now. What would you like to talk about?"
+        return "Wala pa tayong masyadong napag-usapan, pero nandito ako ngayon. Ano ang gusto mong pag-usapan?"
+    topics = []
+    for user_text, bot_text in list(history):
+        snippet = str(user_text or "").strip().replace("\n", " ")
+        if snippet and snippet.lower() not in ("hi", "hello", "hey", "kumusta", "kamusta"):
+            topics.append(snippet[:120])
+    topics = topics[-5:]
+    if resp_lang == "waray":
+        intro = "Oo, naaalala ko an aton pag-istorya. "
+        if topics:
+            body = "Amo ini an aton mga nahisgutan: " + "; ".join(f'"{t}"' for t in topics) + ". "
+        else:
+            body = ""
+        return intro + body + "Padayon la, aadi ako para mabulig ha imo."
+    if resp_lang == "english":
+        intro = "Yes, I remember our conversation. "
+        if topics:
+            body = "Here's what we've talked about: " + "; ".join(f'"{t}"' for t in topics) + ". "
+        else:
+            body = ""
+        return intro + body + "I'm still here — what would you like to continue with?"
+    intro = "Oo, naaalala ko ang pinag-usapan natin. "
+    if topics:
+        body = "Ito ang mga nabanggit mo: " + "; ".join(f'"{t}"' for t in topics) + ". "
+    else:
+        body = ""
+    return intro + body + "Nandito lang ako — ano ang gusto mong balikan o ipagpatuloy?"
 
 
 def _request_chat_continuation(client, model, messages, partial_text,
@@ -2178,6 +2379,15 @@ def generate_response(user_input, last_intent=None, language='tagalog', history=
 
         resp = _crisis_response(resp_lang)
         return (resp, "crisis_situation", 1, is_abusive_in_crisis)
+
+    # 1b. Recall check — kapag tinatanong ng user kung naaalala ang dating
+    # usapan, sagutin ito DIREKTA mula sa history (deterministic, hindi AI
+    # guess) para siguradong may babalikan ang user.
+    try:
+        if _is_recall_request(user_input) and history:
+            return (_build_recall_response(history, resp_lang), None, 0, 0)
+    except Exception:
+        logging.exception("Recall handler failed; continuing to AI path.")
 
     # 2. Abusive Language Check (High Priority — NEVER bypassed, even in AI-first mode)
     if any(k in text for k in ABUSIVE_KEYWORDS):
