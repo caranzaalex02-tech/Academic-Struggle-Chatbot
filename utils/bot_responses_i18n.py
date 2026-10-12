@@ -73,6 +73,36 @@ TAGALOG_MARKERS = {
     "kaklase", "kaibigan", "magulang", "pamilya", "trabaho", "pera",
     "baon", "utang", "aralin", "proyekto", "paaralan", "eskwela",
     "pasukan", "depensa",
+    # Malalalim / pormal na Tagalog — dapat maintindihan pa rin bilang Tagalog
+    # (hal. "Ako'y nababagabag", "labis ang aking hinagpis").
+    "bagabag", "nababagabag", "nabagabag", "pagkabagabag", "ligalig",
+    "naliligalig", "balisa", "nababalisa", "pagkabalisa", "himutok",
+    "hinagpis", "pighati", "dalamhati", "lumbay", "nanlulumo", "lumo",
+    "panglulumo", "ginhawa", "gininhawa", "ligaya", "galak", "nagalak",
+    "tuwa", "natuwa", "poot", "napoot", "ngitngit", "nanggigitngit",
+    "yamot", "naiyamot", "siphayo", "kabiguan", "pagkabigo", "nabigo",
+    "tagumpay", "nagtatagumpay", "kasawian", "sawi", "palad", "kapalaran",
+    "tadhana", "pagsubok", "pakikibaka", "nakikibaka", "pagdaramdam",
+    "nagdaramdam", "damdamin", "kalooban", "budhi", "diwa", "kaluluwa",
+    "pagninilay", "nagmumuni", "pagmumuni", "pagbubulay", "karunungan",
+    "kaalaman", "kaisipan", "pagkatuto", "pagtitiis", "nagtitiis",
+    "nagtitimpi", "pagtitimpi", "pagdurusa", "naghihinagpis", "paghihirap",
+    "kalumbayan", "kapighatian", "kasiyahang", "kagalakan", "kapayapaan",
+    "kapanatagan", "panatag", "tiwasay", "katahimikan", "kaguluhan",
+    "naguguluhan", "pagkalito", "nalilito", "paghanga", "hinahangaan",
+    "pagmamahal", "nagmamahal", "minamahal", "pagkasabik", "nasasabik",
+    "pagkainis", "pagkapagod", "pagkatuwa", "pagkalungkot", "pagkatakot",
+    "pangamba", "nangangamba", "alalahanin", "nag-aalala", "pag-aalala",
+    "suliranin", "siranin", "aglahi", "adhikain", "layunin", "hangarin",
+    "ninanais", "pinapangarap", "pangarap", "mithiin", "samut",
+    "samu't", "sari", "iniibig", "sinisinta", "sinta", "irog",
+    "napagtanto", "napagmasdan", "namasdan", "pinagmasdan", "natanaw",
+    "nasumpungan", "natagpuan", "pinagmumulan", "pinagmulan",
+    "pinanggalingan", "bukal", "ugat", "sanhi", "dahilan", "bunga",
+    "kawalan", "kakulangan", "kasaganaan", "kasapatan", "kaginhawaan",
+    "kahirapan", "karukhaan", "kadakilaan", "dakila", "hamak", "aba",
+    "maralita", "salat", "kapos", "sapat", "labis", "sobra", "timbang",
+    "higit", "kulang", "puno", "punong", "tigib", "umaapaw",
 }
 
 WARAY_MARKERS = {
@@ -543,13 +573,13 @@ TAGALOG_RESPONSES = {
         "\"Ang sikreto ay hindi sa paggastos ng oras, kundi sa pag-invest dito.\" – Stephen R. Covey"
     ],
     "overthinking": [
-        "Naiintindihan ko. Minsan, ang bigat ng mga isip na parang hindi na pwedeng hintayin. Normal lang 'to, at hindi ka mag-isa dito.\n\n"
-        "Narito ang ilang simpleng paraan para mapababa ang overthinking:\n"
-        "1. **Ibura sa papel.** Isulat ang lahat ng nakaliligalig sa isip mo. Kapag nakita mo ito sa papel, madalas mas malinaw at mas mababa ang takot.\n"
-        "2. **5-4-3-2-1 grounding.** Hanapin 5 bagay na nakikita mo, 4 na nararamdaman mo, 3 na naririnig mo, 2 na amoy, at 1 na lasa. Ito ay tumutulong upang bumalik ka sa kasalukuyan.\n"
-        "3. **Limitado ang oras ng pag-iisip.** Sabihin sa sarili mo, \"May 10 minutes lang ako para mag-isip dito.\" Pag tapos ang oras, gawin ang ibang gawain.\n"
-        "4. **Kumustahan ang sarili.** Tanungin mo ang sarili, \"Totoo ba ang takot ko, o kaya lang ba ito sa isip ko?\" Minsan, kaya lang ito sa isip.\n"
-        "Kung sobrang lala na at nakakaapekto sa pagtulog o pagkain, maaari kang kumonsulta sa school counselor para sa mas malalim na tulong. 💙"
+        "Naiintindihan kita. Minsan, sobrang bigat ng mga iniisip mo na parang hindi na ito matapos-tapos. Normal lang 'yan, at hindi ka nag-iisa.\n\n"
+        "Narito ang ilang simpleng paraan para kumalma ang isip mo:\n"
+        "1. **Isulat sa papel.** Isulat mo lahat ng bumabagabag sa isip mo. Kapag nakikita mo ito sa papel, kadalasan mas nagiging malinaw at hindi na ito ganoon nakakatakot.\n"
+        "2. **5-4-3-2-1 grounding.** Maghanap ka ng 5 bagay na nakikita mo, 4 na nahahawakan mo, 3 na naririnig mo, 2 na naaamoy mo, at 1 na nalalasahan mo. Tinutulungan ka nitong bumalik sa kasalukuyan.\n"
+        "3. **Bigyan ng oras ang pag-iisip.** Sabihin mo sa sarili mo, \"May 10 minutes lang ako para isipin ito.\" Kapag tapos na ang oras, lumipat ka na sa ibang gawain.\n"
+        "4. **Kausapin ang sarili nang mahinahon.** Tanungin mo ang sarili mo, \"Totoo ba ang kinatatakutan ko, o lumalaki lang ito sa isip ko?\" Kadalasan, lumalaki lang ito sa isip.\n"
+        "Kung sobrang bigat na at naaapektuhan na ang tulog o pagkain mo, puwede kang lumapit sa school counselor para sa mas malalim na tulong. 💙"
     ],
     "imposter_syndrome": [
         "Sobrang karaniwan ang imposter syndrome, lalo na sa mga mahuhusay. Tunay at pinaghirapan mo ang mga naabot mo.\n"
