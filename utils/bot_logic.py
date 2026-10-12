@@ -6,7 +6,6 @@ import re
 import sqlite3
 import logging
 import time
-import datetime
 from pathlib import Path
 
 try:  # Normal package import (Flask app / pytest)
@@ -103,100 +102,6 @@ conversation_memory = {}
 
 def _get_db_path():
     return os.environ.get("MENTALHEALTHWEB_DB", "database.db")
-
-def _is_postgres_db():
-    """Detect if the app is using PostgreSQL (for cross-DB compatibility)."""
-    return os.environ.get("DATABASE_URL") is not None
-
-
-def save_message_to_db(user_email, user_message, bot_response, is_crisis=0, is_abusive=0):
-    """Save one user-bot exchange to the messages table."""
-    db_path = _get_db_path()
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    c.execute(
-        "INSERT INTO messages (user_email, user_message, bot_response, is_crisis, is_abusive, timestamp) VALUES (?,?,?,?,?,?)",
-        (
-            user_email,
-            user_message,
-            bot_response,
-            is_crisis,
-            is_abusive,
-            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        ),
-    )
-    conn.commit()
-    conn.close()
-
-
-def get_conversation_history(user_email, limit=20):
-    """Fetch conversation history for a user as [(user_text, bot_text), ...] ordered oldest to newest."""
-    db_path = _get_db_path()
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    if _is_postgres_db():
-        c.execute(
-            "SELECT user_message, bot_response FROM messages WHERE user_email=? ORDER BY id DESC LIMIT ?",
-            (user_email, limit),
-        )
-    else:
-        c.execute(
-            "SELECT user_message, bot_response FROM messages WHERE user_email=? ORDER BY id DESC LIMIT ?",
-            (user_email, limit),
-        )
-    rows = c.fetchall()
-    conn.close()
-    # rows come newest to oldest, so reverse to oldest to newest
-    return [(row["user_message"], row["bot_response"]) for row in reversed(rows)]
-
-
-def get_conversation_recap(user_email, max_messages=10):
-    """
-    Build a structured recap of a conversation for the user.
-    Returns a dict ready to be JSON-serialized.
-    """
-    history = get_conversation_history(user_email, limit=max_messages)
-    if not history:
-        return {
-            "user_email": user_email,
-            "has_history": False,
-            "summary": "Walang nabago pang usapan sa chat ngayon.",
-            "messages": [],
-            "total_turns": 0,
-        }
-
-    # Separate user and bot messages in chronological order
-    messages = []
-    for user_text, bot_text in history:
-        messages.append(
-            {
-                "role": "user",
-                "content": str(user_text)[:500],
-                "bot_response": str(bot_text)[:500],
-            }
-        )
-
-    # Naive summary: first few turns + last few turns
-    total_turns = len(messages)
-    if total_turns <= 4:
-        captured = messages
-    else:
-        captured = messages[:2] + messages[-2:]  # first 2 and last 2
-
-    summary_lines = [f"Total turns: {total_turns} | "]
-    if captured:
-        last_user = captured[-1]["content"]
-        summary_lines.append(f"Last topic: \"{last_user[:100]}\"")
-
-    return {
-        "user_email": user_email,
-        "has_history": True,
-        "summary": " ".join(summary_lines),
-        "messages": messages,
-        "total_turns": total_turns,
-    }
-
 
 # ----------------------------
 # CRISIS KEYWORDS & RESPONSE

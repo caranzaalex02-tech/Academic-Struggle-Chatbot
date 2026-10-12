@@ -35,13 +35,7 @@ if load_dotenv is not None:
     load_dotenv()
 
 # Local Application Imports
-from utils.bot_logic import (
-    generate_response,
-    resolve_response_language,
-    save_message_to_db,
-    get_conversation_history,
-    get_conversation_recap,
-)
+from utils.bot_logic import generate_response, resolve_response_language
 from utils.email_utils import (
     send_crisis_email,
     send_registration_email,
@@ -1395,11 +1389,19 @@ def chat():
 
     # Generate bot response and check for abuse
     last_intent = session.get('last_intent')
-    # Kumain ang full conversation history (hindi na lang 3 palitan) para
-    # manatiling on-topic ang AI sa follow-up questions
+    # Kunin ang huling 3 palitan para manatiling on-topic ang AI sa follow-ups.
     history = []
     try:
-        history = get_conversation_history(session["user"], limit=20)
+        if is_postgres_db():
+            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=%s ORDER BY id DESC LIMIT 3", (session["user"],))
+        else:
+            c.execute("SELECT user_message, bot_response FROM messages WHERE user_email=? ORDER BY id DESC LIMIT 3", (session["user"],))
+        for row in (c.fetchall() or []):
+            try:
+                history.append((row["user_message"], row["bot_response"]))
+            except (TypeError, KeyError, IndexError):
+                history.append((row[0], row[1]))
+        history = list(reversed(history))
     except Exception:
         history = []
     reply, new_intent, is_crisis, is_abusive = generate_response(message, last_intent, user_language, history=history)
@@ -1466,25 +1468,6 @@ def chat():
 
     return jsonify({"response":reply, "message_id": message_id})
 
-@app.route("/chat/history", methods=["POST"])
-def chat_history():
-    """Return the user's conversation history as [(user_text, bot_text), ...]."""
-    if "user" not in session:
-        return jsonify({"status": "Unauthorized"}), 401
-    try:
-        history = get_conversation_history(session["user"], limit=50)
-        # Return as list for easy front-end zipping (user, bot pairs)
-        pairs = []
-        for i in range(0, len(history) - 1, 2):
-            pairs.append([history[i][0], history[i][1]])
-        # If odd number, handle last one
-        if len(history) % 2 == 1:
-            pairs.append([history[-1][0], ""])
-        return jsonify({"status": "ok", "history": pairs})
-    except Exception as e:
-        return jsonify({"status": "error", "error": str(e)}), 500
-
-
 # ---- DELETE (UNSEND) MESSAGE ----
 @app.route("/delete_message", methods=["POST"])
 def delete_message():
@@ -1502,22 +1485,6 @@ def delete_message():
         c.execute("DELETE FROM messages WHERE id=? AND user_email=?", (message_id, session["user"]))
     db.commit()
     return jsonify({"status": "ok"})
-
-# ---- CONVERSATION RECAP ----
-@app.route("/chat/recap", methods=["POST"])
-def chat_recap():
-    """Return a recap of the user's conversation history."""
-    if "user" not in session:
-        return jsonify({"status": "Unauthorized"}), 401
-    try:
-        recap = get_conversation_recap(session["user"], max_messages=10)
-        return jsonify({"status": "ok", "recap": recap})
-    except Exception as e:
-        return jsonify({"status": "error", "error": str(e)}), 500
-
-
-# ---- MOOD LOGGING ----
-
 
 # ---- MOOD LOGGING ----
 @app.route("/log_mood", methods=["POST"])
