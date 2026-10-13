@@ -181,6 +181,7 @@
             <input type="checkbox" id="accept_terms" name="accept_terms" value="yes" required class="form-check-input">
             <label for="accept_terms" class="form-check-label">I accept the 
                 <a href="#" data-toggle="modal" data-target="#termsModal">Terms and Conditions</a>
+                and <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>
             </label>
         </div>
         <button type="submit" class="btn btn-p">Register</button>
@@ -204,9 +205,9 @@
       <div class="modal-body">
         <p>Welcome to Academic Struggle Support! By using this service, you agree to the following terms:</p>
         <ul>
-            <li><strong>Not a Substitute for Professional Help:</strong> This chatbot is designed for emotional support and is NOT a substitute for professional medical advice, diagnosis, or treatment from a licensed therapist, psychologist, or psychiatrist.</li>
-            <li><strong>Crisis Situations:</strong> If you are in a crisis or feel you may hurt yourself or others, please contact emergency services (911) or a crisis hotline immediately. This app is not monitored 24/7 for crisis situations.</li>
-            <li><strong>Privacy:</strong> We are committed to protecting your privacy. Your conversations are stored securely. However, in cases of detected crisis or self-harm intent, we may be required to notify a designated school official or authority as per our crisis intervention protocol.</li>
+            <li><strong>Not a Substitute for Professional Help:</strong> This chatbot is an AI study-support tool and is NOT a substitute for professional medical advice, diagnosis, or treatment from a licensed therapist, psychologist, or psychiatrist. It does not provide diagnosis or prescriptions.</li>
+            <li><strong>Crisis Situations — No 24/7 Monitoring:</strong> This app is NOT monitored 24/7. We DO NOT automatically notify any person, school official, or authority when you send a crisis-related message. If you are in crisis or feel you may hurt yourself or others, please contact emergency services (911), the NCMH Crisis Hotline 1553 / 0966-351-4518 / 0917-899-8727, or a trusted person immediately. Always seek help on your own — do not wait for a response from this app.</li>
+            <li><strong>Privacy & Admin Access (Data Privacy Act RA 10173):</strong> Your conversations, mood logs, and profile are stored to run the service. Authorized school admins may view account stats and, only when needed for safety/moderation (e.g., abuse report or safety review), limited conversation content. We do not sell your data. You may request deletion of your account and conversations via Settings / contacting the admin. Data is kept only while your account is active for school purposes.</li>
             <li><strong>User Conduct:</strong> You agree not to use abusive, harassing, or inappropriate language. Violation of this rule may result in the suspension or termination of your account.</li>
             <li><strong>Age Requirement:</strong> You must be 18 years or older to use this application.</li>
         </ul>

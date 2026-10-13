@@ -235,6 +235,15 @@
 
             <div class="card grid-col-span-3">
                 <h3>Conversation History</h3>
+                <p style="font-size:12px;color:var(--secondary-text);line-height:1.6;margin-bottom:12px;">🔒 <strong>Privacy-protected:</strong> {{ total_messages }} messages total, {{ crisis_count }} flagged crisis. Full text is hidden by default (Data Privacy Act). Only open full chats when needed for safety/moderation — every full view is logged.
+                {% if not show_full %}
+                <br><a href="{{ url_for('admin_user_details', username=user.email) }}?show_full=1" onclick="return confirm('Bubuksan mo ang full conversation text para sa safety/moderation review. Ito ay naka-log. Ituloy?');" style="color:var(--danger-color);font-weight:700;">→ Request full chat view (logged)</a>
+                {% else %}
+                <br><span style="color:var(--danger-color);font-weight:700;">⚠️ Full view ON — this access has been logged.</span>
+                <a href="{{ url_for('admin_user_details', username=user.email) }}" style="margin-left:10px;">Hide full text</a>
+                {% endif %}
+                </p>
+                {% if show_full %}
                 <div class="tabs">
                     <button class="tab-btn active" onclick="showTab('active', this)">Active Chats</button>
                     <button class="tab-btn" onclick="showTab('archived', this)">Archived Chats</button>
@@ -269,6 +278,9 @@
                         <p style="text-align:center; color:var(--secondary-text); padding-top: 20px;">No archived conversations.</p>
                     {% endif %}
                 </div>
+                {% else %}
+                <p style="text-align:center;color:var(--secondary-text);padding:16px;">Full conversation text is hidden. Click "Request full chat view" above if a safety/moderation review is truly needed.</p>
+                {% endif %}
             </div>
         </div>
     </main>

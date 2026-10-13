@@ -768,17 +768,17 @@ CRISIS_RESPONSE_TL = """🚨 NARIRINIG KITA, AT NAGMAMALASAKIT AKO 🚨
 
 Totoo ang sakit na nararamdaman mo, at karapat-dapat kang makatanggap ng tulong AGAD. PAKITAWAG sa kahit sino sa mga ito NGAYON:
 
-📞 **CRISIS HOTLINE NUMBERS:**
-• PNP Suicide Hotline: 0917-558-5999
-• HOPELINE: 2389-6363
-• In Touch Crisis Line: (02) 8969-9119
-• Lifeline PH: (02) 8817-2222
+📞 **CRISIS HOTLINE NUMBERS (24/7, Pilipinas):**
+• NCMH Crisis Hotline: 1553 (Luzon) / 0966-351-4518
+• NCMH Mobile: 0917-899-8727 (0917-899-USAP)
+• In Touch Community: (02) 8893-7603
+• Emergency: 911
 
 🏥 **AGARANG GAGAWIN:**
 1. Tumawag sa emergency (911) kung nasa panganib ka ngayon
 2. Pumunta sa pinakamalapit na ER ng ospital
 3. Sabihin agad sa pinagkakatiwalaang tao: magulang, kaibigan, guro, counselor
-4. I-text ang HOPE sa +63917-558-5999
+4. Maaari ka ring lumapit sa inyong school guidance counselor NGAYON
 
 ⏰ **NGAYON NA:**
 - Wala kang kailangang madaliin. Huminga ka muna nang malalim.

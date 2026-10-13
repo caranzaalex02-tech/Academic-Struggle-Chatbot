@@ -241,17 +241,17 @@ CRISIS_RESPONSE = """🚨 I HEAR YOU, AND I CARE 🚨
 
 Your pain is real, and you deserve immediate support. PLEASE reach out to someone RIGHT NOW:
 
-📞 **CRISIS HOTLINE NUMBERS:**
-• PNP Suicide Hotline: 0917-558-5999
-• HOPELINE: 2389-6363
-• In Touch Crisis Line: (02) 8969-9119
-• Lifeline PH: (02) 8817-2222
+📞 **CRISIS HOTLINE NUMBERS (24/7, Philippines):**
+• NCMH Crisis Hotline: 1553 (Luzon) / 0966-351-4518
+• NCMH Mobile: 0917-899-8727 (0917-899-USAP)
+• In Touch Community: (02) 8893-7603
+• Emergency: 911
 
 🏥 **IMMEDIATE ACTION:**
 1. Call emergency (911) if you're in immediate danger
 2. Go to the nearest hospital ER
 3. Tell a trusted person: parent, friend, teacher, counselor NOW
-4. Text HOPE to +63917-558-5999
+4. You can also contact your school guidance counselor or a trusted adult NOW
 
 ⏰ **RIGHT NOW:**
 - You don't have to do anything rash. Just take one breath.
@@ -267,17 +267,17 @@ WARAY_CRISIS_RESPONSE = """🚨 NAMAMATI AKO, NGAN NAGPAPAHALAGA AKO 🚨
 
 Tinuod an imo kasakit, ngan angay ka buligan yana dayon. PALIHOG pakipag-istorya ha iba:
 
-📞 **CRISIS HOTLINE NUMBERS:**
-• PNP Suicide Hotline: 0917-558-5999
-• HOPELINE: 2389-6363
-• In Touch Crisis Line: (02) 8969-9119
-• Lifeline PH: (02) 8817-2222
+📞 **CRISIS HOTLINE NUMBERS (24/7, Pilipinas):**
+• NCMH Crisis Hotline: 1553 (Luzon) / 0966-351-4518
+• NCMH Mobile: 0917-899-8727 (0917-899-USAP)
+• In Touch Community: (02) 8893-7603
+• Emergency: 911
 
 🏥 **IMMEDIATE ACTION:**
 1. Tumawag ha emergency (911) kung ikaw in aada ha peligro
 2. Kumadto ha pinaka-hirani nga hospital ER
 3. Sumat ha imo gintatapuran: kag-anak, sangkay, o teacher YANA
-4. Text HOPE to +63917-558-5999
+4. Pwede ka gihapon makipag-istorya ha iyo school guidance counselor YANA
 
 💙 "Importante ka. Alayon pagpabilin. Alayon pagsumat. Diri ka nag-uusahan."
 

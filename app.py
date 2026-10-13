@@ -1301,6 +1301,12 @@ def admin_reset_with_token(token):
 
     return render_template('admin_reset_with_token.html', token=token)
 
+# ---- PRIVACY POLICY (RA 10173 Data Privacy Act) ----
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
 # ---- CHATBOT ----
 @app.route("/chatbot")
 def chatbot():
@@ -1470,7 +1476,10 @@ def chat():
     db.commit()
     
     if is_crisis:
-        # send_crisis_email(session["user"], message) # Temporarily disable to avoid email errors during setup
+        # SAFETY: Hindi kami nag-auto-notify ng kahit sino (walang 24/7 monitoring).
+        # Ang crisis response mismo (may NCMH 1553 hotlines) ang ibinabalik sa user.
+        # Huwag magtangkang mag-email dito para hindi magmukhang may live responder.
+        app.logger.warning("Crisis message detected for user: %s (no auto-notify; hotline reply sent)", session.get("user"))
         pass
 
     return jsonify({"response":reply, "message_id": message_id})
@@ -2178,6 +2187,7 @@ def admin_user_details(username):
         return "User not found", 404
 
     user_info = dict(user_info_row) # Convert to dict to modify
+    user_info.pop("password", None)  # NEVER expose password hash to template
 
     # Add ban status to the user_info dict
     user_info['is_banned'] = False
@@ -2193,19 +2203,40 @@ def admin_user_details(username):
         except (ValueError, TypeError):
             pass
 
-    # Chat History (Active)
+    # PRIVACY (RA 10173): default ay stats/metadata lang. Full message content
+    # ay bubuksan lang kapag may ?show_full=1 (safety/moderation review) at naka-log.
+    show_full = request.args.get("show_full", "0") == "1"
     if is_postgres_db():
-        c.execute("SELECT * FROM messages WHERE user_email=%s ORDER BY timestamp DESC", (username,))
+        c.execute("SELECT id, is_crisis, is_abusive, timestamp FROM messages WHERE user_email=%s ORDER BY timestamp DESC LIMIT 200", (username,))
     else:
-        c.execute("SELECT * FROM messages WHERE user_email=? ORDER BY timestamp DESC", (username,))
-    active_chats = c.fetchall()
-    
-    # Chat History (Archived)
-    if is_postgres_db():
-        c.execute("SELECT * FROM archived_messages WHERE user_email=%s ORDER BY timestamp DESC", (username,))
+        c.execute("SELECT id, is_crisis, is_abusive, timestamp FROM messages WHERE user_email=? ORDER BY timestamp DESC LIMIT 200", (username,))
+    active_meta = c.fetchall()
+    active_crisis_count = 0
+    try:
+        for r in (active_meta or []):
+            try:
+                v = r["is_crisis"]
+            except (TypeError, KeyError, IndexError):
+                v = r[1]
+            if v == 1:
+                active_crisis_count += 1
+    except Exception:
+        active_crisis_count = 0
+    if show_full:
+        log_admin_action(session.get("user", "admin"), "view_full_chats", username)
+        if is_postgres_db():
+            c.execute("SELECT * FROM messages WHERE user_email=%s ORDER BY timestamp DESC LIMIT 200", (username,))
+        else:
+            c.execute("SELECT * FROM messages WHERE user_email=? ORDER BY timestamp DESC LIMIT 200", (username,))
+        active_chats = c.fetchall()
+        if is_postgres_db():
+            c.execute("SELECT * FROM archived_messages WHERE user_email=%s ORDER BY timestamp DESC LIMIT 200", (username,))
+        else:
+            c.execute("SELECT * FROM archived_messages WHERE user_email=? ORDER BY timestamp DESC LIMIT 200", (username,))
+        archived_chats = c.fetchall()
     else:
-        c.execute("SELECT * FROM archived_messages WHERE user_email=? ORDER BY timestamp DESC", (username,))
-    archived_chats = c.fetchall()
+        active_chats = []
+        archived_chats = []
     
     # Mood Logs
     if is_postgres_db():
@@ -2252,7 +2283,10 @@ def admin_user_details(username):
     return render_template("admin_user_details.html", user=user_info, 
                            active_chats=active_chats, archived_chats=archived_chats, 
                            mood_counts=mood_counts, avg_rating=avg_rating,
-                           days=days, trend_data=trend_data)
+                           days=days, trend_data=trend_data,
+                           show_full=show_full,
+                           total_messages=len(active_meta or []),
+                           crisis_count=active_crisis_count)
 
 @app.route("/admin/delete_user/<username>", methods=["POST"])
 @admin_required
