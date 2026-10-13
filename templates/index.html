@@ -731,6 +731,7 @@ transform:translateY(-1px);
   }
   .sidebar-user { display: none; }
   .sidebar-divider { display: none; }
+  .sidebar-safety { display: none; }
   /* Compact SANC.AI logo sa mobile top bar */
   .sidebar-brand { padding: 4px 8px; }
   .sidebar-brand .brand-name { font-size: 1rem; }
@@ -1015,7 +1016,18 @@ transform:translateY(-1px);
     <a href="{{ url_for('user_settings') }}"><i class="fas fa-sliders-h"></i> Settings</a>
     <a href="{{ url_for('archived_room') }}"><i class="fas fa-box-archive"></i> Archived</a>
     <a href="{{ url_for('restart_chat') }}" onclick="return confirm('Clear and archive this chat?');"><i class="fas fa-undo-alt"></i> Restart Chat</a>
+    <div class="sidebar-divider"></div>
+    <a href="#" onclick="event.preventDefault(); showHotlines();" style="color:#92400e;"><i class="fas fa-phone-alt"></i> Emergency Hotlines</a>
+    <a href="#" onclick="event.preventDefault(); showSafetyNotice();" style="color:#92400e;"><i class="fas fa-exclamation-triangle"></i> Safety Notice</a>
   </nav>
+
+  <!-- Safety notice card sa sidebar -->
+  <div class="sidebar-safety" style="margin:10px 12px 0;padding:10px 12px;border-radius:10px;background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.35);font-size:11px;line-height:1.55;color:#422006;">
+    <strong>⚠️ AI lang ito, hindi counselor.</strong><br>
+    Hindi ito 24/7 binabantayan.<br>
+    Emergency? Tumawag sa <strong>911</strong> o <strong>NCMH 1553</strong><br>
+    <a href="#" onclick="event.preventDefault(); showHotlines();" style="color:#0e6b7a;font-weight:700;font-size:11px;">— tingnan hotlines</a>
+  </div>
 
   <!-- Footer -->
   <div class="sidebar-footer">
@@ -1046,12 +1058,6 @@ transform:translateY(-1px);
 
   <div class="quote">
   <b>Daily Quote:</b> {{ daily_quote }}
-  </div>
-
-  <div class="safety-banner" role="alert" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);color:#422006;padding:8px 12px;border-radius:10px;font-size:12px;line-height:1.5;margin:0 14px 10px;">
-    <strong>⚠️ AI lang ito, hindi counselor. Hindi ito 24/7 binabantayan.</strong>
-    Emergency? Tumawag sa <strong>911</strong> o <strong>NCMH 1553 / 0966-351-4518 / 0917-899-8727</strong>
-    — <a href="#" onclick="event.preventDefault(); showHotlines();" style="color:#0e6b7a;font-weight:700;">tingnan hotlines</a>
   </div>
 
   <style>
@@ -1153,7 +1159,7 @@ transform:translateY(-1px);
     <button class="modal-close" onclick="closeHotlines()">&times;</button>
     <h3 style="margin-bottom: 6px; color: #0e6b7a; font-size: 1rem;">🌊 Emergency Hotlines</h3>
     <p style="font-size:12px; margin-bottom:18px; color:#5a8a9a;">You are not alone. Help is available 24/7.</p>
-    
+
     <div class="hotline-item">
         <span class="hotline-title">NCMH Crisis Hotline (24/7, Luzon)</span>
         <span class="hotline-number">1553 / 0966-351-4518 / 0917-899-8727</span>
@@ -1167,6 +1173,17 @@ transform:translateY(-1px);
         <span class="hotline-number">911</span>
     </div>
     <p style="font-size:11px;color:#5a8a9a;margin-top:10px;line-height:1.5;">⚠️ SANC.AI is AI only, not a counselor, and is not monitored 24/7. In crisis, call a hotline or trusted person yourself — do not wait for the app.</p>
+  </div>
+</div>
+
+<!-- Safety Notice Modal (galing sa sidebar button) -->
+<div id="safetyModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeSafetyNotice()">&times;</button>
+    <h3 style="margin-bottom: 8px; color: #0e6b7a; font-size: 1rem;">⚠️ Safety Notice</h3>
+    <p style="font-size:13px;line-height:1.7;color:#1a3a4a;"><strong>AI lang ito, hindi counselor. Hindi ito 24/7 binabantayan.</strong></p>
+    <p style="font-size:13px;line-height:1.7;color:#1a3a4a;margin-top:8px;">Emergency? Tumawag sa <strong>911</strong> o <strong>NCMH 1553 / 0966-351-4518 / 0917-899-8727</strong> — <a href="#" onclick="event.preventDefault(); closeSafetyNotice(); showHotlines();" style="color:#0e6b7a;font-weight:700;">tingnan hotlines</a></p>
+    <p style="font-size:12px;line-height:1.6;color:#5a8a9a;margin-top:8px;">SANC.AI ay study-support tool lang. Hindi ito nag-di-diagnose, hindi nagre-reseta, at hindi pumapalit sa guidance counselor, psychologist, o psychiatrist. Huwag maghintay sa reply ng app kapag nasa panganib — humingi agad ng tulong sa tao.</p>
   </div>
 </div>
 
@@ -1189,6 +1206,12 @@ function showHotlines(){
 function closeHotlines(){
     document.getElementById("hotlineModal").style.display = "none";
 }
+function showSafetyNotice(){
+    document.getElementById("safetyModal").style.display = "block";
+}
+function closeSafetyNotice(){
+    document.getElementById("safetyModal").style.display = "none";
+}
 function toggleDropdown(){
     document.getElementById("chatMenu").classList.toggle("open");
 }
@@ -1198,6 +1221,9 @@ function closeDropdown(){
 window.onclick = function(event) {
     if (event.target == document.getElementById("hotlineModal")) {
         closeHotlines();
+    }
+    if (event.target == document.getElementById("safetyModal")) {
+        closeSafetyNotice();
     }
     if (event.target == document.getElementById("breathingModal")) {
         closeBreathing();
