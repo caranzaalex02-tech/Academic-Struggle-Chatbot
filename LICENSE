@@ -1,0 +1,27 @@
+SANC.AI — Academic Struggle Support System Chatbot (ESSU-Guiuan)
+Copyright (c) 2026 Alex L. Caranza, Dio P. Alain, Trinidad G. Enderio
+ALL RIGHTS RESERVED.
+
+This software and its accompanying materials — including source code
+(app.py, utils/, templates/, static/), chatbot response datasets in
+English, Tagalog, and Waray, documentation, and user-interface design —
+are the original works of the authors listed above, developed as a
+capstone/thesis project for Eastern Samar State University (ESSU) Guiuan.
+
+No part of this work may be reproduced, distributed, transmitted, or
+used in any form or by any means — electronic, mechanical, photocopying,
+recording, or otherwise — without the prior written permission of the
+copyright holders, except as permitted by Philippine law (Republic Act
+No. 8293, Intellectual Property Code of the Philippines) for fair use
+such as private study, research, criticism, or review.
+
+Third-party components used by this project (e.g., Flask, Werkzeug,
+Flask-Limiter, psycopg2, gunicorn, openai, groq, redis, python-dotenv,
+Google Fonts, Font Awesome, Bootstrap, jQuery, Chart.js) remain the
+property of their respective owners and are used under their own
+open-source licenses. This copyright claim covers only the original
+expression of the authors, not the underlying third-party libraries.
+
+For permission requests, contact the authors through ESSU-Guiuan.
+
+Registered / filing reference (IPOPHL): ______________________ (to be filled upon filing).

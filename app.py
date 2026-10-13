@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Alex L. Caranza, Dio P. Alain, Trinidad G. Enderio (ESSU-Guiuan).
+# SANC.AI — Academic Struggle Support System Chatbot. All Rights Reserved.
 # Python Standard Library
 import base64
 import hashlib

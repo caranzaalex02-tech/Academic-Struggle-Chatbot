@@ -1,0 +1,35 @@
+NOTICE — Copyright Ownership & Authorship
+================================================
+
+Project : SANC.AI — Academic Struggle Support System Chatbot (ESSU-Guiuan)
+Type    : Computer Program / Web Application + Literary Dataset (EN/TL/Waray)
+Year    : 2026
+School  : Eastern Samar State University (ESSU) Guiuan
+
+Authors / Joint Copyright Holders (equal shares unless agreed otherwise):
+  1. Alex L. Caranza
+  2. Dio P. Alain
+  3. Trinidad G. Enderio
+
+Original contributions covered by this notice:
+  - Flask application logic (app.py): authentication, session handling,
+    rate limiting, Postgres/SQLite support, email utilities, admin controls
+  - Chatbot logic (utils/bot_logic.py): intent detection, crisis/abuse
+    handling, AI-provider flow (Groq/OpenAI/Gemini), conversation memory
+  - Multilingual response datasets (utils/bot_responses_i18n.py + bot_logic):
+    original English, Tagalog, and Waray guidance for academic struggles,
+    plus NCMH 1553 crisis responses
+  - Templates, styles, and client scripts (templates/, static/): landing,
+    chat, community, settings, admin views, safety banners/modals
+  - Tests and deployment config (tests/, render.yaml, gunicorn.conf.py)
+
+Third-party materials NOT claimed (used under their own licenses):
+  Flask, Werkzeug, itsdangerous, Flask-Limiter, psycopg2-binary, gunicorn,
+  waitress, openai, groq, redis, python-dotenv, Google Fonts, Font Awesome,
+  Bootstrap, jQuery, Chart.js.
+
+No confidential material is deposited for copyright purposes:
+  .env, API keys, database.db, uploads, and credentials are excluded.
+
+Contact for permission: through the authors / ESSU-Guiuan.
+IPOPHL filing reference: ______________________ (fill upon filing).
