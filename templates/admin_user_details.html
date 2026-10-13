@@ -8,7 +8,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 <style>
     /* ===== Parehong theme ng chatbot: green fluid waves bg + gold fluid sidebar ===== */
     :root {
@@ -126,6 +127,30 @@
     }
     .banned-badge { background-color: #18181b; } /* Black */
     .active-badge { background-color: #10B981; } /* Green */
+    /* Privacy controls sa Conversation History */
+    .privacy-note { font-size: 12px; color: var(--secondary-text); line-height: 1.6; margin-bottom: 12px; }
+    .privacy-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+    .full-view-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: #FFF; border: none; padding: 9px 16px; border-radius: 0.6rem;
+        cursor: pointer; font-weight: 600; font-size: 0.85rem;
+        text-decoration: none; transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .full-view-btn:hover { box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3); transform: translateY(-2px); }
+    .hide-view-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255,255,255,0.65); color: var(--primary-text);
+        border: 1px solid rgba(255,255,255,0.8); padding: 9px 16px; border-radius: 0.6rem;
+        cursor: pointer; font-weight: 600; font-size: 0.85rem; text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .hide-view-btn:hover { background: #fff; box-shadow: 0 4px 8px rgba(20, 83, 45, 0.15); transform: translateY(-2px); }
+    .full-view-status {
+        display: inline-flex; align-items: center; gap: 8px;
+        font-size: 0.85rem; font-weight: 700; color: var(--danger-color);
+    }
 </style>
 </head>
 <body>
@@ -235,14 +260,17 @@
 
             <div class="card grid-col-span-3">
                 <h3>Conversation History</h3>
-                <p style="font-size:12px;color:var(--secondary-text);line-height:1.6;margin-bottom:12px;">🔒 <strong>Privacy-protected:</strong> {{ total_messages }} messages total, {{ crisis_count }} flagged crisis. Full text is hidden by default (Data Privacy Act). Only open full chats when needed for safety/moderation — every full view is logged.
+                <p class="privacy-note">🔒 <strong>Privacy-protected:</strong> {{ total_messages }} messages total, {{ crisis_count }} flagged crisis. Full text is hidden by default (Data Privacy Act). Only open full chats when needed for safety/moderation — every full view is logged.</p>
                 {% if not show_full %}
-                <br><a href="{{ url_for('admin_user_details', username=user.email) }}?show_full=1" onclick="return confirm('Bubuksan mo ang full conversation text para sa safety/moderation review. Ito ay naka-log. Ituloy?');" style="color:var(--danger-color);font-weight:700;">→ Request full chat view (logged)</a>
+                <div class="privacy-actions">
+                    <a class="full-view-btn" href="{{ url_for('admin_user_details', username=user.email) }}?show_full=1" onclick="return confirm('Bubuksan mo ang full conversation text para sa safety/moderation review. Ito ay naka-log. Ituloy?');"><i class="fas fa-eye"></i> Request full chat view (logged)</a>
+                </div>
                 {% else %}
-                <br><span style="color:var(--danger-color);font-weight:700;">⚠️ Full view ON — this access has been logged.</span>
-                <a href="{{ url_for('admin_user_details', username=user.email) }}" style="margin-left:10px;">Hide full text</a>
+                <div class="privacy-actions">
+                    <span class="full-view-status">⚠️ Full view ON — this access has been logged.</span>
+                    <a class="hide-view-btn" href="{{ url_for('admin_user_details', username=user.email) }}"><i class="fas fa-eye-slash"></i> Hide full text</a>
+                </div>
                 {% endif %}
-                </p>
                 {% if show_full %}
                 <div class="tabs">
                     <button class="tab-btn active" onclick="showTab('active', this)">Active Chats</button>
