@@ -776,8 +776,9 @@ Totoo ang nararamdaman mo. Mahalaga ang buhay mo. PAKITAWAG sa isa sa mga numero
 
 🏥 **AGARANG GAGAWIN:**
 
-Tumawag sa emergency (911) kung nasa panganib ka ngayon
 Sabihin agad sa pinagkakatiwalaang tao: magulang, kaibigan, guro, counselor
+Tumawag sa emergency (911) kung nasa panganib ka ngayon
+Pumunta sa pinakamalapit na ospital.
 Maaari ka ring lumapit sa inyong school guidance counselor NGAYON
 
 ⏰ **NGAYON NA:**

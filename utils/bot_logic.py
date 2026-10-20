@@ -251,9 +251,9 @@ Your pain is real, and you deserve immediate support. PLEASE reach out to someon
 
 🏥 **IMMEDIATE ACTION:**
 
+Tell a trusted person: parent, friend, teacher, counselor NOW
 Call emergency (911) if you're in immediate danger
 Go to the nearest hospital.
-Tell a trusted person: parent, friend, teacher, counselor NOW
 You can also contact your school guidance counselor or a trusted adult NOW
 
 ⏰ **RIGHT NOW:**
@@ -277,10 +277,10 @@ Tinuod an imo kasakit, ngan angay ka buligan yana dayon. PALIHOG pakipag-istorya
 • Emergency: 911
 
 🏥 **IMMEDIATE ACTION:**
-1. Tumawag ha emergency (911) kung ikaw in aada ha peligro
-2. Kumadto ha pinaka-hirani nga hospital ER
-3. Sumat ha imo gintatapuran: kag-anak, sangkay, o teacher YANA
-4. Pwede ka gihapon makipag-istorya ha iyo school guidance counselor YANA
+Sumat ha imo gintatapuran: kag-anak, sangkay, o teacher YANA
+Tumawag ha emergency (911) kung ikaw in aada ha peligro
+Kumadto ha pinaka-hirani nga hospital.
+Pwede ka gihapon makipag-istorya ha iyo school guidance counselor YANA
 
 💙 "Importante ka. Alayon pagpabilin. Alayon pagsumat. Diri ka nag-uusahan."
 
