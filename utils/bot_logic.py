@@ -266,25 +266,31 @@ Other people have felt this exact way and got better.
 
 PLEASE contact one of those numbers . I'm rooting for you. Your story isn't over yet."""
 
-WARAY_CRISIS_RESPONSE = """🚨 NAMAMATI AKO, NGAN NAGPAPAHALAGA AKO 🚨
+WARAY_CRISIS_RESPONSE = """🚨 NAMAMATI AKO, NGA NAGPAPAHALAGA AKO 🚨
 
-Tinuod an imo kasakit, ngan angay ka buligan yana dayon. PALIHOG pakipag-istorya ha iba:
+Totoo an imo kasakit, ngan angay mo nga buligan yana dayon. PALIHOG makipag-istorya ha iba:
 
-📞 **CRISIS HOTLINE NUMBERS (24/7, Pilipinas):**
+📞 **MGA NUMERO HA PAGHIMAGPAW (24/7, Pilipinas):**
 • MDRRMO: 09639425823
 • NCMH Mobile: 1553
 • In Touch Community: (+63 2) 8893-7603
 • Emergency: 911
 
-🏥 **IMMEDIATE ACTION:**
+🏥 **AGARANG GAWON:**
 Sumat ha imo gintatapuran: kag-anak, sangkay, o teacher YANA
 Tumawag ha emergency (911) kung ikaw in aada ha peligro
-Kumadto ha pinaka-hirani nga hospital.
+Kumadto ha pinaka-hirani nga hospital
 Pwede ka gihapon makipag-istorya ha iyo school guidance counselor YANA
 
-💙 "Importante ka. Alayon pagpabilin. Alayon pagsumat. Diri ka nag-uusahan."
+⏰ **YANA:**
+Wala mo kailangan himotad hin madali. Hinhawa hin malayom anay.
+Totoo an imo kabut-an. Importante an imo buot.
+Kada la anay ini. Madawat ini, nga ipinapangako ko.
+May mga tawo nga nakakaagi ni nga gani ngan naka-recover.
 
-PLEASE contact one of those numbers or go to ER. Diri pa tapos an imo istorya."""
+💙 "Importante ka nga labaw sa imo nga kabin-anan. Palihi pagpabilin. Palihi pagtawag. Diri ka nag-uusahan."
+
+Pakipag-istorya ha usa ha mga numero ini. Kaupod ako ha imo. Diri pa tapos an imo istorya."""
 
 # ----------------------------
 # ABUSIVE KEYWORDS & RESPONSE
