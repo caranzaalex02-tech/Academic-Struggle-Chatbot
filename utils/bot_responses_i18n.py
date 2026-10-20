@@ -766,29 +766,29 @@ ACADEMIC_REFERRAL_EN = (
 # ---------------------------------------------------------------------------
 CRISIS_RESPONSE_TL = """🚨 NARIRINIG KITA, AT NAGMAMALASAKIT AKO 🚨
 
-Totoo ang sakit na nararamdaman mo, at karapat-dapat kang makatanggap ng tulong AGAD. PAKITAWAG sa kahit sino sa mga ito NGAYON:
+Totoo ang nararamdaman mo. Mahalaga ang buhay mo. PAKITAWAG sa isa sa mga numerong 'yan NGAYON:
 
 📞 **CRISIS HOTLINE NUMBERS (24/7, Pilipinas):**
-• NCMH Crisis Hotline: 1553 (Luzon) / 0966-351-4518
-• NCMH Mobile: 0917-899-8727 (0917-899-USAP)
-• In Touch Community: (02) 8893-7603
+• MDRRMO: 09639425823
+• NCMH Mobile: 1553
+• In Touch Community: (+63 2) 8893-7603
 • Emergency: 911
 
 🏥 **AGARANG GAGAWIN:**
-1. Tumawag sa emergency (911) kung nasa panganib ka ngayon
-2. Pumunta sa pinakamalapit na ER ng ospital
-3. Sabihin agad sa pinagkakatiwalaang tao: magulang, kaibigan, guro, counselor
-4. Maaari ka ring lumapit sa inyong school guidance counselor NGAYON
+
+Tumawag sa emergency (911) kung nasa panganib ka ngayon
+Sabihin agad sa pinagkakatiwalaang tao: magulang, kaibigan, guro, counselor
+Maaari ka ring lumapit sa inyong school guidance counselor NGAYON
 
 ⏰ **NGAYON NA:**
-- Wala kang kailangang madaliin. Huminga ka muna nang malalim.
-- Totoo ang nararamdaman mo. Mahalaga ang buhay mo.
-- Pansamantala lang ang sakit na ito. Magbabago ito, ipinapangako ko.
-- May mga taong nakaramdam din ng ganito at gumaling.
 
+Wala kang kailangang madaliin. Huminga ka muna nang malalim.
+Totoo ang nararamdaman mo. Mahalaga ang buhay mo.
+Pansamantala lang ang sakit na ito. Magbabago ito, ipinapangako ko.
+May mga taong nakaramdam din ng ganito at gumaling.
 💙 "Mahalaga ka nang higit sa alam mo. Mangyaring manatili. Mangyaring mag-reach out. Hindi ka nag-iisa."
 
-PAKITAWAG sa isa sa mga numerong 'yan o pumunta sa ER. Kampi ako sa'yo. Hindi pa tapos ang kuwento mo."""
+PAKITAWAG sa isa sa mga numerong 'yan . Kampi ako sa'yo. Hindi pa tapos ang kuwento mo."""
 
 
 # ---------------------------------------------------------------------------

@@ -244,35 +244,36 @@ CRISIS_RESPONSE = """🚨 I HEAR YOU, AND I CARE 🚨
 Your pain is real, and you deserve immediate support. PLEASE reach out to someone RIGHT NOW:
 
 📞 **CRISIS HOTLINE NUMBERS (24/7, Philippines):**
-• NCMH Crisis Hotline: 1553 (Luzon) / 0966-351-4518
-• NCMH Mobile: 0917-899-8727 (0917-899-USAP)
+• MDRRMO: 09639425823
+• NCMH Mobile: 1553
 • In Touch Community: (02) 8893-7603
 • Emergency: 911
 
 🏥 **IMMEDIATE ACTION:**
-1. Call emergency (911) if you're in immediate danger
-2. Go to the nearest hospital ER
-3. Tell a trusted person: parent, friend, teacher, counselor NOW
-4. You can also contact your school guidance counselor or a trusted adult NOW
+
+Call emergency (911) if you're in immediate danger
+Go to the nearest hospital.
+Tell a trusted person: parent, friend, teacher, counselor NOW
+You can also contact your school guidance counselor or a trusted adult NOW
 
 ⏰ **RIGHT NOW:**
-- You don't have to do anything rash. Just take one breath.
-- Your feelings ARE valid. Your life IS valuable.
-- This pain is temporary. It WILL change, I promise.
-- Other people have felt this exact way and got better.
 
+You don't have to do anything rash. Just take one breath.
+Your feelings ARE valid. Your life IS valuable.
+This pain is temporary. It WILL change, I promise.
+Other people have felt this exact way and got better.
 💙 "You matter more than you know. Please stay. Please reach out. You're not alone."
 
-PLEASE contact one of those numbers or go to ER. I'm rooting for you. Your story isn't over yet."""
+PLEASE contact one of those numbers . I'm rooting for you. Your story isn't over yet."""
 
 WARAY_CRISIS_RESPONSE = """🚨 NAMAMATI AKO, NGAN NAGPAPAHALAGA AKO 🚨
 
 Tinuod an imo kasakit, ngan angay ka buligan yana dayon. PALIHOG pakipag-istorya ha iba:
 
 📞 **CRISIS HOTLINE NUMBERS (24/7, Pilipinas):**
-• NCMH Crisis Hotline: 1553 (Luzon) / 0966-351-4518
-• NCMH Mobile: 0917-899-8727 (0917-899-USAP)
-• In Touch Community: (02) 8893-7603
+• MDRRMO: 09639425823
+• NCMH Mobile: 1553
+• In Touch Community: (+63 2) 8893-7603
 • Emergency: 911
 
 🏥 **IMMEDIATE ACTION:**
