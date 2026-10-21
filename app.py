@@ -9,7 +9,7 @@ import re
 import secrets
 import sqlite3
 import urllib.parse
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, date, timedelta, timezone
 from functools import wraps
 from threading import Timer
 
@@ -727,13 +727,13 @@ def register():
         password = request.form.get("password", "")
         email = request.form.get("email", "").strip().lower()
         student_id = request.form.get("student_id", "").strip()
-        age = request.form.get("age")
+        birthday = request.form.get("birthday")
         gender = request.form.get("gender")
         course = request.form.get("course")
         accept_terms = request.form.get("accept_terms")
         app.logger.info(
-            "Register attempt: email=%r gender=%r course=%r student_id=%r age=%r terms=%r",
-            email, gender, course, student_id, age, accept_terms,
+            "Register attempt: email=%r gender=%r course=%r student_id=%r birthday=%r terms=%r",
+            email, gender, course, student_id, birthday, accept_terms,
         )
 
         # --- Validation ---
@@ -751,19 +751,22 @@ def register():
             error = "Student ID is required."
         elif not re.match(r'^\d{2}-\d{4}$', student_id):
             error = "Student ID must be in the format 23-0768 (2 digits, dash, 4 digits)."
-        elif not age:
-            error = "Age is required."
+        elif not birthday:
+            error = "Birthdate is required."
         elif not gender:
             error = "Gender is required."
         elif not course:
             error = "College/Department is required."
         else:
+            # Calculate age from birthdate to keep the 18+ minimum enforced
             try:
-                age_int = int(age)
-                if age_int < 18:
+                dob = datetime.strptime(birthday, "%Y-%m-%d").date()
+                today = date.today()
+                age = today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+                if age < 18:
                     error = "You must be at least 18 years old to register."
             except (ValueError, TypeError):
-                error = "Invalid age. Please enter a valid number."
+                error = "Invalid birthdate. Please enter a valid date."
             if error is None and not accept_terms:
                 error = "You must accept the Terms and Conditions to register."
 
