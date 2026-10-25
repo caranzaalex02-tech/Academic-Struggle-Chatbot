@@ -15,21 +15,21 @@
 <div class="dashboard-container">
     <h2>Welcome, {{ username }}!</h2>
     <div class="top-links">
-        <a href="{{ url_for('mini_dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('archived_room') }}">Archived Conversations Room</a>
-        <a href="{{ url_for('restart_chat') }}" onclick="return confirm('Restart chat?');">Restart Chat</a>
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="{{ url_for('mini_dashboard') }}" class="btn-3d btn-3d-green btn-sm press-3d">Dashboard</a>
+        <a href="{{ url_for('archived_room') }}" class="btn-3d btn-3d-yellow btn-sm press-3d">Archived Conversations Room</a>
+        <a href="{{ url_for('restart_chat') }}" class="btn-3d btn-3d-yellow btn-sm press-3d" onclick="return confirm('Restart chat?');">Restart Chat</a>
+        <a href="{{ url_for('logout') }}" class="btn-3d btn-3d-yellow btn-sm press-3d">Logout</a>
     </div>
 
-    <div class="tip-box">💡 Tip of the Day: {{ tip_of_the_day }}</div>
+    <div class="tip-box card-3d tilt-hover">💡 Tip of the Day: {{ tip_of_the_day }}</div>
 
     <!-- Mood Charts -->
-    <div class="chart-wrapper">
+    <div class="chart-wrapper card-3d tilt-hover">
         <h3>Mood Summary</h3>
         <canvas id="moodChart"></canvas>
     </div>
 
-    <div class="chart-wrapper">
+    <div class="chart-wrapper card-3d tilt-hover">
         <h3>Weekly Mood Trend</h3>
         <canvas id="trendChart"></canvas>
     </div>
@@ -40,7 +40,7 @@
         <h3>Archived Conversations</h3>
         {% if archived %}
             {% for chat in archived %}
-                <div class="archived-item">
+                <div class="archived-item card-3d tilt-hover">
                     <div class="timestamp">{{ chat[2] }}</div>
                     <div class="chat-line user"><strong>You:</strong> {{ chat[0] }}</div>
                     <div class="chat-line bot"><strong>Bot:</strong> {{ chat[1] }}</div>

@@ -407,3 +407,206 @@
     background: #22c55e;
 }
 
+/* ============================================================
+   SANC.AI — 3D CSS Effects
+   Pure CSS 3D depth, no JavaScript required
+   ============================================================ */
+
+/* ---- Perspective base for 3D children ---- */
+.perspective-1000 {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+/* ---- Depth shadow layers ---- */
+.depth-1 {
+    box-shadow: 0 4px 6px -1px rgba(20, 83, 45, 0.1), 0 2px 4px -1px rgba(20, 83, 45, 0.06);
+}
+.depth-2 {
+    box-shadow: 0 10px 15px -3px rgba(20, 83, 45, 0.12), 0 4px 6px -2px rgba(20, 83, 45, 0.08);
+}
+.depth-3 {
+    box-shadow: 0 20px 25px -5px rgba(20, 83, 45, 0.15), 0 8px 10px -6px rgba(20, 83, 45, 0.08);
+}
+
+/* ---- 3D Card: tilts slightly on hover with depth shadow ---- */
+.card-3d {
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+    box-shadow: 0 10px 15px -3px rgba(20, 83, 45, 0.12), 0 4px 6px -2px rgba(20, 83, 45, 0.08);
+    border: 1px solid rgba(134, 239, 172, 0.28);
+    background: #ffffff;
+    border-radius: 20px;
+}
+
+.card-3d:hover {
+    transform: rotateX(5deg) rotateY(3deg) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(20, 83, 45, 0.25), 0 8px 16px -4px rgba(20, 83, 45, 0.15);
+    border-color: rgba(74, 222, 128, 0.55);
+}
+
+/* ---- 3D Button: pressed effect on click/depth on hover ---- */
+.btn-3d {
+    position: relative;
+    transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s ease;
+    transform-style: preserve-3d;
+    box-shadow: 0 6px 0 rgba(20, 83, 45, 0.15), 0 4px 12px rgba(20, 83, 45, 0.12);
+}
+
+.btn-3d:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 rgba(20, 83, 45, 0.15), 0 6px 16px rgba(20, 83, 45, 0.18);
+}
+
+.btn-3d:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(20, 83, 45, 0.15), 0 2px 6px rgba(20, 83, 45, 0.1);
+}
+
+.btn-3d-green {
+    background: #4ade80;
+    color: #fff;
+}
+.btn-3d-green:hover {
+    background: #22c55e;
+}
+
+.btn-3d-yellow {
+    background: #facc15;
+    color: #14532d;
+}
+.btn-3d-yellow:hover {
+    background: #eab308;
+}
+
+/* ---- Glassmorphism 3D Card ---- */
+.glass-3d {
+    position: relative;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-top: 1px solid rgba(255, 255, 255, 0.75);
+    border-left: 1px solid rgba(255, 255, 255, 0.75);
+    box-shadow:
+        0 8px 32px 0 rgba(20, 83, 45, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+    border-radius: 20px;
+}
+
+/* ---- Subtle tilt hover using transform (CSS only) ---- */
+.tilt-hover {
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.tilt-hover:hover {
+    transform: rotateX(3deg) rotateY(-3deg);
+}
+
+/* ---- 3D Flip Card (front/back) ---- */
+.flip-card {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    border-radius: 20px;
+}
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-style: preserve-3d;
+    border-radius: 20px;
+}
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+}
+.flip-card-front {
+    background: #ffffff;
+    border: 1px solid rgba(134, 239, 172, 0.28);
+    color: #14532d;
+    box-shadow: 0 10px 25px -5px rgba(20, 83, 45, 0.12);
+}
+.flip-card-back {
+    background: linear-gradient(135deg, #f0fdf4 0%, #fef9c3 100%);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    color: #14532d;
+    transform: rotateY(180deg);
+    box-shadow: 0 10px 25px -5px rgba(74, 222, 128, 0.25);
+}
+
+/* ---- 3D Layered Badge ---- */
+.badge-3d {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    border: none;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12), 0 6px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.badge-3d:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+.badge-3d:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
+}
+.badge-3d::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    background: inherit;
+    opacity: 0.45;
+    filter: blur(8px);
+    z-index: -1;
+}
+
+/* ---- Mood dots with 3D depth ---- */
+.mood-dot-3d {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    background: #fff;
+    display: inline-block;
+}
+.mood-dot-3d.happy { background: #4ade80; box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
+.mood-dot-3d.neutral { background: #facc15; box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
+.mood-dot-3d.sad { background: #f87171; box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
+
+/* ---- Pressed 3D utility for any clickable ---- */
+.press-3d {
+    transition: transform 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.press-3d:active {
+    transform: scale(0.96);
+    filter: brightness(0.92);
+}
+
