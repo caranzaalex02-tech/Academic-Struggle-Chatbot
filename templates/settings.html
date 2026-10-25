@@ -20,13 +20,13 @@ left:0;
 bottom:0;
 width:272px;
 /* Gold fluid wavy abstract background — gold_fluid_waves_bg.svg */
-background:#fef3c7 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-color:#3b2507;
+background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
+color:#6d5a12;
 display:flex;
 flex-direction:column;
 z-index:50;
-box-shadow:4px 0 24px rgba(80,53,10,0.35), 1px 0 0 rgba(255,255,255,0.18);
-border-right:1px solid rgba(120,80,15,0.25);
+box-shadow:4px 0 24px rgba(80,53,10,0.2), 1px 0 0 rgba(255,255,255,0.12);
+border-right:1px solid rgba(120,80,15,0.15);
 overflow-y:auto;
 overflow-x:hidden;
 }
@@ -42,8 +42,8 @@ font-family:'Poppins','Inter','Segoe UI',sans-serif;
 font-size:1.55rem;
 font-weight:700;
 letter-spacing:0.045em;
-color:#3b2507;
-text-shadow:0 1px 0 rgba(255,255,255,0.65);
+color:#6d5a12;
+text-shadow:0 1px 0 rgba(255,255,255,0.5);
 }
 .sidebar-brand .brand-ai{
 margin-left:2px;
@@ -103,7 +103,7 @@ min-width:0;
 .sidebar-user-name{
 font-size:0.88rem;
 font-weight:700;
-color:#422006;
+color:#7c6a12;
 letter-spacing:-0.01em;
 white-space:nowrap;
 overflow:hidden;
@@ -111,7 +111,7 @@ text-overflow:ellipsis;
 }
 .sidebar-user-email{
 font-size:0.68rem;
-color:#92600c;
+color:#9a8a1c;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -126,7 +126,7 @@ font-size:0.65rem;
 font-weight:700;
 text-transform:uppercase;
 letter-spacing:0.08em;
-color:#8a5a0b;
+color:#a5901e;
 }
 
 /* ---- Navigation nav ---- */
@@ -141,7 +141,7 @@ flex-direction:column;
 display:flex;
 align-items:center;
 gap:12px;
-color:#6b4407;
+color:#8a6d1a;
 text-decoration:none;
 padding:10px 14px;
 border-radius:10px;
@@ -160,7 +160,7 @@ transition:color 0.2s ease, transform 0.2s ease;
 }
 .sidebar a:hover{
 background:rgba(255,255,255,0.55);
-color:#422006;
+color:#5a4a0c;
 box-shadow:inset 0 0 0 1px rgba(217,119,6,0.25);
 }
 .sidebar a:hover i{
@@ -169,7 +169,7 @@ transform:translateX(2px);
 }
 .sidebar a.active{
 background:linear-gradient(135deg,rgba(245,158,11,0.35),rgba(253,230,138,0.55));
-color:#422006;
+color:#5a4a0c;
 box-shadow:inset 0 0 0 1px rgba(180,83,9,0.45);
 }
 .sidebar a.active i{
@@ -231,8 +231,8 @@ margin:8px 16px;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    background:#fef3c7 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-    box-shadow:0 4px 16px rgba(80,53,10,0.35);
+    background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
+    box-shadow:0 4px 16px rgba(80,53,10,0.2);
   }
   .sidebar-user { display: none; }
   .sidebar-divider { display: none; }
