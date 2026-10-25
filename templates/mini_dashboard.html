@@ -6,98 +6,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial, sans-serif;
+video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
 }
-
-body{
-height:100vh;
-overflow:hidden;
-color:white;
-}
-
-/* Background Video */
-video{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-object-fit:cover;
-z-index:-1;
-}
-
-/* Overlay */
-.overlay{
-position:absolute;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.65);
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-}
-
-/* Charts Container */
-.charts{
-width:95%;
-max-width:900px;
-display:flex;
-justify-content:center;
-align-items:center;
-gap:15px;
-}
-
-/* Chart Box */
-.chart-box{
-width:45%;
-height:230px;
-background:white;
-border-radius:10px;
-padding:8px;
-}
-
-canvas{
-width:100% !important;
-height:100% !important;
-}
-
-/* Buttons */
-.buttons{
-margin-top:15px;
-}
-
-.buttons a{
-display:inline-block;
-margin:4px;
-padding:6px 12px;
-background:rgba(255,255,255,0.2);
-color:white;
-text-decoration:none;
-border-radius:6px;
-font-size:13px;
-}
-
-.buttons a:hover{
-background:#ffcc00;
-color:black;
-}
-@media (max-width:768px){
-body{height:auto;min-height:100vh;overflow:auto;-webkit-text-size-adjust:100%;}
-.overlay{position:static;min-height:100vh;padding:16px 12px;}
-.charts{flex-direction:column;width:100%;}
-.chart-box{width:100%;height:auto;min-height:220px;}
-.buttons a{min-height:44px;line-height:32px;font-size:14px;}
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    z-index: 1;
 }
 </style>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+
 </head>
 
 <body>
@@ -108,20 +43,20 @@ body{height:auto;min-height:100vh;overflow:auto;-webkit-text-size-adjust:100%;}
 
 <div class="overlay">
 
-<div class="charts">
-<div class="chart-box">
+<div class="row">
+<div class="chart-wrapper">
 <canvas id="pieChart"></canvas>
 </div>
 
-<div class="chart-box">
+<div class="chart-wrapper">
 <canvas id="lineChart"></canvas>
 </div>
 </div>
 
-<div class="buttons">
-<a href="{{ url_for('chatbot') }}">⬅ Back</a>
-<a href="{{ url_for('archived_room') }}">📂 Archive</a>
-<a href="{{ url_for('logout') }}">🚪 Logout</a>
+<div class="top-links">
+<a href="{{ url_for('chatbot') }}" class="btn btn-outline btn-sm">⬅ Back</a>
+<a href="{{ url_for('archived_room') }}" class="btn btn-outline btn-sm">📂 Archive</a>
+<a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">🚪 Logout</a>
 </div>
 
 </div>
@@ -147,7 +82,7 @@ data: {
 labels: chartData.moods,
 datasets: [{
 data: chartData.counts,
-backgroundColor: ["#4caf50","#ffeb3b","#f44336"]
+backgroundColor: ["#4ade80","#facc15","#f87171"]
 }]
 },
 options: {
@@ -168,19 +103,19 @@ datasets: [
 {
 label: "Happy",
 data: chartData.trend_data.Happy,
-borderColor: "#4caf50",
+borderColor: "#4ade80",
 tension: 0.3
 },
 {
 label: "Neutral",
 data: chartData.trend_data.Neutral,
-borderColor: "#ffeb3b",
+borderColor: "#facc15",
 tension: 0.3
 },
 {
 label: "Sad",
 data: chartData.trend_data.Sad,
-borderColor: "#f44336",
+borderColor: "#f87171",
 tension: 0.3
 }
 ]

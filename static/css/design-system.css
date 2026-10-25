@@ -1,0 +1,160 @@
+/* ============================================================
+   SANC.AI — Global Design System
+   ============================================================
+   Centralized design tokens + reusable component styles.
+
+   Design Tokens (Soft Green & Yellow Palette):
+   - Primary bg       : #f0fdf4  (soft green)
+   - Secondary bg     : #fef9c3  (soft yellow)
+   - Accent green     : #86efac
+   - Accent yellow    : #fde68a
+   - Text primary     : #14532d  (deep green)
+   - Text secondary   : #4d7c0f
+   - Text muted       : #64715a
+   - Success          : #4ade80
+   - Warning          : #facc15
+   - Danger           : #f87171
+   - Info             : #10b981
+   - Cards            : #ffffff  (white)
+   - Buttons          : green #4ade80 / yellow #facc15
+   ============================================================ */
+
+:root {
+    /* ---- Backgrounds ---- */
+    --bg-primary: #f0fdf4;
+    --bg-secondary: #fef9c3;
+    --bg-accent-green: #86efac;
+    --bg-accent-yellow: #fde68a;
+    --bg-glow-green: rgba(134, 239, 172, 0.15);
+    --bg-glow-yellow: rgba(253, 230, 138, 0.18);
+
+    /* ---- Text ---- */
+    --text-primary: #14532d;
+    --text-secondary: #4d7c0f;
+    --text-muted: #64715a;
+
+    /* ---- Cards ---- */
+    --card-bg: #ffffff;
+    --card-bg-soft: rgba(255, 255, 255, 0.72);
+    --card-border: rgba(134, 239, 172, 0.28);
+    --card-border-yellow: rgba(253, 230, 138, 0.35);
+
+    /* ---- Buttons ---- */
+    --btn-green: #4ade80;
+    --btn-green-hover: #22c55e;
+    --btn-yellow: #facc15;
+    --btn-yellow-hover: #eab308;
+
+    /* ---- Forms ---- */
+    --input-bg: #ffffff;
+    --input-border: rgba(134, 239, 172, 0.35);
+    --input-focus-border: var(--btn-green);
+    --input-focus-shadow: rgba(134, 239, 172, 0.20);
+
+    /* ---- Status / Semantic ---- */
+    --success: #4ade80;
+    --success-bg: rgba(74, 222, 128, 0.14);
+    --warning: #facc15;
+    --warning-bg: rgba(250, 204, 21, 0.14);
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.14);
+    --info: #10b981;
+    --info-bg: rgba(16, 185, 129, 0.12);
+
+    /* ---- Shadows ---- */
+    --shadow-card: 0 12px 40px -12px rgba(20, 83, 45, 0.18), 0 4px 16px -6px rgba(20, 83, 45, 0.08);
+    --shadow-input: 0 0 0 4px var(--input-focus-shadow);
+
+    /* ---- Chart palette (consistent across all pages) ---- */
+    --chart-happy: #4ade80;    /* green */
+    --chart-neutral: #facc15;  /* yellow */
+    --chart-sad: #f87171;      /* red */
+    --chart-accent1: #4ade80;
+    --chart-accent2: #facc15;
+    --chart-accent3: #60a5fa;  /* blue (muted) */
+    --chart-accent4: #f472b6;  /* pink (muted) */
+}
+
+/* ---- Reset / Base ---- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', 'Poppins', sans-serif;
+    color: var(--text-primary);
+    background: linear-gradient(160deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+    position: relative;
+    padding: 40px 20px;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(600px 400px at 12% 18%, var(--bg-glow-green), transparent 60%),
+        radial-gradient(700px 500px at 88% 82%, var(--bg-glow-yellow), transparent 60%),
+        radial-gradient(400px 300px at 50% 100%, rgba(253, 230, 138, 0.10), transparent 60%);
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(500px 300px at 90% 20%, rgba(134, 239, 172, 0.07), transparent 60%),
+        radial-gradient(400px 250px at 10% 90%, rgba(253, 230, 138, 0.06), transparent 60%);
+}
+
+/* ---- Focus states ---- */
+:focus-visible {
+    outline: 2px solid var(--btn-green);
+    outline-offset: 2px;
+}
+
+/* ---- Typography helpers ---- */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.2; }
+h2 { font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.3; }
+h3 { font-size: clamp(1.1rem, 2.5vw, 1.5rem); line-height: 1.4; }
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+
+/* ---- Links ---- */
+a {
+    color: var(--btn-green);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+a:hover {
+    color: var(--btn-green-hover);
+    text-decoration: underline;
+}
+
+/* ---- Images / media ---- */
+img, svg, video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}

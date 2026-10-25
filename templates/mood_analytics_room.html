@@ -4,13 +4,15 @@
 <title>Mood Analytics</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 <style>
 body{margin:0;padding:16px;font-family:Arial,sans-serif;background:#f4f6f8;color:#1a3a4a;}
 canvas{max-width:100%;}
 a{display:inline-block;margin-top:12px;min-height:44px;line-height:44px;}
 @media (max-width:480px){body{padding:12px;}h2{font-size:1.15rem;}}
 </style>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 </head>
 <body>
 
@@ -44,7 +46,7 @@ new Chart(summaryCtx, {
     datasets: [{
       label: 'Mood Count',
       data: chartData.counts,
-      backgroundColor: ['green', 'gray', 'red']
+      backgroundColor: ['#4ade80', '#facc15', '#f87171']
     }]
   },
   options: {
@@ -67,19 +69,19 @@ new Chart(trendCtx, {
       {
         label: 'Happy',
         data: chartData.trend_data['Happy'],
-        borderColor: 'green',
+        borderColor: '#4ade80',
         tension: 0.1
       },
       {
         label: 'Neutral',
         data: chartData.trend_data['Neutral'],
-        borderColor: 'gray',
+        borderColor: '#facc15',
         tension: 0.1
       },
       {
         label: 'Sad',
         data: chartData.trend_data['Sad'],
-        borderColor: 'red',
+        borderColor: '#f87171',
         tension: 0.1
       }
     ]
