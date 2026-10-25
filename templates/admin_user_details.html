@@ -10,6 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <style>
     /* ===== Parehong theme ng chatbot: green fluid waves bg + gold fluid sidebar ===== */
     :root {
@@ -335,7 +337,7 @@ new Chart(ctx, {
         labels: Object.keys(moodData),
         datasets: [{
             data: Object.values(moodData),
-            backgroundColor: ['#1abc9c', '#f1c40f', '#e74c3c', '#3498db', '#9b59b6'], /* Professional Colors */
+            backgroundColor: ['#4ade80', '#facc15', '#f87171', '#60a5fa', '#f472b6'], /* Design System Colors */
             borderWidth: 0
         }]
     },
@@ -365,21 +367,21 @@ if (typeof Chart !== 'undefined' && trendCtx) {
                 {
                     label: 'Happy',
                     data: trendData.Happy,
-                    borderColor: '#1abc9c',
+                    borderColor: '#4ade80',
                     tension: 0.3,
                     fill: false
                 },
                 {
                     label: 'Neutral',
                     data: trendData.Neutral,
-                    borderColor: '#f1c40f',
+                    borderColor: '#facc15',
                     tension: 0.3,
                     fill: false
                 },
                 {
                     label: 'Sad',
                     data: trendData.Sad,
-                    borderColor: '#e74c3c',
+                    borderColor: '#f87171',
                     tension: 0.3,
                     fill: false
                 }
