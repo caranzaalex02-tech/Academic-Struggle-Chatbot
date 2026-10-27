@@ -108,7 +108,7 @@ p { font-size: 0.95rem; margin-bottom: 8px; line-height: 1.5; }
 }
 
 /* ===== Buttons (Figma-style) ===== */
-button:not(.mood-btn):not(.star):not(.menu-btn):not(.msg-options-btn),
+button:not(.mood-btn):not(.star):not(.menu-btn):not(.msg-options-btn):not(.send-btn),
 .btn, .chat-btn, .create-btn, .rooms-toggle,
 .members-toggle, .action-btn, .view-btn, a.back-btn,
 .btn-3d, .btn-3d-green, .btn-3d-yellow {
@@ -127,6 +127,30 @@ button:not(.mood-btn):not(.star):not(.menu-btn):not(.msg-options-btn),
   cursor: pointer;
   width: 100%;
   box-sizing: border-box;
+}
+
+.send-btn {
+  width: auto !important;
+  min-height: auto;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #0ea5b9, #0891b2);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(14, 165, 185, 0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.send-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(14, 165, 185, 0.4);
+}
+.send-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(14, 165, 185, 0.2);
 }
 
 .btn-3d {
@@ -397,7 +421,7 @@ th:not(#archived-table th), td:not(#archived-table td) { padding: 10px 12px; fon
     border-radius: 20px !important;
   }
 
-  button:not(.mood-btn):not(.star):not(.menu-btn):not(.msg-options-btn),
+  button:not(.mood-btn):not(.star):not(.menu-btn):not(.msg-options-btn):not(.send-btn),
   .btn, .chat-btn, .create-btn, .rooms-toggle,
   .members-toggle, .action-btn, .view-btn, a.back-btn,
   .btn-3d, .btn-3d-green, .btn-3d-yellow {
@@ -497,3 +521,5 @@ th:not(#archived-table th), td:not(#archived-table td) { padding: 10px 12px; fon
     border-radius: 14px !important;
   }
 }
+
+
