@@ -56,11 +56,11 @@ body::after { content: ""; position: fixed; inset: 0; background: rgba(0,40,60,0
 .sender-label { font-size: 11px; font-weight: 700; color: #5a8a9a; margin-bottom: 2px; }
 .timestamp { font-size: 10px; opacity: 0.7; margin-left: 8px; }
 .input-area {
-    padding: 12px 16px; background: rgba(255,255,255,0.2); backdrop-filter: blur(18px);
+    padding: 14px 18px; background: rgba(255,255,255,0.2); backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    display: flex; gap: 8px; flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.35);
+    display: flex; gap: 10px; flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.35);
 }
-.input-area input { flex: 1; padding: 12px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); font-size: 0.9rem; background: rgba(255,255,255,0.5); color: #1a4a5a; outline: none; }
+.input-area input { flex: 1; padding: 14px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.5); font-size: 1rem; background: rgba(255,255,255,0.5); color: #1a4a5a; outline: none; }
 .input-area button { width: 46px; height: 46px; border-radius: 50%; border: none; background: #0ea5b9; color: #fff; font-size: 16px; cursor: pointer; }
 @media (max-width: 768px){
 body{background-attachment:scroll;-webkit-text-size-adjust:100%;}
@@ -68,8 +68,8 @@ body{background-attachment:scroll;-webkit-text-size-adjust:100%;}
 .header-title{font-size:0.9rem;}
 .chat-box{padding:12px 10px;}
 .message{max-width:85%;font-size:0.85rem;}
-.input-area{padding:10px 10px calc(10px + env(safe-area-inset-bottom));}
-.input-area input{font-size:16px;}
+.input-area{padding:12px 12px calc(12px + env(safe-area-inset-bottom));gap:10px;}
+.input-area input{font-size:16px;padding:14px 16px;}
 }
 @media (max-width: 480px){
 .message{max-width:92%;}
@@ -313,4 +313,6 @@ loadMessages();
 </script>
 </body>
 </html>
+
+
 

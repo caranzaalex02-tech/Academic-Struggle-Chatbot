@@ -131,7 +131,7 @@ button:not(.mood-btn):not(.star):not(.menu-btn):not(.msg-options-btn):not(.send-
 
 .send-btn {
   width: auto !important;
-  min-height: auto;
+  min-height: auto !important;
   padding: 8px 14px;
   border-radius: 999px;
   font-size: 13px;
@@ -521,5 +521,6 @@ th:not(#archived-table th), td:not(#archived-table td) { padding: 10px 12px; fon
     border-radius: 14px !important;
   }
 }
+
 
 
