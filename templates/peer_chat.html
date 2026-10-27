@@ -220,6 +220,28 @@ button.send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba
 
 </style>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
+<style>
+  button.send-btn {
+    width: auto !important;
+    min-height: auto !important;
+    padding: 8px 14px !important;
+    border-radius: 999px !important;
+    flex-shrink: 0 !important;
+    background: linear-gradient(135deg, #0ea5b9, #0891b2) !important;
+    color: #fff !important;
+    border: none !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+  button.send-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(14, 165, 185, 0.4) !important;
+  }
+  button.send-btn:active {
+    transform: translateY(1px) !important;
+    box-shadow: 0 2px 8px rgba(14, 165, 185, 0.2) !important;
+  }
+</style>
 </head>
 <body>
 
