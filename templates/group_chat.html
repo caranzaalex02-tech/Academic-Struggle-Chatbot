@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -80,7 +80,7 @@ body{background-attachment:scroll;-webkit-text-size-adjust:100%;}
 <body>
 <div class="header">
     <a href="/community" class="back-btn"><i class="fas fa-arrow-left"></i></a>
-    <div class="header-title">💬 <span id="room-name-text">{{ room_name }}</span></div>
+    <div class="header-title">ðŸ’¬ <span id="room-name-text">{{ room_name }}</span></div>
     {% if is_creator %}
     <button class="rename-btn" onclick="renameRoom()" title="Rename room"><i class="fas fa-pen"></i></button>
     {% endif %}
@@ -194,7 +194,7 @@ function appendMessage(id, sender, text, timestamp){
     if(isSent && id){
         const btn = document.createElement('button');
         btn.className = 'msg-options-btn';
-        btn.textContent = '⋮';
+        btn.textContent = 'â‹®';
         btn.title = 'Options';
         btn.onclick = function(e){ e.stopPropagation(); showMessageMenuByButton(btn); };
         wrapper.appendChild(btn);

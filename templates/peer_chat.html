@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -195,7 +195,7 @@ button.send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba
 .close-modal:focus { color: #bbb; text-decoration: none; cursor: pointer; }
 
 /* ============================================== */
-/* MOBILE RESPONSIVE (≤768px)                     */
+/* MOBILE RESPONSIVE (â‰¤768px)                     */
 /* ============================================== */
 @media (max-width: 768px) {
     .header { padding: 8px 10px; }
@@ -225,17 +225,17 @@ button.send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba
 
 <div class="header">
     <div class="header-left">
-        <a href="/community" class="back-btn">⬅</a>
+        <a href="/community" class="back-btn">â¬…</a>
         <img src="{{ partner_pic }}" alt="Partner Avatar" class="partner-avatar">
         <span class="partner-name">{{ partner }}</span>
     </div>
     <div class="theme-selector">
-        <button class="theme-btn" onclick="toggleThemeMenu()">🎨</button>
+        <button class="theme-btn" onclick="toggleThemeMenu()">ðŸŽ¨</button>
         <div class="theme-options" id="theme-menu">
-            <button class="theme-option" onclick="setTheme('light')">⚪ Light</button>
-            <button class="theme-option" onclick="setTheme('dark')">⚫ Dark</button>
-            <button class="theme-option" onclick="setTheme('ocean')">🌊 Ocean</button>
-            <button class="theme-option" onclick="setTheme('sunset')">🌅 Sunset</button>
+            <button class="theme-option" onclick="setTheme('light')">âšª Light</button>
+            <button class="theme-option" onclick="setTheme('dark')">âš« Dark</button>
+            <button class="theme-option" onclick="setTheme('ocean')">ðŸŒŠ Ocean</button>
+            <button class="theme-option" onclick="setTheme('sunset')">ðŸŒ… Sunset</button>
         </div>
     </div>
 </div>
@@ -250,8 +250,8 @@ button.send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba
 <div class="input-area">
     <input type="text" id="msg-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
     <input type="file" id="image-input" accept="image/*" style="display: none;">
-    <button class="attach-btn" onclick="document.getElementById('image-input').click()">📎</button>
-    <button class="send-btn" onclick="sendMessage()">➤</button>
+    <button class="btn btn-sm" onclick="document.getElementById('image-input').click()">ðŸ“Ž</button>
+    <button class="btn btn-3d" onclick="sendMessage()">âž¤</button>
 </div>
 
 <!-- Image Modal -->
@@ -426,7 +426,7 @@ function loadMessages() {
             if (isSent && msg.id) {
                 const btn = document.createElement('button');
                 btn.className = 'msg-options-btn';
-                btn.textContent = '⋮';
+                btn.textContent = 'â‹®';
                 btn.title = 'Options';
                 btn.onclick = function(e){ e.stopPropagation(); showMessageMenuByButton(btn); };
                 messageDiv.appendChild(btn);
@@ -509,7 +509,7 @@ function unsendMessage(messageId){
     });
 }
 
-// Long-press / right-click / ⋮ button
+// Long-press / right-click / â‹® button
 chatBox.addEventListener('contextmenu', function(e){
     const wrapper = e.target.closest('.message.sent');
     if(wrapper && wrapper.dataset.messageId){

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -166,18 +166,18 @@ input{
 </head>
 <body>
 
-<a class="back-btn" href="/chatbot">⬅ Back to Chatbot</a>
+<a class="back-btn" href="/chatbot">â¬… Back to Chatbot</a>
 <h1>Academic Struggle Mini Games</h1>
 
-<button id="back-to-menu-btn" class="game-btn" style="display:none; margin:0 auto 20px auto; background:linear-gradient(135deg,#ff9966,#ff5e62);" onclick="showMenu()">⬅ Back to Menu</button>
+<button id="back-to-menu-btn" class="game-btn" style="display:none; margin:0 auto 20px auto; background:linear-gradient(135deg,#ff9966,#ff5e62);" onclick="showMenu()">â¬… Back to Menu</button>
 
 <div class="games" id="games-menu">
-  <button class="game-btn" onclick="startTrivia()">❓ Trivia Game</button>
-  <button class="game-btn" onclick="startMemoryMatch()">🧠 Memory Match</button>
-  <button class="game-btn" onclick="startWordScramble()">🔤 Word Scramble</button>
-  <button class="game-btn" onclick="startMathChallenge()">➕ Math Challenge</button>
-  <button class="game-btn" onclick="startReactionTime()">⚡ Reaction Time</button>
-  <button class="game-btn" onclick="startColorMatch()">🎨 Color Match</button>
+  <button class="game-btn" onclick="startTrivia()">â“ Trivia Game</button>
+  <button class="game-btn" onclick="startMemoryMatch()">ðŸ§  Memory Match</button>
+  <button class="game-btn" onclick="startWordScramble()">ðŸ”¤ Word Scramble</button>
+  <button class="game-btn" onclick="startMathChallenge()">âž• Math Challenge</button>
+  <button class="game-btn" onclick="startReactionTime()">âš¡ Reaction Time</button>
+  <button class="game-btn" onclick="startColorMatch()">ðŸŽ¨ Color Match</button>
 </div>
 
 <div class="game-container" id="game-container">
@@ -224,7 +224,7 @@ function startTrivia(){
   scoreBoard.id = 'trivia-score-board';
   scoreBoard.className = 'score-board';
   scoreBoard.innerHTML = `
-    <div class="score-board-title">🎮 Trivia Game</div>
+    <div class="score-board-title">ðŸŽ® Trivia Game</div>
     <div class="score-board-content">
       <div class="score-item">
         <div class="score-label">Score</div>
@@ -235,7 +235,7 @@ function startTrivia(){
         <div class="time-value" id="time-display">10</div>
       </div>
       <div class="level-info">
-        <span>📊 Level: <strong id="level-display">1</strong> / ${maxLevel}</span>
+        <span>ðŸ“Š Level: <strong id="level-display">1</strong> / ${maxLevel}</span>
       </div>
     </div>
   `;
@@ -289,7 +289,7 @@ function startTrivia(){
   function playTrivia(){
     if(level > maxLevel){
       scoreBoard.remove();
-      container.innerHTML = `<h2 style="color:#00ff00;">🎉 You've completed all ${maxLevel} levels!</h2><p style="margin-top:15px;">Final Score: ${triviaScore}/${maxLevel}</p><button class="game-btn" onclick="startTrivia()">Restart</button>`;
+      container.innerHTML = `<h2 style="color:#00ff00;">ðŸŽ‰ You've completed all ${maxLevel} levels!</h2><p style="margin-top:15px;">Final Score: ${triviaScore}/${maxLevel}</p><button class="game-btn" onclick="startTrivia()">Restart</button>`;
       return;
     }
 
@@ -329,7 +329,7 @@ function startTrivia(){
         level++;
         updateScoreBoard();
         const feedback = document.createElement('p');
-        feedback.textContent="⏰ Time's up! Moving to next level.";
+        feedback.textContent="â° Time's up! Moving to next level.";
         feedback.style.color="#ff5555";
         feedback.style.fontSize="18px";
         feedback.style.fontWeight="bold";
@@ -355,7 +355,7 @@ function startTrivia(){
           level++;
           updateScoreBoard();
           const feedback = document.createElement('p');
-          feedback.textContent="✅ Correct!";
+          feedback.textContent="âœ… Correct!";
           feedback.style.color="#00ff00";
           feedback.style.fontSize="18px";
           feedback.style.fontWeight="bold";
@@ -368,7 +368,7 @@ function startTrivia(){
           level++;
           updateScoreBoard();
           const feedback = document.createElement('p');
-          feedback.textContent=`❌ Wrong! Answer: ${current.a}`;
+          feedback.textContent=`âŒ Wrong! Answer: ${current.a}`;
           feedback.style.color="#ff5555";
           feedback.style.fontSize="18px";
           feedback.style.fontWeight="bold";
@@ -406,7 +406,7 @@ function startMemoryMatch(){
   scoreBoard.id = 'memory-score-board';
   scoreBoard.className = 'score-board';
   scoreBoard.innerHTML = `
-    <div class="score-board-title">🧠 Memory Match</div>
+    <div class="score-board-title">ðŸ§  Memory Match</div>
     <div class="score-board-content">
       <div class="score-item">
         <div class="score-label">Score</div>
@@ -417,7 +417,7 @@ function startMemoryMatch(){
         <div class="time-value" id="memory-time-display">15</div>
       </div>
       <div class="level-info">
-        <span>📊 Level: <strong id="memory-level-display">1</strong> / ${maxLevel}</span>
+        <span>ðŸ“Š Level: <strong id="memory-level-display">1</strong> / ${maxLevel}</span>
       </div>
     </div>
   `;
@@ -429,7 +429,7 @@ function startMemoryMatch(){
   function playMemory(){
     if(level > maxLevel){
       scoreBoard.remove();
-      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Perfect Memory!</h2><p style="margin-top:15px;">Final Score: ${memoryScore}/${maxLevel}</p><button class="game-btn" onclick="startMemoryMatch()">Restart</button>`;
+      container.innerHTML = `<h2 style="color:#00ff00;">ðŸŽ‰ Perfect Memory!</h2><p style="margin-top:15px;">Final Score: ${memoryScore}/${maxLevel}</p><button class="game-btn" onclick="startMemoryMatch()">Restart</button>`;
       return;
     }
     
@@ -460,7 +460,7 @@ function startMemoryMatch(){
       if(timeLeft <= 0){
         clearInterval(activeInterval);
         level++;
-        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up!</p>`;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">â° Time's up!</p>`;
         activeTimeout = setTimeout(() => {
           container.innerHTML = '';
           playMemory();
@@ -512,7 +512,7 @@ function startMemoryMatch(){
                 clearInterval(activeInterval);
                 memoryScore++;
                 level++;
-                container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Perfect Match!</p>`;
+                container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">âœ… Perfect Match!</p>`;
                 activeTimeout = setTimeout(() => {
                   container.innerHTML = '';
                   playMemory();
@@ -552,7 +552,7 @@ function startWordScramble(){
   scoreBoard.id = 'scramble-score-board';
   scoreBoard.className = 'score-board';
   scoreBoard.innerHTML = `
-    <div class="score-board-title">🔤 Word Scramble</div>
+    <div class="score-board-title">ðŸ”¤ Word Scramble</div>
     <div class="score-board-content">
       <div class="score-item">
         <div class="score-label">Score</div>
@@ -563,7 +563,7 @@ function startWordScramble(){
         <div class="time-value" id="scramble-time-display">20</div>
       </div>
       <div class="level-info">
-        <span>📊 Level: <strong id="scramble-level-display">1</strong> / ${maxLevel}</span>
+        <span>ðŸ“Š Level: <strong id="scramble-level-display">1</strong> / ${maxLevel}</span>
       </div>
     </div>
   `;
@@ -600,7 +600,7 @@ function startWordScramble(){
   function playScramble(){
     if(level > maxLevel){
       scoreBoard.remove();
-      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Word Master!</h2><p style="margin-top:15px;">Final Score: ${scrambleScore}/${maxLevel}</p><button class="game-btn" onclick="startWordScramble()">Restart</button>`;
+      container.innerHTML = `<h2 style="color:#00ff00;">ðŸŽ‰ Word Master!</h2><p style="margin-top:15px;">Final Score: ${scrambleScore}/${maxLevel}</p><button class="game-btn" onclick="startWordScramble()">Restart</button>`;
       return;
     }
     
@@ -625,7 +625,7 @@ function startWordScramble(){
       if(timeLeft <= 0){
         clearInterval(activeInterval);
         level++;
-        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up! The correct word was: ${current.word}</p>`;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">â° Time's up! The correct word was: ${current.word}</p>`;
         activeTimeout = setTimeout(() => {
           container.innerHTML = '';
           playScramble();
@@ -661,13 +661,13 @@ function startWordScramble(){
       if(answer === current.word){
         scrambleScore++;
         level++;
-        container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Correct!</p>`;
+        container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">âœ… Correct!</p>`;
         activeTimeout = setTimeout(() => {
           playScramble();
         }, 2000);
       } else {
         level++;
-        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">❌ Wrong! The correct word was: ${current.word}</p>`;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">âŒ Wrong! The correct word was: ${current.word}</p>`;
         activeTimeout = setTimeout(() => {
           playScramble();
         }, 3000);
@@ -691,7 +691,7 @@ function startMathChallenge(){
   scoreBoard.id = 'math-score-board';
   scoreBoard.className = 'score-board';
   scoreBoard.innerHTML = `
-    <div class="score-board-title">➕ Math Challenge</div>
+    <div class="score-board-title">âž• Math Challenge</div>
     <div class="score-board-content">
       <div class="score-item">
         <div class="score-label">Score</div>
@@ -702,7 +702,7 @@ function startMathChallenge(){
         <div class="time-value" id="math-time-display">10</div>
       </div>
       <div class="level-info">
-        <span>📊 Level: <strong id="math-level-display">1</strong> / ${maxLevel}</span>
+        <span>ðŸ“Š Level: <strong id="math-level-display">1</strong> / ${maxLevel}</span>
       </div>
     </div>
   `;
@@ -711,7 +711,7 @@ function startMathChallenge(){
   
   function generateProblem(){
     const difficulty = Math.min(Math.floor(level / 4) + 1, 5);
-    const operations = ['+', '-', '×'];
+    const operations = ['+', '-', 'Ã—'];
     const op = operations[Math.floor(Math.random() * operations.length)];
     
     let num1, num2, answer;
@@ -736,7 +736,7 @@ function startMathChallenge(){
   function playMath(){
     if(level > maxLevel){
       scoreBoard.remove();
-      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Math Genius!</h2><p style="margin-top:15px;">Final Score: ${mathScore}/${maxLevel}</p><button class="game-btn" onclick="startMathChallenge()">Restart</button>`;
+      container.innerHTML = `<h2 style="color:#00ff00;">ðŸŽ‰ Math Genius!</h2><p style="margin-top:15px;">Final Score: ${mathScore}/${maxLevel}</p><button class="game-btn" onclick="startMathChallenge()">Restart</button>`;
       return;
     }
     
@@ -760,7 +760,7 @@ function startMathChallenge(){
       if(timeLeft <= 0){
         clearInterval(activeInterval);
         level++;
-        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up! Answer: ${answer}</p>`;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">â° Time's up! Answer: ${answer}</p>`;
         activeTimeout = setTimeout(() => {
           container.innerHTML = '';
           playMath();
@@ -794,14 +794,14 @@ function startMathChallenge(){
       if(userAnswer === answer){
         mathScore++;
         level++;
-        container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Correct!</p>`;
+        container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">âœ… Correct!</p>`;
         activeTimeout = setTimeout(() => {
           container.innerHTML = '';
           playMath();
         }, 1500);
       } else {
         level++;
-        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">❌ Wrong! Answer: ${answer}</p>`;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">âŒ Wrong! Answer: ${answer}</p>`;
         activeTimeout = setTimeout(() => {
           container.innerHTML = '';
           playMath();
@@ -828,7 +828,7 @@ function startReactionTime(){
   scoreBoard.id = 'reaction-score-board';
   scoreBoard.className = 'score-board';
   scoreBoard.innerHTML = `
-    <div class="score-board-title">⚡ Reaction Time</div>
+    <div class="score-board-title">âš¡ Reaction Time</div>
     <div class="score-board-content">
       <div class="score-item">
         <div class="score-label">Score</div>
@@ -839,7 +839,7 @@ function startReactionTime(){
         <div class="time-value" id="reaction-time-display">3</div>
       </div>
       <div class="level-info">
-        <span>📊 Level: <strong id="reaction-level-display">1</strong> / ${maxLevel}</span>
+        <span>ðŸ“Š Level: <strong id="reaction-level-display">1</strong> / ${maxLevel}</span>
       </div>
     </div>
   `;
@@ -849,7 +849,7 @@ function startReactionTime(){
   function playReaction(){
     if(level > maxLevel){
       scoreBoard.remove();
-      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Lightning Fast!</h2><p style="margin-top:15px;">Final Score: ${reactionScore}/${maxLevel}</p><button class="game-btn" onclick="startReactionTime()">Restart</button>`;
+      container.innerHTML = `<h2 style="color:#00ff00;">ðŸŽ‰ Lightning Fast!</h2><p style="margin-top:15px;">Final Score: ${reactionScore}/${maxLevel}</p><button class="game-btn" onclick="startReactionTime()">Restart</button>`;
       return;
     }
     
@@ -900,7 +900,7 @@ function startReactionTime(){
             clearInterval(activeInterval);
             if(!clicked){
               level++;
-              container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Too slow!</p>`;
+              container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">â° Too slow!</p>`;
               activeTimeout = setTimeout(() => {
                 container.innerHTML = '';
                 playReaction();
@@ -915,7 +915,7 @@ function startReactionTime(){
             clearInterval(activeInterval);
             reactionScore++;
             level++;
-            container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">⚡ Great reflexes!</p>`;
+            container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">âš¡ Great reflexes!</p>`;
             activeTimeout = setTimeout(() => {
               container.innerHTML = '';
               playReaction();
@@ -943,7 +943,7 @@ function startColorMatch(){
   scoreBoard.id = 'color-score-board';
   scoreBoard.className = 'score-board';
   scoreBoard.innerHTML = `
-    <div class="score-board-title">🎨 Color Match</div>
+    <div class="score-board-title">ðŸŽ¨ Color Match</div>
     <div class="score-board-content">
       <div class="score-item">
         <div class="score-label">Score</div>
@@ -954,7 +954,7 @@ function startColorMatch(){
         <div class="time-value" id="color-time-display">8</div>
       </div>
       <div class="level-info">
-        <span>📊 Level: <strong id="color-level-display">1</strong> / ${maxLevel}</span>
+        <span>ðŸ“Š Level: <strong id="color-level-display">1</strong> / ${maxLevel}</span>
       </div>
     </div>
   `;
@@ -973,7 +973,7 @@ function startColorMatch(){
   function playColor(){
     if(level > maxLevel){
       scoreBoard.remove();
-      container.innerHTML = `<h2 style="color:#00ff00;">🎉 Color Expert!</h2><p style="margin-top:15px;">Final Score: ${colorScore}/${maxLevel}</p><button class="game-btn" onclick="startColorMatch()">Restart</button>`;
+      container.innerHTML = `<h2 style="color:#00ff00;">ðŸŽ‰ Color Expert!</h2><p style="margin-top:15px;">Final Score: ${colorScore}/${maxLevel}</p><button class="game-btn" onclick="startColorMatch()">Restart</button>`;
       return;
     }
     
@@ -1002,7 +1002,7 @@ function startColorMatch(){
       if(timeLeft <= 0){
         clearInterval(activeInterval);
         level++;
-        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">⏰ Time's up!</p>`;
+        container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">â° Time's up!</p>`;
         activeTimeout = setTimeout(() => {
           container.innerHTML = '';
           playColor();
@@ -1037,14 +1037,14 @@ function startColorMatch(){
         if(c.name === correctAns){
           colorScore++;
           level++;
-          container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">✅ Correct!</p>`;
+          container.innerHTML = `<p style="color:#00ff00;font-size:18px;font-weight:bold;">âœ… Correct!</p>`;
           activeTimeout = setTimeout(() => {
             container.innerHTML = '';
             playColor();
           }, 1500);
         } else {
           level++;
-          container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">❌ Wrong! Answer: ${correctAns}</p>`;
+          container.innerHTML = `<p style="color:#ff5555;font-size:18px;font-weight:bold;">âŒ Wrong! Answer: ${correctAns}</p>`;
           activeTimeout = setTimeout(() => {
             container.innerHTML = '';
             playColor();

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -56,18 +56,18 @@ body{background-attachment:scroll;padding:12px;-webkit-text-size-adjust:100%;}
 <body>
 <div class="container">
     <a href="/community" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Group Study</a>
-    <h1>💬 Create Group Chat Room</h1>
+    <h1>ðŸ’¬ Create Group Chat Room</h1>
     <p class="subtitle">Select the users you want to add to the room.</p>
 
     <label class="room-label" for="room-name">Room Name</label>
     <input type="text" id="room-name" placeholder="e.g. Group 1 - Thesis Discussion">
 
-    <input type="text" id="member-search" onkeyup="filterMembers()" placeholder="🔍 Search users..." style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.5); font-size:0.9rem; background:rgba(255,255,255,0.55); color:#1a4a5a; outline:none; margin-bottom:10px;">
+    <input type="text" id="member-search" onkeyup="filterMembers()" placeholder="ðŸ” Search users..." style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.5); font-size:0.9rem; background:rgba(255,255,255,0.55); color:#1a4a5a; outline:none; margin-bottom:10px;">
 
     <div class="user-list" id="user-list">
         {% if users %}
             {% for user in users %}
-            <label class="user-card" data-search="{{ user.name|lower }} {{ user.email|lower }}">
+            <label class="card-3d" data-search="{{ user.name|lower }} {{ user.email|lower }}" style="display:flex; align-items:center; gap:10px; padding:12px; cursor:pointer;">
                 <input type="checkbox" class="member-checkbox" value="{{ user.email }}">
                 <span>{{ user.name }} ({{ user.email }})</span>
             </label>
@@ -77,7 +77,7 @@ body{background-attachment:scroll;padding:12px;-webkit-text-size-adjust:100%;}
         {% endif %}
     </div>
 
-    <button class="create-btn" id="create-btn" onclick="createRoom()"><i class="fas fa-check"></i> Create Room</button>
+    <button class="btn btn-3d btn-sm" id="create-btn" onclick="createRoom()"><i class="fas fa-check"></i> Create Room</button>
 </div>
 
 <script>

@@ -172,16 +172,16 @@
                         <td>{{ log.timestamp }}</td>
                         <td>{{ log.admin_username }}</td>
                         <td>
-                            <span class="action-tag action-{{ log.action }}">{{ log.action.replace('_', ' ') | title }}</span>
+                            <span class="badge badge-3d badge-{{ 'red' if 'ban' in log.action else 'green' if 'unban' in log.action else 'red' if 'delete' in log.action else 'blue' }}">{{ log.action.replace('_', ' ') | title }}</span>
                         </td>
                         <td>{{ log.target_username }}</td>
                         <td>
                             {% if log.target_username and log.target_username != 'admin' %}
                             <form class="delete-action-form" method="POST" action="{{ url_for('admin_delete_user', username=log.target_username) }}" onsubmit="return confirm('Delete user {{ log.target_username }}? This cannot be undone.');">
-                                <button type="submit" class="delete-action-btn">Delete</button>
+                                <button type="submit" class="btn btn-3d btn-sm">Delete</button>
                             </form>
                             {% else %}
-                            <button type="button" class="delete-action-btn" disabled>Delete</button>
+                            <button type="button" class="btn btn-3d btn-sm" disabled>Delete</button>
                             {% endif %}
                         </td>
                     </tr>

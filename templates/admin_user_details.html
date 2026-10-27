@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -213,15 +213,15 @@
                 </div>
                 <div class="info-item">
                     <span class="label">Average Rating</span>
-                    <span class="value">{{ '%.2f'|format(avg_rating) }} / 5.00 ⭐</span>
+                    <span class="value">{{ '%.2f'|format(avg_rating) }} / 5.00 â­</span>
                 </div>
                 <div class="info-item">
                     <span class="label">Status</span>
                     <span class="value">
                         {% if user.is_banned %}
-                            <span class="badge banned-badge">Banned until {{ user.ban_expiry_formatted }}</span>
+                            <span class="badge badge-3d badge-yellow">Banned until {{ user.ban_expiry_formatted }}</span>
                         {% else %}
-                            <span class="badge active-badge">Active</span>
+                            <span class="badge badge-3d badge-green">Active</span>
                         {% endif %}
                     </span>
                 </div>
@@ -237,11 +237,11 @@
                         </form>
                     {% else %}
                         <form action="{{ url_for('admin_ban_user', username=user.email) }}" method="POST" style="display: inline;" onsubmit="return confirm('Sigurado ka bang gusto mong i-ban nang permanente ang user na ito?');">
-                            <button type="submit" class="ban-user-btn">Ban Permanently</button>
+                            <button type="submit" class="btn btn-3d btn-sm">Ban Permanently</button>
                         </form>
                     {% endif %}
                     <form action="{{ url_for('admin_delete_user', username=user.email) }}" method="POST" onsubmit="return confirm('WARNING: This will permanently delete the user and all their data. Are you sure?');">
-                        <button type="submit" class="delete-user-btn">Delete User</button>
+                        <button type="submit" class="btn btn-3d btn-sm">Delete User</button>
                     </form>
                 </div>
             </div>
@@ -262,15 +262,15 @@
 
             <div class="card grid-col-span-3">
                 <h3>Conversation History</h3>
-                <p class="privacy-note">🔒 <strong>Privacy-protected:</strong> {{ total_messages }} messages total, {{ crisis_count }} flagged crisis. Full text is hidden by default (Data Privacy Act). Only open full chats when needed for safety/moderation — every full view is logged.</p>
+                <p class="privacy-note">ðŸ”’ <strong>Privacy-protected:</strong> {{ total_messages }} messages total, {{ crisis_count }} flagged crisis. Full text is hidden by default (Data Privacy Act). Only open full chats when needed for safety/moderation â€” every full view is logged.</p>
                 {% if not show_full %}
                 <div class="privacy-actions">
-                    <a class="full-view-btn" href="{{ url_for('admin_user_details', username=user.email) }}?show_full=1" onclick="return confirm('Bubuksan mo ang full conversation text para sa safety/moderation review. Ito ay naka-log. Ituloy?');"><i class="fas fa-eye"></i> Request full chat view (logged)</a>
+                    <a class="btn btn-3d btn-sm" href="{{ url_for('admin_user_details', username=user.email) }}?show_full=1" onclick="return confirm('Bubuksan mo ang full conversation text para sa safety/moderation review. Ito ay naka-log. Ituloy?');"><i class="fas fa-eye"></i> Request full chat view (logged)</a>
                 </div>
                 {% else %}
                 <div class="privacy-actions">
-                    <span class="full-view-status">⚠️ Full view ON — this access has been logged.</span>
-                    <a class="hide-view-btn" href="{{ url_for('admin_user_details', username=user.email) }}"><i class="fas fa-eye-slash"></i> Hide full text</a>
+                    <span class="full-view-status">âš ï¸ Full view ON â€” this access has been logged.</span>
+                    <a class="btn btn-outline btn-sm" href="{{ url_for('admin_user_details', username=user.email) }}"><i class="fas fa-eye-slash"></i> Hide full text</a>
                 </div>
                 {% endif %}
                 {% if show_full %}
@@ -281,11 +281,11 @@
                 <div id="active-chats" class="chat-box">
                     {% if active_chats %}
                         {% for chat in active_chats %}
-                        <div class="msg user">
+                        <div class="message user">
                             <strong>User:</strong> {{ chat.user_message }}
                             <span class="timestamp">{{ chat.timestamp }}</span>
                         </div>
-                        <div class="msg bot">
+                        <div class="message bot">
                             <strong>Bot:</strong> {{ chat.bot_response }}
                         </div>
                         {% endfor %}
@@ -296,11 +296,11 @@
                 <div id="archived-chats" class="chat-box" style="display:none;">
                     {% if archived_chats %}
                         {% for chat in archived_chats %}
-                        <div class="msg user">
+                        <div class="message user">
                             <strong>User:</strong> {{ chat.user_message }}
                             <span class="timestamp">{{ chat.timestamp }}</span>
                         </div>
-                        <div class="msg bot">
+                        <div class="message bot">
                             <strong>Bot:</strong> {{ chat.bot_response }}
                         </div>
                         {% endfor %}

@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
 <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -48,10 +49,12 @@
 </head>
 <body>
 
-<div class="auth-box">
-    <h2>Something Went Wrong</h2>
-    <p class="info-text">{{ message|default('An unexpected error occurred. Please try again later.') }}</p>
-    <a href="{{ url_for('login') }}">Back to Login</a>
+<div class="container">
+    <div class="auth-box">
+        <h2>Something Went Wrong</h2>
+        <p class="info-text">{{ message|default('An unexpected error occurred. Please try again later.') }}</p>
+        <a href="{{ url_for('login') }}">Back to Login</a>
+    </div>
 </div>
 
 </body>
