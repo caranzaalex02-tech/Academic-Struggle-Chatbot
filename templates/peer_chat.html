@@ -251,7 +251,7 @@ button.send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba
     <input type="text" id="msg-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
     <input type="file" id="image-input" accept="image/*" style="display: none;">
     <button class="btn btn-sm" onclick="document.getElementById('image-input').click()">ðŸ“Ž</button>
-    <button class="btn btn-3d" onclick="sendMessage()">âž¤</button>
+    <button class="send-btn" onclick="sendMessage()">âž¤</button>
 </div>
 
 <!-- Image Modal -->
@@ -398,7 +398,8 @@ function loadMessages() {
     .then(res => res.json())
     .then(data => {
         chatBox.innerHTML = ''; // Clear the box
-        data.messages.forEach(msg => {
+        // Reverse so oldest messages appear first (top) and newest at bottom
+        [...data.messages].reverse().forEach(msg => {
             const isSent = msg.sender === currentUser;
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;

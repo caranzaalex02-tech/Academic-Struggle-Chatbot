@@ -209,7 +209,8 @@ function loadMessages(){
     .then(res => res.json())
     .then(data => {
         chatBox.innerHTML = '';
-        data.messages.forEach(msg => {
+        // Reverse so oldest messages appear first (top) and newest at bottom
+        [...data.messages].reverse().forEach(msg => {
             appendMessage(msg.id, msg.sender, msg.message, msg.timestamp);
         });
         scrollToBottom();
