@@ -11,25 +11,84 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <style>
-video {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -1;
-}
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.65);
+/* Mini dashboard — clean, no video/3D */
+.mini-dash-container {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
+    padding: 32px 28px;
+    background: #f0fdf4;
+}
+
+.chart-row {
+    display: flex;
+    gap: 28px;
     justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.chart-wrapper {
+    flex: 1;
+    min-width: 280px;
+    max-width: 420px;
+}
+
+.chart-wrapper canvas {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 16 / 10;
+}
+
+.top-links {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 24px;
+}
+
+.btn {
+    display: inline-flex;
     align-items: center;
-    color: #ffffff;
-    z-index: 1;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.btn-green {
+    background: #4ade80;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(74,222,128,0.35);
+}
+
+.btn-green:hover {
+    background: #22c55e;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.btn-yellow {
+    background: #facc15;
+    color: #14532d;
+    box-shadow: 0 4px 14px rgba(250,204,21,0.35);
+}
+
+.btn-yellow:hover {
+    background: #eab308;
+    color: #14532d;
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: 7px 14px;
+    font-size: 0.82rem;
 }
 </style>
 
@@ -37,26 +96,22 @@ video {
 
 <body>
 
-<video autoplay muted loop>
-<source src="{{ url_for('static', filename='videos/background.mp4') }}" type="video/mp4">
-</video>
+<div class="mini-dash-container">
 
-<div class="overlay">
-
-<div class="row perspective-1000">
-<div class="chart-wrapper card-3d tilt-hover">
+<div class="chart-row">
+<div class="chart-wrapper">
 <canvas id="pieChart"></canvas>
 </div>
 
-<div class="chart-wrapper card-3d tilt-hover">
+<div class="chart-wrapper">
 <canvas id="lineChart"></canvas>
 </div>
 </div>
 
 <div class="top-links">
-<a href="{{ url_for('chatbot') }}" class="btn-3d btn-3d-green btn-sm press-3d">⬅ Back</a>
-<a href="{{ url_for('archived_room') }}" class="btn-3d btn-3d-yellow btn-sm press-3d">📂 Archive</a>
-<a href="{{ url_for('logout') }}" class="btn-3d btn-3d-yellow btn-sm press-3d">🚪 Logout</a>
+<a href="{{ url_for('chatbot') }}" class="btn btn-green btn-sm">⬅ Back</a>
+<a href="{{ url_for('archived_room') }}" class="btn btn-yellow btn-sm">📂 Archive</a>
+<a href="{{ url_for('logout') }}" class="btn btn-yellow btn-sm">🚪 Logout</a>
 </div>
 
 </div>
