@@ -273,7 +273,7 @@ button.send-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba
     <input type="text" id="msg-input" placeholder="Type a message..." onkeydown="if(event.key==='Enter') sendMessage()">
     <input type="file" id="image-input" accept="image/*" style="display: none;">
     <button class="btn btn-sm" onclick="document.getElementById('image-input').click()">ðŸ“Ž</button>
-    <button class="send-btn" onclick="sendMessage()">âž¤</button>
+    <button class="send-btn" onclick="sendMessage()" style="width: auto !important; min-height: auto !important; padding: 8px 14px !important; border-radius: 999px !important; flex-shrink: 0 !important; background: linear-gradient(135deg, #0ea5b9, #0891b2) !important; color: #fff !important; border: none !important; font-size: 13px !important; font-weight: 700 !important;">âž¤</button>
 </div>
 
 <!-- Image Modal -->
@@ -559,3 +559,4 @@ loadMessages(); // Initial load
 
 </body>
 </html>
+

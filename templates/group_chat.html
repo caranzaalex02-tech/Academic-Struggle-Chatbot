@@ -112,7 +112,7 @@ body{background-attachment:scroll;-webkit-text-size-adjust:100%;}
 </div>
 <div class="input-area">
     <input type="text" id="msg-input" placeholder="Type a message to the group..." onkeydown="if(event.key==='Enter')sendMessage()">
-    <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+    <button class="send-btn" onclick="sendMessage()" style="width: 46px !important; height: 46px !important; border-radius: 50% !important; background: #0ea5b9 !important; color: #fff !important; border: none !important; font-size: 16px !important;"><i class="fas fa-paper-plane"></i></button>
 </div>
 
 <script>
@@ -313,3 +313,4 @@ loadMessages();
 </script>
 </body>
 </html>
+
