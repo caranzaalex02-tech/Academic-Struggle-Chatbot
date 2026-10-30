@@ -6,52 +6,49 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-    /* StudyLeaf UI color palette — light mint background */
-    --bg-primary: #E8F5E9;
-    --bg-secondary: #F1FAF2;
-    --bg-accent-green: #52C878;
-    --mint-green: #C8E6C9;
-    --bg-accent-yellow: #A5D6A7;
-    --bg-glow-green: rgba(46, 173, 98, 0.15);
-    --bg-glow-yellow: rgba(165, 214, 167, 0.18);
+    /* Soft background palette — gentle on the eyes */
+    --bg-primary: #f0fdf4;
+    --bg-secondary: #fef9c3;
+    --bg-accent-green: #86efac;
+    --bg-accent-yellow: #fde68a;
+    --bg-glow-green: rgba(134, 239, 172, 0.15);
+    --bg-glow-yellow: rgba(253, 230, 138, 0.18);
 
     /* Text */
-    --text-primary: #164B2E;
-    --text-secondary: #228B45;
-    --text-muted: #52745D;
+    --text-primary: #14532d;
+    --text-secondary: #4d7c0f;
+    --text-muted: #64715a;
 
     /* Cards */
-    --card-bg: #FFFFFF;
-    --card-bg-soft: rgba(255, 255, 255, 0.95);
-    --cream-white: #FAFCF7;
-    --card-border: rgba(165, 214, 167, 0.35);
-    --card-border-yellow: rgba(165, 214, 167, 0.35);
+    --card-bg: #ffffff;
+    --card-bg-soft: rgba(255, 255, 255, 0.72);
+    --card-border: rgba(134, 239, 172, 0.28);
+    --card-border-yellow: rgba(253, 230, 138, 0.35);
 
     /* Buttons */
-    --btn-green: #228B45;
-    --btn-yellow: #52C878;
-    --btn-green-hover: #2EAD62;
-    --btn-yellow-hover: #A5D6A7;
+    --btn-green: #4ade80;
+    --btn-yellow: #facc15;
+    --btn-green-hover: #22c55e;
+    --btn-yellow-hover: #eab308;
 
     /* Forms */
-    --input-bg: #FFFFFF;
-    --input-border: rgba(165, 214, 167, 0.35);
+    --input-bg: #ffffff;
+    --input-border: rgba(134, 239, 172, 0.35);
     --input-focus-border: var(--btn-green);
-    --input-focus-shadow: rgba(46, 173, 98, 0.20);
+    --input-focus-shadow: rgba(134, 239, 172, 0.20);
 
     /* Status */
-    --success: #52C878;
-    --success-bg: rgba(82, 200, 120, 0.14);
-    --success-color: #164B2E;
-    --warning-bg: rgba(165, 214, 167, 0.14);
-    --warning-color: #52745D;
+    --success: #4ade80;
+    --success-bg: rgba(74, 222, 128, 0.14);
+    --warning-bg: rgba(250, 204, 21, 0.14);
+    --warning-color: #facc15;
     --danger: #f87171;
     --danger-bg: rgba(248, 113, 113, 0.14);
-    --info-bg: rgba(46, 173, 98, 0.12);
-    --info-color: #2EAD62;
+    --info-bg: rgba(16, 185, 129, 0.12);
+    --info-color: #10b981;
 
     /* Shadows */
-    --shadow-card: 0 12px 40px -12px rgba(22, 75, 46, 0.18), 0 4px 16px -6px rgba(22, 75, 46, 0.08);
+    --shadow-card: 0 12px 40px -12px rgba(20, 83, 45, 0.18), 0 4px 16px -6px rgba(20, 83, 45, 0.08);
     --shadow-input: 0 0 0 4px var(--input-focus-shadow);
 }
 
