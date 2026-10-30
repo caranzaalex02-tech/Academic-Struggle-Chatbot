@@ -6,9 +6,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
 
 :root {
-    /* Soft background palette — gentle on the eyes */
-    --bg-primary: #f0fdf4;
-    --bg-secondary: #fef9c3;
+    /* StudyLeaf mockup color palette — light mint background */
+    --bg-primary: #EDF9F2;
+    --bg-secondary: #fde68a;
     --bg-accent-green: #86efac;
     --bg-accent-yellow: #fde68a;
     --bg-glow-green: rgba(134, 239, 172, 0.15);
@@ -16,13 +16,13 @@
 
     /* Text */
     --text-primary: #14532d;
-    --text-secondary: #4d7c0f;
+    --text-secondary: #3e8e4c;
     --text-muted: #64715a;
 
     /* Cards */
     --card-bg: #ffffff;
-    --card-bg-soft: rgba(255, 255, 255, 0.72);
-    --card-border: rgba(134, 239, 172, 0.28);
+    --card-bg-soft: rgba(255, 255, 255, 0.85);
+    --card-border: rgba(134, 239, 172, 0.35);
     --card-border-yellow: rgba(253, 230, 138, 0.35);
 
     /* Buttons */

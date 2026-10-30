@@ -9,7 +9,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
-  </head>
+    <style>
+        /* StudyLeaf mockup background — light mint */
+        body {
+            background: #EDF9F2 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center center / cover no-repeat;
+        }
+    </style>
+</head>
 <body>
 
 <div class="auth-box">
