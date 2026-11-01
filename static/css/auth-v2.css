@@ -98,6 +98,7 @@ body {
     -webkit-backdrop-filter: blur(10px);
     position: relative;
     z-index: 1;
+    text-align: center;
 }
 
 .auth-box .logo-wrap {
