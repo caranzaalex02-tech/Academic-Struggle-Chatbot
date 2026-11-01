@@ -112,6 +112,29 @@
                 padding: 20px;
             }
         }
+
+        /* Buong lapad ang lahat ng input/select na kailangang punan ng user
+           para malinaw at hindi kumpol sa gilid, sa laptop at mobile. */
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .form-row > .form-group {
+            flex: 1;
+            margin: 0 !important;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100% !important;
+            box-sizing: border-box;
+        }
+        @media (max-width: 480px) {
+            .form-row > .form-group {
+                flex-basis: 100%;
+                min-width: 100%;
+            }
+        }
     </style>
   </head>
 <body>
