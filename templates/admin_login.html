@@ -10,13 +10,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* ===== Parehong design system ng landing + login page ===== */
-        :root{--ink:#14532d;--ink-2:#4d7c0f;--muted:#64715a;--green:#22c55e;--green-2:#4ade80;--yellow:#facc15;--card:rgba(255,255,255,.78);--card-border:rgba(134,239,172,.45)}
+        :root{--ink:#064E3B;--ink-2:#477B62;--muted:#6B8F7A;--green:#22C55E;--green-2:#10B981;--yellow:#ECFDF5;--card:rgba(255,255,255,.78);--card-border:#A7F3D0}
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             min-height: 100vh;
             font-family: 'Poppins', sans-serif;
             color: var(--ink);
-            background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
+            background:#D1FAE5 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
         }
         body::before {
             content: '';
@@ -32,9 +32,8 @@
         .landing-side{grid-area:landing;min-width:0;min-height:0}
         .login-side{grid-area:login;min-width:0;min-height:0;max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:thin}
         .hero{text-align:center;padding:6px 10px 0}
-        .logo-frame{width:64px;height:64px;margin:0 auto 8px;border-radius:50%;padding:5px;background:#fff;box-shadow:0 0 0 4px rgba(74,222,128,.45),0 10px 30px rgba(20,83,45,.18)}
-        .logo-frame img{width:100%;height:100%;object-fit:contain;border-radius:50%;display:block}
-        .badge{display:inline-block;font-size:10px;letter-spacing:.8px;font-weight:600;color:#166534;background:rgba(74,222,128,.16);border:1px solid rgba(74,222,128,.45);border-radius:999px;padding:4px 12px;margin-bottom:8px}
+        .logo-frame{width:64px;height:64px;margin:0 auto 8px;border-radius:50%;padding:5px;background:#fff;box-shadow:0 0 0 4px rgba(52,211,153,.45),0 10px 30px rgba(6,78,59,.18)}
+        .badge{display:inline-block;font-size:10px;letter-spacing:.8px;font-weight:600;color:#166534;background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.45);border-radius:999px;padding:4px 12px;margin-bottom:8px}
         .hero h1{font-size:clamp(1.2rem,2.6vw,1.7rem);line-height:1.2;margin-bottom:6px;color:var(--ink)}
         .hero h1 span{color:#16a34a}
         .sub{color:rgba(20,83,45,.82);max-width:640px;margin:0 auto;line-height:1.5;font-size:.82rem}
@@ -43,16 +42,18 @@
         .card i{font-size:1.1rem;color:#16a34a}
         .card h3{font-size:.82rem;margin:6px 0 4px;color:var(--ink)}
         .card p{font-size:.72rem;color:rgba(20,83,45,.75);line-height:1.5}
-        /* ===== ADMIN LOGIN PANEL (kanan) — diagonal gold/green gaya ng user login ===== */
+        /* ===== ADMIN LOGIN PANEL (kanan) ===== */
         .auth-box {
             position: relative;
             overflow: hidden;
-            background-color: #fffbeb;
-            background-image: url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}');
-            background-position: center;
-            background-size: cover;
-            background-repeat: no-repeat;
-            border: 1px solid rgba(180,130,20,.35);
+            background-color: #fff;
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            box-shadow: 0 24px 60px -24px rgba(6, 78, 59, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1;
+        }
             border-radius: 22px;
             padding: 30px 26px 26px;
             box-shadow: 0 24px 60px -24px rgba(20,83,45,.4);

@@ -1,78 +1,95 @@
 /* ============================================================
-   SANC.AI — Global Design System
+   SANC.AI — Global Design System (Soft Mint & Forest Palette)
    ============================================================
-   Centralized design tokens + reusable component styles.
-
-   Design Tokens (Soft Green & Yellow Palette):
-   - Primary bg       : #f0fdf4  (soft green)
-   - Secondary bg     : #fef9c3  (soft yellow)
-   - Accent green     : #86efac
-   - Accent yellow    : #fde68a
-   - Text primary     : #14532d  (deep green)
-   - Text secondary   : #4d7c0f
-   - Text muted       : #64715a
-   - Success          : #4ade80
-   - Warning          : #facc15
-   - Danger           : #f87171
-   - Info             : #10b981
-   - Cards            : #ffffff  (white)
-   - Buttons          : green #4ade80 / yellow #facc15
+   Design Tokens based on:
+   - Landing Page, Login/Registration, Chatbot Interface
+   
+   Color System:
+   - Mint Green #D1FAE5 — Main backgrounds
+   - Emerald #34D399 — Gradients (left)
+   - Pale Green #ECFDF5 — Right gradient
+   - Forest Green #064E3B — Main title typography
+   - Highlighted Emerald #10B981 — Accent titles
+   - Muted Green #477B62 — Descriptions, secondary text
+   - White Mint #F0FDF4 — Feature cards, chat container
+   - Light Green #A7F3D0 — Card borders, input borders
+   - Emerald #059669 — Feature icons, buttons
+   - Forest Green #065F46 — Feature headings, header
+   - Muted Green #6B8F7A — Footer text
    ============================================================ */
 
 :root {
     /* ---- Backgrounds ---- */
-    --bg-primary: #f0fdf4;
-    --bg-secondary: #fef9c3;
-    --bg-accent-green: #86efac;
-    --bg-accent-yellow: #fde68a;
-    --bg-glow-green: rgba(134, 239, 172, 0.15);
-    --bg-glow-yellow: rgba(253, 230, 138, 0.18);
+    --bg-main: #D1FAE5;
+    --bg-gradient-left: #34D399;
+    --bg-gradient-right: #ECFDF5;
+    --bg-chat-container: #F0FDF4;
+    --bg-header: #FFFFFF;
+    --bg-chat-divider: #D1FAE5;
+    --bg-daily-quote: #ECFDF5;
 
     /* ---- Text ---- */
-    --text-primary: #14532d;
-    --text-secondary: #4d7c0f;
-    --text-muted: #64715a;
+    --text-main: #064E3B;
+    --text-highlight: #10B981;
+    --text-description: #477B62;
+    --text-header: #065F46;
+    --text-footer: #6B8F7A;
+    --text-input: #1F2937;
+    --text-cloud: #164E3B;
+    --text-quote: #047857;
+    --text-online: #22C55E;
 
     /* ---- Cards ---- */
-    --card-bg: #ffffff;
-    --card-bg-soft: rgba(255, 255, 255, 0.72);
-    --card-border: rgba(134, 239, 172, 0.28);
-    --card-border-yellow: rgba(253, 230, 138, 0.35);
+    --card-white-mint: #F0FDF4;
+    --card-border: #A7F3D0;
+    --card-bg: #FFFFFF;
+
+    /* ---- Feature Cards (Landing) ---- */
+    --feature-card: #F0FDF4;
+    --feature-card-border: #A7F3D0;
+    --feature-icon: #059669;
+    --feature-heading: #065F46;
 
     /* ---- Buttons ---- */
-    --btn-green: #4ade80;
-    --btn-green-hover: #22c55e;
-    --btn-yellow: #facc15;
-    --btn-yellow-hover: #eab308;
+    --btn-emerald: #10B981;
+    --btn-emerald-hover: #059669;
+    --btn-send: #059669;
+    --btn-send-hover: #047857;
 
     /* ---- Forms ---- */
-    --input-bg: #ffffff;
-    --input-border: rgba(134, 239, 172, 0.35);
-    --input-focus-border: var(--btn-green);
-    --input-focus-shadow: rgba(134, 239, 172, 0.20);
+    --input-bg: #FFFFFF;
+    --input-border: #A7F3D0;
+    --input-focus-border: #10B981;
+    --input-placeholder: #94A3A0;
+    --input-focus-shadow: rgba(16, 185, 129, 0.20);
 
-    /* ---- Status / Semantic ---- */
-    --success: #4ade80;
-    --success-bg: rgba(74, 222, 128, 0.14);
-    --warning: #facc15;
-    --warning-bg: rgba(250, 204, 21, 0.14);
-    --danger: #f87171;
-    --danger-bg: rgba(248, 113, 113, 0.14);
-    --info: #10b981;
-    --info-bg: rgba(16, 185, 129, 0.12);
+    /* ---- Login / Auth Specific ---- */
+    --login-bg: #D1FAE5;
+    --logo-text: #064E3B;
+    --forgot-link: #047857;
+    --create-link: #059669;
+
+    /* ---- Chatbot Interface ---- */
+    --bot-message-bg: #FFFFFF;
+    --bot-message-text: #164E3B;
+    --user-message-bg: #10B981;
+    --user-message-text: #FFFFFF;
+    --input-bg-chat: #FFFFFF;
+    --send-btn: #059669;
+    --send-btn-hover: #047857;
 
     /* ---- Shadows ---- */
-    --shadow-card: 0 12px 40px -12px rgba(20, 83, 45, 0.18), 0 4px 16px -6px rgba(20, 83, 45, 0.08);
+    --shadow-card: 0 12px 40px -12px rgba(6, 78, 59, 0.18), 0 4px 16px -6px rgba(6, 78, 59, 0.08);
     --shadow-input: 0 0 0 4px var(--input-focus-shadow);
 
-    /* ---- Chart palette (consistent across all pages) ---- */
-    --chart-happy: #4ade80;    /* green */
-    --chart-neutral: #facc15;  /* yellow */
-    --chart-sad: #f87171;      /* red */
+    /* ---- Chart palette ---- */
+    --chart-happy: #4ade80;
+    --chart-neutral: #facc15;
+    --chart-sad: #f87171;
     --chart-accent1: #4ade80;
     --chart-accent2: #facc15;
-    --chart-accent3: #60a5fa;  /* blue (muted) */
-    --chart-accent4: #f472b6;  /* pink (muted) */
+    --chart-accent3: #60a5fa;
+    --chart-accent4: #f472b6;
 }
 
 /* ---- Reset / Base ---- */
@@ -89,8 +106,8 @@ html {
 body {
     min-height: 100vh;
     font-family: 'Inter', 'Segoe UI', 'Poppins', sans-serif;
-    color: var(--text-primary);
-    background: linear-gradient(160deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+    color: var(--text-main);
+    background: linear-gradient(160deg, var(--bg-main) 0%, var(--bg-gradient-right) 100%);
     position: relative;
     padding: 40px 20px;
     overflow-x: hidden;
@@ -105,9 +122,9 @@ body::before {
     z-index: 0;
     pointer-events: none;
     background:
-        radial-gradient(600px 400px at 12% 18%, var(--bg-glow-green), transparent 60%),
-        radial-gradient(700px 500px at 88% 82%, var(--bg-glow-yellow), transparent 60%),
-        radial-gradient(400px 300px at 50% 100%, rgba(253, 230, 138, 0.10), transparent 60%);
+        radial-gradient(600px 400px at 12% 18%, rgba(52, 211, 153, 0.15), transparent 60%),
+        radial-gradient(700px 500px at 88% 82%, rgba(236, 253, 245, 0.35), transparent 60%),
+        radial-gradient(400px 300px at 50% 100%, rgba(236, 253, 245, 0.10), transparent 60%);
 }
 
 body::after {
@@ -118,18 +135,18 @@ body::after {
     pointer-events: none;
     background:
         radial-gradient(500px 300px at 90% 20%, rgba(134, 239, 172, 0.07), transparent 60%),
-        radial-gradient(400px 250px at 10% 90%, rgba(253, 230, 138, 0.06), transparent 60%);
+        radial-gradient(400px 250px at 10% 90%, rgba(236, 253, 245, 0.06), transparent 60%);
 }
 
 /* ---- Focus states ---- */
 :focus-visible {
-    outline: 2px solid var(--btn-green);
+    outline: 2px solid var(--btn-emerald);
     outline-offset: 2px;
 }
 
 /* ---- Typography helpers ---- */
 h1, h2, h3, h4, h5, h6 {
-    color: var(--text-primary);
+    color: var(--text-main);
     font-weight: 600;
 }
 
@@ -137,18 +154,20 @@ h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.2; }
 h2 { font-size: clamp(1.4rem, 3vw, 2rem); line-height: 1.3; }
 h3 { font-size: clamp(1.1rem, 2.5vw, 1.5rem); line-height: 1.4; }
 
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-muted { color: var(--text-muted); }
+.text-main { color: var(--text-main); }
+.text-highlight { color: var(--text-highlight); }
+.text-description { color: var(--text-description); }
+.text-header { color: var(--text-header); }
+.text-footer { color: var(--text-footer); }
 
 /* ---- Links ---- */
 a {
-    color: var(--btn-green);
+    color: var(--btn-emerald);
     text-decoration: none;
     transition: color 0.2s ease;
 }
 a:hover {
-    color: var(--btn-green-hover);
+    color: var(--btn-emerald-hover);
     text-decoration: underline;
 }
 

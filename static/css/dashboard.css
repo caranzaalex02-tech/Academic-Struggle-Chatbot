@@ -1,5 +1,5 @@
-ï»¿/* =============================================================
-   SANC.AI â€” Dashboard Components
+/* =============================================================
+   SANC.AI — Dashboard Components
    ============================================================= */
 
 /* ---- Dashboard container ---- */
@@ -29,7 +29,7 @@
 }
 
 .dashboard-header p {
-    color: #64715a;
+    color: #6B8F7A;
     font-size: 0.92rem;
 }
 
@@ -50,7 +50,7 @@
     border-radius: 12px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #14532d;
+    color: #064E3B;
     background: rgba(255,255,255,0.55);
     border: 1px solid rgba(134,239,172,0.55);
     transition: all 0.2s ease;
@@ -58,8 +58,8 @@
 
 .top-links a:hover {
     background: #f0fdf4;
-    border-color: #4ade80;
-    color: #14532d;
+    border-color: #10B981;
+    color: #064E3B;
     transform: translateY(-1px);
 }
 
@@ -106,39 +106,39 @@
 }
 
 .btn-green {
-    background: #4ade80;
+    background: #10B981;
     color: #fff;
     box-shadow: 0 4px 14px rgba(74,222,128,0.35);
 }
 
 .btn-green:hover {
-    background: #22c55e;
+    background: #059669;
     color: #fff;
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(74,222,128,0.45);
 }
 
 .btn-yellow {
-    background: #facc15;
-    color: #14532d;
+    background: #ECFDF5;
+    color: #064E3B;
     box-shadow: 0 4px 14px rgba(250,204,21,0.35);
 }
 
 .btn-yellow:hover {
-    background: #eab308;
-    color: #14532d;
+    background: #047857;
+    color: #064E3B;
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(250,204,21,0.45);
 }
 
 .btn-outline {
     background: transparent;
-    border: 2px solid #4ade80;
-    color: #4ade80;
+    border: 2px solid #10B981;
+    color: #10B981;
 }
 
 .btn-outline:hover {
-    background: #4ade80;
+    background: #10B981;
     color: #fff;
 }
 
@@ -235,12 +235,12 @@
 .stat-card .number {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #14532d;
+    color: #064E3B;
 }
 
 .stat-card .label {
     font-size: 0.82rem;
-    color: #64715a;
+    color: #6B8F7A;
     margin-top: 4px;
 }
 
@@ -275,7 +275,7 @@
 
 .archived-item .timestamp {
     font-size: 0.8rem;
-    color: #64715a;
+    color: #6B8F7A;
     margin-bottom: 6px;
 }
 
@@ -286,7 +286,7 @@
 }
 
 .archived-item .chat-line.user {
-    color: #14532d;
+    color: #064E3B;
 }
 
 .archived-item .chat-line.bot {
@@ -302,13 +302,13 @@
     border-radius: 8px;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #4ade80;
+    color: #10B981;
     background: rgba(74,222,128,0.14);
     border: 1px solid rgba(74,222,128,0.35);
 }
 
 .restore-link:hover {
-    background: #4ade80;
+    background: #10B981;
     color: #fff;
 }
 
@@ -330,12 +330,12 @@
     border: 1px solid rgba(134,239,172,0.28);
     border-radius: 16px;
     text-decoration: none;
-    color: #14532d;
+    color: #064E3B;
     transition: all 0.2s ease;
 }
 
 .quick-action:hover {
-    border-color: #4ade80;
+    border-color: #10B981;
     box-shadow: 0 6px 20px rgba(74,222,128,0.2);
     transform: translateY(-2px);
 }
@@ -347,7 +347,7 @@
 .quick-action .label {
     font-size: 0.82rem;
     font-weight: 600;
-    color: #14532d;
+    color: #064E3B;
 }
 
 /* ---- Mood indicator dots ---- */
@@ -365,8 +365,8 @@
     border: 2px solid rgba(20,83,45,0.15);
 }
 
-.mood-dot.happy { background: #4ade80; border-color: #4ade80; }
-.mood-dot.neutral { background: #facc15; border-color: #facc15; }
+.mood-dot.happy { background: #10B981; border-color: #10B981; }
+.mood-dot.neutral { background: #ECFDF5; border-color: #ECFDF5; }
 .mood-dot.sad { background: #f87171; border-color: #f87171; }
 
 /* ---- Layout helpers ---- */
@@ -399,16 +399,16 @@
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #4ade80;
+    background: #10B981;
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #22c55e;
+    background: #059669;
 }
 
 /* ============================================================
-   SANC.AI â€” 3D CSS Effects
+   SANC.AI — 3D CSS Effects
    Pure CSS 3D depth, no JavaScript required
    ============================================================ */
 
@@ -465,19 +465,19 @@
 }
 
 .btn-3d-green {
-    background: #4ade80;
+    background: #10B981;
     color: #fff;
 }
 .btn-3d-green:hover {
-    background: #22c55e;
+    background: #059669;
 }
 
 .btn-3d-yellow {
-    background: #facc15;
-    color: #14532d;
+    background: #ECFDF5;
+    color: #064E3B;
 }
 .btn-3d-yellow:hover {
-    background: #eab308;
+    background: #047857;
 }
 
 /* ---- Glassmorphism 3D Card ---- */
@@ -542,13 +542,13 @@
 .flip-card-front {
     background: #ffffff;
     border: 1px solid rgba(134, 239, 172, 0.28);
-    color: #14532d;
+    color: #064E3B;
     box-shadow: 0 10px 25px -5px rgba(20, 83, 45, 0.12);
 }
 .flip-card-back {
     background: linear-gradient(135deg, #f0fdf4 0%, #fef9c3 100%);
     border: 1px solid rgba(74, 222, 128, 0.35);
-    color: #14532d;
+    color: #064E3B;
     transform: rotateY(180deg);
     box-shadow: 0 10px 25px -5px rgba(74, 222, 128, 0.25);
 }
@@ -597,8 +597,8 @@
     background: #fff;
     display: inline-block;
 }
-.mood-dot-3d.happy { background: #4ade80; box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
-.mood-dot-3d.neutral { background: #facc15; box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
+.mood-dot-3d.happy { background: #10B981; box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
+.mood-dot-3d.neutral { background: #ECFDF5; box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
 .mood-dot-3d.sad { background: #f87171; box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
 
 /* ---- Pressed 3D utility for any clickable ---- */
@@ -609,4 +609,7 @@
     transform: scale(0.96);
     filter: brightness(0.92);
 }
+
+
+
 
