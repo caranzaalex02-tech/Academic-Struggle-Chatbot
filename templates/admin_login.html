@@ -7,27 +7,232 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth-v2.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}">
-  </head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* ===== Parehong design system ng landing + login page ===== */
+        :root{--primary:#10B981;--primary-hover:#059669;--primary-dark:#047857;--emerald:#059669;--fresh-mint:#34D399;--soft-emerald:#6EE7B7;--light-mint:#A7F3D0;--bg-main:#ECFDF5;--bg-light:#F0FDF4;--bg-mint:#D1FAE5;--bg-wave:#86EFAC;--bg-wave-light:#BBF7D0;--heading:#064E3B;--subheading:#065F46;--text-green:#047857;--text-description:#477B62;--text-muted:#6B8F7A;--card-bg:#FFFFFF;--card-border:#A7F3D0;--input-bg:#FFFFFF;--input-border:#A7F3D0;--input-focus:#10B981;--placeholder:#94A3A0;--btn-bg:#10B981;--btn-hover:#059669;--btn-text:#FFFFFF}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            color: var(--heading);
+            background:#D1FAE5 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(160deg,rgba(236,253,245,.28),rgba(236,253,245,.20));
+            z-index: 1;
+        }
+        /* ===== SPLIT: landing info sa KALIWA, admin login sa KANAN â€” walang page scroll sa desktop ===== */
+        html,body{height:100%}
+        body{height:100vh;overflow:hidden}
+        .split{position:relative;z-index:2;max-width:1200px;height:100vh;margin:0 auto;padding:14px 20px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login";gap:12px 24px;align-items:center;overflow:hidden}
+        .landing-side{grid-area:landing;min-width:0;min-height:0}
+        .login-side{grid-area:login;min-width:0;min-height:0;max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:thin}
+        .hero{text-align:center;padding:6px 10px 0}
+        .logo-frame{width:64px;height:64px;margin:0 auto 8px;border-radius:50%;padding:5px;background:#fff;box-shadow:0 0 0 4px rgba(52,211,153,.45),0 10px 30px rgba(6,78,59,.18)}
+        .badge{display:inline-block;font-size:10px;letter-spacing:.8px;font-weight:600;color:var(--text-green);background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.45);border-radius:999px;padding:4px 12px;margin-bottom:8px}
+        .hero h1{font-size:clamp(1.2rem,2.6vw,1.7rem);line-height:1.2;margin-bottom:6px;color:var(--heading)}
+        .hero h1 span{color:var(--emerald)}
+        .sub{color:rgba(20,83,45,.82);max-width:640px;margin:0 auto;line-height:1.5;font-size:.82rem}
+        .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+        .card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:12px 10px;box-shadow:0 10px 26px -18px rgba(6,78,59,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+        .card i{font-size:1.1rem;color:var(--emerald)}
+        .card h3{font-size:.82rem;margin:6px 0 4px;color:var(--heading)}
+        .card p{font-size:.72rem;color:rgba(6,78,59,.75);line-height:1.5}
+        /* ===== ADMIN LOGIN PANEL (kanan) ===== */
+        .auth-box {
+            position: relative;
+            overflow: hidden;
+            background-color: #fff;
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            box-shadow: 0 24px 60px -24px rgba(6, 78, 59, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 1;
+        }
+            border-radius: 22px;
+            padding: 30px 26px 26px;
+            box-shadow: 0 24px 60px -24px rgba(6,78,59,.4);
+            text-align: center;
+        }
+        .auth-box::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: #fffbeb;
+            background-image: url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            clip-path: polygon(0 0,100% 0,0 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .auth-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.82));
+            z-index: 1;
+            pointer-events: none;
+        }
+        .auth-box > * { position: relative; z-index: 2; }
+        .auth-box .sanc-brand{padding:2px 8px 0;text-align:center;line-height:1.2;margin-bottom:12px}
+        .auth-box .sanc-brand .brand-name{font-family:'Poppins',sans-serif;font-size:1.65rem;font-weight:700;letter-spacing:.045em;color:var(--subheading);text-shadow:0 1px 0 rgba(255,255,255,.65)}
+        .auth-box .sanc-brand .brand-ai{margin-left:2px;padding:1px 7px 2px;border-radius:7px;font-size:.58em;letter-spacing:.06em;vertical-align:.28em;color:var(--btn-text);background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 3px 8px rgba(180,83,9,.45),inset 0 1px 0 rgba(255,255,255,.45)}
+        .auth-box .sanc-brand .brand-wave{display:block;width:118px;height:12px;margin:5px auto 0}
+        .auth-box h2 { margin-bottom: 6px; font-weight: 700; font-size: 1.28rem; color: var(--heading); }
+        .auth-box .subtitle { font-size: .86rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.6; }
+        .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-size: .82rem;
+            font-weight: 600;
+            color: var(--ink-2);
+            margin-bottom: 6px;
+            letter-spacing: .01em;
+        }
+        .auth-box input {
+            width: 100%;
+            padding: 13px 15px;
+            border-radius: 12px;
+            border: 1.5px solid var(--input-border);
+            outline: none;
+            font-size: .94rem;
+            font-family: 'Poppins', sans-serif;
+            background: var(--input-bg);
+            color: var(--heading);
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .auth-box input::placeholder {
+            color: var(--placeholder);
+        }
+        .auth-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(16,185,129,.25);
+        }
+        .password-wrapper {
+            position: relative;
+        }
+        .password-wrapper input {
+            padding-right: 50px;
+        }
+        .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            background: rgba(255,255,255,.9);
+            border: 1px solid var(--input-border);
+            border-radius: 50%;
+            color: var(--text-description);
+            font-size: 15px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: background .2s ease, border-color .2s ease;
+        }
+        .toggle-password:hover {
+            background: var(--card-bg);
+            border-color: var(--primary);
+        }
+        .toggle-password svg { width: 17px; height: 17px; }
+        .auth-box button[type="submit"] {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #f87171, #ef4444); /* Red = admin identity */
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: filter .2s ease, box-shadow .2s ease;
+            box-shadow: 0 12px 28px -10px rgba(239, 68, 68, 0.5);
+        }
+        .auth-box button[type="submit"]:hover { filter: brightness(1.05); box-shadow: 0 16px 34px -10px rgba(239, 68, 68, 0.6); }
+        .flash-message { padding: 12px 14px; margin-bottom: 14px; border-radius: 12px; font-size: .86rem; text-align: left; line-height: 1.5; word-break: break-word; background: rgba(74,222,128,.16); color: #166534; border: 1px solid rgba(74,222,128,.4); }
+        .flash-success { background: rgba(74,222,128,.2); color: #15803d; border: 1px solid rgba(74,222,128,.5); }
+        .flash-error { background: rgba(248,113,113,.14); color: #b91c1c; border: 1px solid rgba(248,113,113,.4); }
+        .error { color: #b91c1c; background: rgba(248,113,113,.14); border: 1px solid rgba(248,113,113,.35); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: .86rem; text-align: left; }
+        .switch { margin-top: 16px; font-size: .87rem; color: var(--muted); text-align: center; }
+        .switch a { color: #16a34a; font-weight: 600; text-decoration: none; }
+        .switch a:hover { text-decoration: underline; }
+        /* ===== MOBILE / ANDROID RESPONSIVE (â‰¤768px) â€” dito puwedeng mag-scroll ===== */
+        @media (max-width:768px){
+            body{height:auto;overflow:auto}
+            body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}');background-size:cover;background-attachment:scroll;-webkit-text-size-adjust:100%}
+            .split{height:auto;max-height:none;overflow:visible;grid-template-columns:1fr;grid-template-areas:"landing" "login";gap:18px;padding:24px 16px 48px;align-content:start;align-items:start}
+            .login-side{max-height:none;overflow:visible}
+            .hero{padding:18px 0 6px}
+            .logo-frame{width:104px;height:104px;margin-bottom:14px}
+            .badge{font-size:11px;letter-spacing:.6px;max-width:100%;line-height:1.6}
+            .card{padding:18px 14px}
+            .auth-box{padding:24px 18px 22px}
+        }
+        @media (max-width:480px){
+            .split{padding:18px 12px 40px}
+            .hero{padding:12px 0 4px}
+            .logo-frame{width:92px;height:92px;margin-bottom:12px}
+            .badge{font-size:10px;letter-spacing:.4px;padding:5px 10px}
+            .hero h1{font-size:1.42rem}
+            .sub{font-size:.92rem;line-height:1.65;margin-bottom:18px}
+            .auth-box h2{font-size:1.14rem}
+        }
+    </style>
+</head>
 <body>
 
+<div class="split">
+
+<!-- ===== KALIWANG SIDE: LANDING INFO ===== -->
+<section class="landing-side">
+<div class="hero">
+<div class="logo-frame"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Guiuan Logo"></div>
+<div class="badge">ESSU-GUIUAN &bull; ADMIN PORTAL</div>
+<h1>Academic Struggle Support <span>Admin Panel</span></h1>
+<p class="sub">For ESSU-Guiuan administrators â€” manage users, monitor the community, and review system logs securely.</p>
+</div>
+<div class="cards">
+<div class="card"><i class="fas fa-users-gear"></i><h3>User Management</h3><p>View, verify, and manage student accounts and access.</p></div>
+<div class="card"><i class="fas fa-comments"></i><h3>Community Oversight</h3><p>Monitor group rooms and peer chats for a safe campus space.</p></div>
+<div class="card"><i class="fas fa-shield-heart"></i><h3>Safe and Private</h3><p>Admin actions are logged. Student data stays protected.</p></div>
+</div>
+</section>
+
+<!-- ===== KANANG SIDE: ADMIN LOGIN ===== -->
+<section class="login-side">
 <div class="auth-box">
-    <div class="logo-wrap sanc-brand">
+    <div class="sanc-brand">
         <span class="brand-name">SANC<span class="brand-ai">.AI</span></span>
         <svg class="brand-wave" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
             <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+            <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
         </svg>
     </div>
-    <h2>Admin Login</h2>
+    <h2><i class="fas fa-user-shield" style="color:var(--btn-bg);margin-right:8px;"></i>Admin Login</h2>
+    <p class="subtitle">Sign in with your administrator account.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash-message flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
     {% endwith %}
 
     {% if error %}
@@ -44,19 +249,19 @@
             <div class="password-wrapper">
                 <input type="password" name="password" id="password" placeholder="Enter your password" required>
                 <span class="toggle-password" id="toggle-password-button">
-                    <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 7.61 17 4.5 12 4.5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7M2.28 4.49L.86 5.91 2 7.05C1.29 7.95.72 9 1 10.24c.73 3.38 3.97 6.03 7 6.71v-1.7c-1.73-.43-3.23-1.55-4.26-3.01c.3-.5.66-1 1.06-1.47l1.42 1.42c-.15.43-.28.88-.36 1.34h1.5c.08-.44.21-.86.39-1.26l2.11 2.11c-.4.1-.81.15-1.23.15-2.76 0-5-2.24-5-5c0-.59.11-1.16.31-1.69L2.28 4.49M12 17c.95 0 1.82-.27 2.57-.72l1.43 1.43C15.9 18.44 14.62 19 13.19 19v1.7c3.03-.68 6.27-3.33 7-6.71c.28-1.24-.29-2.29-1-3.19L17.73 8.57 12 14.3 2.28 4.49Z"/></svg>
-                    <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5m0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5 5 5Z"/></svg>
+                    <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c2.76 0 5 2.24 5 5c0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75C21.27 7.61 17 4.5 12 4.5c-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7M2.28 4.49L.86 5.91 2 7.05C1.29 7.95.72 9 1 10.24c.73 3.38 3.97 6.03 7 6.71v-1.7c-1.73-.43-3.23-1.55-4.26-3.01.3-.5.66-1 1.06-1.47l1.42 1.42c-.15.43-.28.88-.36 1.34h1.5c.08-.44.21-.86.39-1.26l2.11 2.11c-.4.1-.81.15-1.23.15-2.76 0-5-2.24-5-5c0-.59.11-1.16.31-1.69L2.28 4.49M12 17c.95 0 1.82-.27 2.57-.72l1.43 1.43C15.9 18.44 14.62 19 13.19 19v1.7c3.03-.68 6.27-3.33 7-6.71.28-1.24-.29-2.29-1-3.19L17.73 8.57 12 14.3 2.28 4.49Z"/></svg>
+                    <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5m0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5Z"/></svg>
                 </span>
             </div>
         </div>
-        <button type="submit" class="btn btn-p">Sign In as Admin</button>
+        <button type="submit">Sign In as Admin</button>
     </form>
 
-    <p class="switch">
+    <p class="switch" style="margin-top: 5px; font-size: 12px;">
         <a href="{{ url_for('admin_forgot_password') }}">Forgot Password?</a>
     </p>
     {% if not admin_exists %}
-    <p class="switch">
+    <p class="switch" style="margin-top: 5px; font-size: 12px;">
         <a href="{{ url_for('admin_register') }}">Create First Admin Account</a>
     </p>
     {% endif %}
@@ -64,6 +269,9 @@
         Not an admin? <a href="{{ url_for('login') }}">Go to User Login</a>
     </p>
 </div>
+</section>
+
+</div> <!-- /split -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -76,10 +284,12 @@
             toggleButton.addEventListener('click', function () {
                 const isPassword = passwordInput.type === 'password';
                 if (isPassword) {
+                    // Show password
                     passwordInput.type = 'text';
                     eyeClosed.style.display = 'none';
                     eyeOpen.style.display = 'inline';
                 } else {
+                    // Hide password
                     passwordInput.type = 'password';
                     eyeOpen.style.display = 'none';
                     eyeClosed.style.display = 'inline';
