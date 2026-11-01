@@ -21,8 +21,11 @@
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
-            padding: 40px 24px 24px 24px;
+            padding: 20px 24px 40px 24px;
             box-sizing: border-box;
+            /* Iwasan ang cut-off: pwede mag-scroll kung masyadong matagal ang form */
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         body::before {
