@@ -9,17 +9,19 @@
 
 :root {
     /* Backgrounds */
-    --login-bg: #D1FAE5;
-    --login-bg-left: #34D399;
-    --login-bg-right: #ECFDF5;
+    --bg-main: #ECFDF5;
+    --bg-light: #F0FDF4;
+    --bg-mint: #D1FAE5;
+    --bg-wave: #86EFAC;
+    --bg-wave-light: #BBF7D0;
 
     /* Text */
-    --logo-text: #064E3B;
-    --heading-text: #065F46;
-    --input-text: #1F2937;
+    --heading: #064E3B;
+    --subheading: #065F46;
+    --text-green: #047857;
+    --text-description: #477B62;
+    --text-muted: #6B8F7A;
     --placeholder: #94A3A0;
-    --forgot-link: #047857;
-    --create-link: #059669;
 
     /* Cards */
     --card-bg: #FFFFFF;
@@ -30,23 +32,21 @@
     /* Forms */
     --input-bg: #FFFFFF;
     --input-border: #A7F3D0;
-    --input-focus-border: #10B981;
+    --input-focus: #10B981;
     --input-focus-shadow: rgba(16, 185, 129, 0.20);
 
     /* Buttons */
-    --btn-emerald: #10B981;
-    --btn-emerald-hover: #059669;
-    --btn-bg: #FFFFFF;
-    --btn-bg-hover: #F0FDF4;
+    --btn-bg: #10B981;
+    --btn-hover: #059669;
+    --btn-text: #FFFFFF;
 
     /* Links */
-    --accent-link: #059669;
-    --accent-hover: #047857;
+    --emerald: #059669;
 
     /* Status colors */
-    --success-bg: rgba(74, 222, 128, 0.12);
-    --success-border: rgba(74, 222, 128, 0.35);
-    --success-color: #15803d;
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --success-border: rgba(16, 185, 129, 0.35);
+    --success-color: var(--text-green);
     --danger-bg: rgba(248, 113, 113, 0.12);
     --danger-border: rgba(248, 113, 113, 0.35);
     --danger-color: #b91c1c;
@@ -76,8 +76,8 @@
 body {
     min-height: 100vh;
     font-family: 'Inter', 'Segoe UI', 'Poppins', sans-serif;
-    color: var(--heading-text);
-    background: linear-gradient(160deg, var(--login-bg) 0%, var(--login-bg-right) 100%);
+    color: var(--subheading);
+    background: linear-gradient(160deg, var(--bg-mint) 0%, var(--bg-main) 100%);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -115,7 +115,7 @@ body {
     font-family: 'Poppins', 'Inter', 'Segoe UI', sans-serif;
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--logo-text);
+    color: var(--heading);
     letter-spacing: 0.04em;
 }
 
@@ -127,7 +127,7 @@ body {
     letter-spacing: 0.06em;
     vertical-align: 0.28em;
     color: #fff8e7;
-    background: linear-gradient(135deg, var(--login-bg-left), var(--heading-text));
+    background: linear-gradient(135deg, var(--fresh-mint), var(--subheading));
 }
 
 .auth-box .logo-wrap .brand-wave {
@@ -138,7 +138,7 @@ body {
 }
 
 .auth-box h2 {
-    color: var(--heading-text);
+    color: var(--subheading);
     text-align: center;
     margin-bottom: 20px;
     font-size: 1.25rem;
@@ -152,7 +152,7 @@ body {
     display: block;
     font-size: 0.82rem;
     font-weight: 600;
-    color: var(--heading-text);
+    color: var(--subheading);
     margin-bottom: 6px;
     letter-spacing: 0.01em;
 }
@@ -168,14 +168,14 @@ body {
     font-size: 0.92rem;
     font-family: inherit;
     background: var(--input-bg);
-    color: var(--input-text);
+    color: var(--heading);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: var(--input-focus-border);
+    border-color: var(--input-focus);
     box-shadow: var(--input-focus-shadow);
 }
 
@@ -211,13 +211,13 @@ body {
 }
 
 .btn-p {
-    background: var(--btn-emerald);
+    background: var(--btn-bg);
     color: #FFFFFF;
     box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
 }
 
 .btn-p:hover {
-    background: var(--btn-emerald-hover);
+    background: var(--btn-hover);
     color: #FFFFFF;
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
@@ -225,13 +225,13 @@ body {
 
 .btn-outline {
     background: transparent;
-    border: 2px solid var(--btn-emerald);
-    color: var(--btn-emerald);
+    border: 2px solid var(--btn-bg);
+    color: var(--btn-bg);
     width: auto;
 }
 
 .btn-outline:hover {
-    background: var(--btn-emerald);
+    background: var(--btn-bg);
     color: #FFFFFF;
 }
 
@@ -239,19 +239,19 @@ body {
 .switch {
     margin-top: 20px;
     font-size: 0.88rem;
-    color: var(--heading-text);
+    color: var(--subheading);
     text-align: center;
 }
 
 .switch a {
-    color: var(--create-link);
+    color: var(--emerald);
     font-weight: 600;
     text-decoration: none;
     transition: color 0.2s ease;
 }
 
 .switch a:hover {
-    color: var(--accent-hover);
+    color: var(--text-green);
     text-decoration: underline;
 }
 
@@ -264,7 +264,7 @@ body {
 }
 
 .forgot-password a {
-    color: var(--forgot-link);
+    color: var(--text-green);
     font-size: 0.82rem;
     font-weight: 600;
     text-decoration: none;
@@ -288,7 +288,7 @@ body {
 
 .password-footer p {
     font-size: 0.76rem;
-    color: var(--heading-text);
+    color: var(--subheading);
     margin: 0;
 }
 
@@ -299,7 +299,7 @@ body {
     border-radius: 999px;
     border: 1px solid var(--input-border);
     background: rgba(255, 255, 255, 0.55);
-    color: var(--heading-text);
+    color: var(--subheading);
     cursor: pointer;
     font-family: inherit;
     font-weight: 600;
@@ -308,7 +308,7 @@ body {
 
 .password-footer button:hover {
     background: rgba(255, 255, 255, 0.9);
-    border-color: var(--btn-emerald);
+    border-color: var(--btn-bg);
 }
 
 /* ===== Form check ===== */
@@ -324,17 +324,17 @@ body {
     height: 18px !important;
     flex-shrink: 0;
     cursor: pointer;
-    accent-color: var(--btn-emerald);
+    accent-color: var(--btn-bg);
 }
 
 .form-check-label {
     font-size: 0.85rem;
-    color: var(--heading-text);
+    color: var(--subheading);
     line-height: 1.5;
 }
 
 .form-check-label a {
-    color: var(--btn-emerald);
+    color: var(--btn-bg);
     font-weight: 600;
     text-decoration: none;
 }
@@ -389,7 +389,7 @@ body {
 }
 
 .admin-login h2 {
-    color: var(--heading-text);
+    color: var(--subheading);
     text-align: center;
     margin-bottom: 24px;
     font-size: 1.3rem;
