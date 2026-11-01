@@ -10,19 +10,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* ===== Parehong design system ng landing + login page ===== */
-        :root{--ink:#064E3B;--ink-2:#477B62;--muted:#6B8F7A;--green:#22C55E;--green-2:#10B981;--yellow:#ECFDF5;--card:rgba(255,255,255,.78);--card-border:#A7F3D0}
+        :root{--primary:#10B981;--primary-hover:#059669;--primary-dark:#047857;--emerald:#059669;--fresh-mint:#34D399;--soft-emerald:#6EE7B7;--light-mint:#A7F3D0;--bg-main:#ECFDF5;--bg-light:#F0FDF4;--bg-mint:#D1FAE5;--bg-wave:#86EFAC;--bg-wave-light:#BBF7D0;--heading:#064E3B;--subheading:#065F46;--text-green:#047857;--text-description:#477B62;--text-muted:#6B8F7A;--card-bg:#FFFFFF;--card-border:#A7F3D0;--input-bg:#FFFFFF;--input-border:#A7F3D0;--input-focus:#10B981;--placeholder:#94A3A0;--btn-bg:#10B981;--btn-hover:#059669;--btn-text:#FFFFFF}
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             min-height: 100vh;
             font-family: 'Poppins', sans-serif;
-            color: var(--ink);
+            color: var(--heading);
             background:#D1FAE5 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
         }
         body::before {
             content: '';
             position: fixed;
             inset: 0;
-            background: linear-gradient(160deg,rgba(220,252,231,.28),rgba(187,247,208,.20));
+            background: linear-gradient(160deg,rgba(236,253,245,.28),rgba(236,253,245,.20));
             z-index: 1;
         }
         /* ===== SPLIT: landing info sa KALIWA, admin login sa KANAN — walang page scroll sa desktop ===== */
@@ -33,15 +33,15 @@
         .login-side{grid-area:login;min-width:0;min-height:0;max-height:calc(100vh - 28px);overflow-y:auto;scrollbar-width:thin}
         .hero{text-align:center;padding:6px 10px 0}
         .logo-frame{width:64px;height:64px;margin:0 auto 8px;border-radius:50%;padding:5px;background:#fff;box-shadow:0 0 0 4px rgba(52,211,153,.45),0 10px 30px rgba(6,78,59,.18)}
-        .badge{display:inline-block;font-size:10px;letter-spacing:.8px;font-weight:600;color:#166534;background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.45);border-radius:999px;padding:4px 12px;margin-bottom:8px}
-        .hero h1{font-size:clamp(1.2rem,2.6vw,1.7rem);line-height:1.2;margin-bottom:6px;color:var(--ink)}
-        .hero h1 span{color:#16a34a}
+        .badge{display:inline-block;font-size:10px;letter-spacing:.8px;font-weight:600;color:var(--text-green);background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.45);border-radius:999px;padding:4px 12px;margin-bottom:8px}
+        .hero h1{font-size:clamp(1.2rem,2.6vw,1.7rem);line-height:1.2;margin-bottom:6px;color:var(--heading)}
+        .hero h1 span{color:var(--emerald)}
         .sub{color:rgba(20,83,45,.82);max-width:640px;margin:0 auto;line-height:1.5;font-size:.82rem}
         .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
-        .card{background:var(--card);border:1px solid var(--card-border);border-radius:14px;padding:12px 10px;box-shadow:0 10px 26px -18px rgba(20,83,45,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-        .card i{font-size:1.1rem;color:#16a34a}
-        .card h3{font-size:.82rem;margin:6px 0 4px;color:var(--ink)}
-        .card p{font-size:.72rem;color:rgba(20,83,45,.75);line-height:1.5}
+        .card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:14px;padding:12px 10px;box-shadow:0 10px 26px -18px rgba(6,78,59,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+        .card i{font-size:1.1rem;color:var(--emerald)}
+        .card h3{font-size:.82rem;margin:6px 0 4px;color:var(--heading)}
+        .card p{font-size:.72rem;color:rgba(6,78,59,.75);line-height:1.5}
         /* ===== ADMIN LOGIN PANEL (kanan) ===== */
         .auth-box {
             position: relative;
@@ -56,7 +56,7 @@
         }
             border-radius: 22px;
             padding: 30px 26px 26px;
-            box-shadow: 0 24px 60px -24px rgba(20,83,45,.4);
+            box-shadow: 0 24px 60px -24px rgba(6,78,59,.4);
             text-align: center;
         }
         .auth-box::after {
@@ -82,11 +82,11 @@
         }
         .auth-box > * { position: relative; z-index: 2; }
         .auth-box .sanc-brand{padding:2px 8px 0;text-align:center;line-height:1.2;margin-bottom:12px}
-        .auth-box .sanc-brand .brand-name{font-family:'Poppins',sans-serif;font-size:1.65rem;font-weight:700;letter-spacing:.045em;color:#3b2507;text-shadow:0 1px 0 rgba(255,255,255,.65)}
-        .auth-box .sanc-brand .brand-ai{margin-left:2px;padding:1px 7px 2px;border-radius:7px;font-size:.58em;letter-spacing:.06em;vertical-align:.28em;color:#fff8e7;background:linear-gradient(135deg,#f59e0b,#b45309);box-shadow:0 3px 8px rgba(180,83,9,.45),inset 0 1px 0 rgba(255,255,255,.45)}
+        .auth-box .sanc-brand .brand-name{font-family:'Poppins',sans-serif;font-size:1.65rem;font-weight:700;letter-spacing:.045em;color:var(--subheading);text-shadow:0 1px 0 rgba(255,255,255,.65)}
+        .auth-box .sanc-brand .brand-ai{margin-left:2px;padding:1px 7px 2px;border-radius:7px;font-size:.58em;letter-spacing:.06em;vertical-align:.28em;color:var(--btn-text);background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 3px 8px rgba(180,83,9,.45),inset 0 1px 0 rgba(255,255,255,.45)}
         .auth-box .sanc-brand .brand-wave{display:block;width:118px;height:12px;margin:5px auto 0}
-        .auth-box h2 { margin-bottom: 6px; font-weight: 700; font-size: 1.28rem; color: var(--ink); }
-        .auth-box .subtitle { font-size: .86rem; color: var(--muted); margin-bottom: 18px; line-height: 1.6; }
+        .auth-box h2 { margin-bottom: 6px; font-weight: 700; font-size: 1.28rem; color: var(--heading); }
+        .auth-box .subtitle { font-size: .86rem; color: var(--text-muted); margin-bottom: 18px; line-height: 1.6; }
         .form-group {
             text-align: left;
             margin-bottom: 16px;
@@ -103,20 +103,20 @@
             width: 100%;
             padding: 13px 15px;
             border-radius: 12px;
-            border: 1.5px solid rgba(134,239,172,.55);
+            border: 1.5px solid var(--input-border);
             outline: none;
             font-size: .94rem;
             font-family: 'Poppins', sans-serif;
-            background: #fff;
-            color: var(--ink);
+            background: var(--input-bg);
+            color: var(--heading);
             transition: border-color .2s ease, box-shadow .2s ease;
         }
         .auth-box input::placeholder {
-            color: var(--muted);
+            color: var(--placeholder);
         }
         .auth-box input:focus {
-            border-color: var(--green-2);
-            box-shadow: 0 0 0 4px rgba(74,222,128,.25);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(16,185,129,.25);
         }
         .password-wrapper {
             position: relative;
@@ -132,9 +132,9 @@
             width: 30px;
             height: 30px;
             background: rgba(255,255,255,.9);
-            border: 1px solid rgba(134,239,172,.55);
+            border: 1px solid var(--input-border);
             border-radius: 50%;
-            color: var(--ink-2);
+            color: var(--text-description);
             font-size: 15px;
             line-height: 1;
             cursor: pointer;
@@ -145,8 +145,8 @@
             transition: background .2s ease, border-color .2s ease;
         }
         .toggle-password:hover {
-            background: #fff;
-            border-color: var(--green);
+            background: var(--card-bg);
+            border-color: var(--primary);
         }
         .toggle-password svg { width: 17px; height: 17px; }
         .auth-box button[type="submit"] {
@@ -221,10 +221,10 @@
         <span class="brand-name">SANC<span class="brand-ai">.AI</span></span>
         <svg class="brand-wave" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
             <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round"/>
-            <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+            <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
         </svg>
     </div>
-    <h2><i class="fas fa-user-shield" style="color:#ef4444;margin-right:8px;"></i>Admin Login</h2>
+    <h2><i class="fas fa-user-shield" style="color:var(--btn-bg);margin-right:8px;"></i>Admin Login</h2>
     <p class="subtitle">Sign in with your administrator account.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
