@@ -129,6 +129,33 @@
             width: 100% !important;
             box-sizing: border-box;
         }
+
+        /* Password eye icon: nasa loob ng input, right side, hindi labas */
+        .password-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-container input {
+            width: 100% !important;
+            padding-right: 40px !important;
+            box-sizing: border-box;
+        }
+        #togglePassword {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+        }
+        #togglePassword svg {
+            width: 1.4em !important;
+            height: 1.4em !important;
+            opacity: 0.75;
+        }
         @media (max-width: 480px) {
             .form-row > .form-group {
                 flex-basis: 100%;
