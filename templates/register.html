@@ -16,6 +16,13 @@
         body {
             font-family: 'Poppins', 'Inter', sans-serif;
             background: #dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            box-sizing: border-box;
         }
 
         body::before {
@@ -34,7 +41,11 @@
             box-shadow: 0 24px 60px -24px rgba(20, 83, 45, 0.4);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
+            width: 100%;
             max-width: 520px;
+            margin: 0 auto;
+            padding: 32px;
+            box-sizing: border-box;
         }
 
         /* SANC.AI wordmark sa register — sakto lang ang laki */
@@ -86,12 +97,19 @@
             font-family: inherit;
         }
 
-        /* Mobile: scroll ang background gaya ng landing page */
+        /* Mobile: scroll ang background gaya ng landing page, centered card */
         @media (max-width: 768px) {
             body {
                 background-attachment: scroll;
                 background-size: cover;
                 -webkit-text-size-adjust: 100%;
+                padding: 16px;
+            }
+            .auth-box {
+                width: 100%;
+                max-width: 520px;
+                margin: 0 auto;
+                padding: 20px;
             }
         }
     </style>
