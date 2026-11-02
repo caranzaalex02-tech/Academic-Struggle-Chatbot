@@ -9,6 +9,13 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <style>
+body {
+    background: #dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Inter', 'Segoe UI', 'Poppins', sans-serif;
+    color: #164E3B;
+}
 
 /* ============================================================
    SIDEBAR — premium professional, modern SaaS style
@@ -20,13 +27,13 @@ left:0;
 bottom:0;
 width:272px;
 /* Gold fluid wavy abstract background — gold_fluid_waves_bg.svg */
-background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-color:#6d5a12;
+background:linear-gradient(180deg, #065F46 0%, #047857 55%, #064E3B 100%);
+color:#FFFFFF;
 display:flex;
 flex-direction:column;
 z-index:50;
-box-shadow:4px 0 24px rgba(80,53,10,0.35), 1px 0 0 rgba(255,255,255,0.18);
-border-right:1px solid rgba(120,80,15,0.25);
+box-shadow:4px 0 24px rgba(6, 95, 70, 0.35), 1px 0 0 rgba(255,255,255,0.18);
+border-right:1px solid rgba(255,255,255,0.2);
 overflow-y:auto;
 overflow-x:hidden;
 }
@@ -42,8 +49,8 @@ font-family:'Poppins','Inter','Segoe UI',sans-serif;
 font-size:1.55rem;
 font-weight:700;
 letter-spacing:0.045em;
-color:#6d5a12;
-text-shadow:0 1px 0 rgba(255,255,255,0.5);
+color:#FFFFFF;
+text-shadow:0 1px 0 rgba(0,0,0,0.3);
 }
 .sidebar-brand .brand-ai{
 margin-left:2px;
@@ -52,9 +59,9 @@ border-radius:7px;
 font-size:0.58em;
 letter-spacing:0.06em;
 vertical-align:0.28em;
-color:#fff8e7;
-background:linear-gradient(135deg,#f59e0b,#b45309);
-box-shadow:0 3px 8px rgba(180,83,9,0.45), inset 0 1px 0 rgba(255,255,255,0.45);
+color:#ffffff;
+background:linear-gradient(135deg,#10B981,#059669);
+box-shadow:0 3px 8px rgba(5,150,105,0.4), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 .sidebar-brand .brand-wave{
 display:block;
@@ -69,7 +76,7 @@ display:flex;
 align-items:center;
 gap:12px;
 padding:24px 20px 20px;
-border-bottom:1px solid rgba(120,80,15,0.18);
+border-bottom:1px solid rgba(255,255,255,0.25);
 margin:0 4px 20px;
 }
 .sidebar-avatar{
@@ -77,13 +84,13 @@ flex-shrink:0;
 width:44px;
 height:44px;
 border-radius:14px;
-background:linear-gradient(135deg,#f59e0b,#d97706);
+background:linear-gradient(135deg,#10B981,#059669);
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:18px;
-color:#fffbea;
-box-shadow:0 8px 20px rgba(217,119,6,0.45);
+color:#FFFFFF;
+box-shadow:0 8px 20px rgba(5,150,105,0.45);
 position:relative;
 }
 .sidebar-avatar::after{
@@ -94,8 +101,8 @@ right:-2px;
 width:12px;
 height:12px;
 border-radius:50%;
-background:#16a34a;
-border:2px solid #fde68a;
+background:#22C55E;
+border:2px solid #D1FAE5;
 }
 .sidebar-user-info{
 min-width:0;
@@ -103,7 +110,7 @@ min-width:0;
 .sidebar-user-name{
 font-size:0.88rem;
 font-weight:700;
-color:#7c6a12;
+color:#FFFFFF;
 letter-spacing:-0.01em;
 white-space:nowrap;
 overflow:hidden;
@@ -111,7 +118,7 @@ text-overflow:ellipsis;
 }
 .sidebar-user-email{
 font-size:0.68rem;
-color:#9a8a1c;
+color:#A7F3D0;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -126,7 +133,7 @@ font-size:0.65rem;
 font-weight:700;
 text-transform:uppercase;
 letter-spacing:0.08em;
-color:#a5901e;
+color:#A7F3D0;
 }
 
 /* ---- Navigation nav ---- */
@@ -141,7 +148,7 @@ flex-direction:column;
 display:flex;
 align-items:center;
 gap:12px;
-color:#8a6d1a;
+color:#ECFDF5;
 text-decoration:none;
 padding:10px 14px;
 border-radius:10px;
@@ -157,36 +164,37 @@ width:20px;
 text-align:center;
 font-size:16px;
 transition:color 0.2s ease, transform 0.2s ease;
+color:#A7F3D0;
 }
 .sidebar a:hover{
-background:rgba(255,255,255,0.55);
-color:#5a4a0c;
-box-shadow:inset 0 0 0 1px rgba(217,119,6,0.25);
+background:#047857;
+color:#FFFFFF;
+box-shadow:inset 0 0 0 1px rgba(16,185,129,0.25);
 }
 .sidebar a:hover i{
-color:#b45309;
+color:#FFFFFF;
 transform:translateX(2px);
 }
 .sidebar a.active{
-background:linear-gradient(135deg,rgba(245,158,11,0.35),rgba(253,230,138,0.55));
-color:#5a4a0c;
-box-shadow:inset 0 0 0 1px rgba(180,83,9,0.45);
+background:#10B981;
+color:#FFFFFF;
+box-shadow:inset 0 0 0 1px rgba(255,255,255,0.45);
 }
 .sidebar a.active i{
-color:#92400e;
+color:#FFFFFF;
 }
 
 /* ---- Sidebar footer ---- */
 .sidebar-footer{
 padding:12px 16px 20px;
-border-top:1px solid rgba(120,80,15,0.2);
+border-top:1px solid rgba(255,255,255,0.15);
 margin:12px 12px 0;
 }
 .sidebar-footer a{
 display:flex;
 align-items:center;
 gap:10px;
-color:#7c2d12;
+color:#A7F3D0;
 text-decoration:none;
 padding:8px 10px;
 border-radius:8px;
@@ -195,21 +203,18 @@ font-weight:600;
 transition:all 0.2s ease;
 }
 .sidebar-footer a:hover{
-background:rgba(255,255,255,0.55);
-color:#b91c1c;
-}
-.sidebar-footer a:hover i{
-color:#dc2626;
+background:rgba(255,255,255,0.15);
+color:#FFFFFF;
 }
 .sidebar-footer a i{
 font-size:15px;
-transition:color 0.2s ease;
+color:#D1FAE5;
 }
 
 /* ---- Sidebar separator divider ---- */
 .sidebar-divider{
 height:1px;
-background:rgba(120,80,15,0.22);
+background:rgba(255,255,255,0.15);
 margin:8px 16px;
 }
 .sidebar-page{margin-left:272px;flex:1;min-height:100vh;min-width:0;display:flex;justify-content:center;align-items:flex-start;padding:40px 20px;}
@@ -231,8 +236,8 @@ margin:8px 16px;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-    box-shadow:0 4px 16px rgba(80,53,10,0.2);
+    background:linear-gradient(180deg, #065F46 0%, #047857 55%, #064E3B 100%);
+    box-shadow:0 4px 16px rgba(6, 95, 70, 0.2);
   }
   .sidebar-user { display: none; }
   .sidebar-divider { display: none; }
@@ -412,28 +417,31 @@ tr:hover{
 
 /* Action buttons */
 a.action-btn{
-    color:#fff;
+    color:#064E3B;
     text-decoration:none;
     padding:6px 12px;
     border-radius:8px;
-    background:linear-gradient(135deg,#22c55e,#16a34a);
+    background:#D1FAE5;
+    border:1px solid #A7F3D0;
     font-size:13px;
     font-weight:600;
     transition:0.3s;
-    box-shadow:0 4px 12px rgba(34,197,94,0.3);
+    box-shadow:0 2px 6px rgba(16, 185, 129, 0.2);
 }
 a.action-btn:hover{
-    background:#16a34a;
-    color:#fff;
+    background:#A7F3D0;
+    color:#047857;
 }
 
-/* Style for the delete button to separate it */
+/* Delete button */
 a.action-btn.delete-btn {
-    background: rgba(255, 99, 71, 0.4); /* Distinct color for delete */
+    background: rgba(248, 113, 113, 0.1);
+    color: #b91c1c;
+    border: 1px solid rgba(248, 113, 113, 0.2);
 }
 a.action-btn.delete-btn:hover {
-    background: #ff4757; /* Brighter red on hover */
-    color: white;
+    background: rgba(248, 113, 113, 0.2);
+    color: #b91c1c;
 }
 
 /* Style for highlighted search text */
@@ -484,12 +492,12 @@ mark {
     table{min-width:0;}
     thead{display:none;}
     tbody tr{
-        background:rgba(255,255,255,0.65);
-        border:1px solid rgba(14,165,185,0.25);
+        background:#FFFFFF;
+        border:1px solid #D1FAE5;
         border-radius:12px;
         margin-bottom:12px;
         padding:10px 12px;
-        box-shadow:0 2px 8px rgba(26,74,90,0.08);
+        box-shadow:0 2px 8px rgba(6, 95, 70, 0.08);
     }
     tbody td{
         padding:5px 0;
@@ -499,11 +507,12 @@ mark {
         word-break:break-word;
         overflow-wrap:anywhere;
         text-align:left;
+        color:#164E3B;
     }
-    tbody td:nth-child(1){font-size:0.75rem;color:#5a8a9a;padding-bottom:2px;}
-    tbody td:nth-child(2)::before{content:"You: ";font-weight:700;color:#0e7490;}
-    tbody td:nth-child(3)::before{content:"SANC.AI: ";font-weight:700;color:#1a4a5a;}
-    tbody td:nth-child(3){border-bottom:1px dashed rgba(14,165,185,0.3);padding-bottom:10px;margin-bottom:10px;}
+    tbody td:nth-child(1){font-size:0.75rem;color:#6B8F7A;padding-bottom:2px;}
+    tbody td:nth-child(2)::before{content:"You: ";font-weight:700;color:#059669;}
+    tbody td:nth-child(3)::before{content:"SANC.AI: ";font-weight:700;color:#064E3B;}
+    tbody td:nth-child(3){border-bottom:1px dashed #A7F3D0;padding-bottom:10px;margin-bottom:10px;}
     tbody td:nth-child(4), tbody td:nth-child(5){
         display:inline-block;
         width:calc(50% - 5px);
