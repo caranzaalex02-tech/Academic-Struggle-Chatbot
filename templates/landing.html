@@ -1,14 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Academic Struggle Support System Chatbot | ESSU-Guiuan</title>
+<title>Academic Support Chatbot | ESSU-Guiuan</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- SANC.AI logo: browser tab icon + social preview kapag shinare ang link -->
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/sanc_ai_logo.png') }}">
 <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/sanc_ai_logo.png') }}">
 <meta property="og:title" content="SANC.AI | ESSU-Guiuan Academic Support Chatbot">
-<meta property="og:description" content="Student-friendly guide for ESSU-Guiuan students — exam stress, thesis, grades, and motivation. Chat in English, Tagalog, or Waray, anytime.">
+<meta property="og:description" content="Student-friendly guide for ESSU-Guiuan students â€” exam stress, thesis, grades, and motivation. Chat in English, Tagalog, or Waray, anytime.">
 <meta property="og:image" content="{{ url_for('static', filename='images/sanc_ai_logo.png', _external=True) }}">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
@@ -21,7 +21,7 @@
 body{min-height:100vh;font-family:'Poppins',sans-serif;color:var(--heading);background:#D1FAE5 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat}
 body::before{content:'';position:fixed;inset:0;background:linear-gradient(160deg,rgba(209,250,229,.28),rgba(236,253,245,.20));z-index:1}
 
-/* ===== SPLIT LAYOUT: landing sa KALIWA, login sa KANAN — walang page scroll sa desktop ===== */
+/* ===== SPLIT LAYOUT: landing sa KALIWA, login sa KANAN â€” walang page scroll sa desktop ===== */
 html,body{height:100%}
 body{height:100vh;overflow:hidden}
 .split{position:relative;z-index:2;max-width:1200px;height:100vh;margin:0 auto;padding:14px 20px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login" "features login";grid-template-rows:auto 1fr;gap:12px 24px;align-items:start;overflow:hidden}
@@ -79,7 +79,7 @@ body{height:100vh;overflow:hidden}
 .flash-error{background:rgba(248,113,113,.14);color:#b91c1c;border:1px solid rgba(248,113,113,.4)}
 .error{color:#b91c1c;background:rgba(248,113,113,.14);border:1px solid rgba(248,113,113,.35);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.86rem;text-align:left}
 
-/* ===== MOBILE / ANDROID RESPONSIVE (≤768px) — dito puwedeng mag-scroll ===== */
+/* ===== MOBILE / ANDROID RESPONSIVE (â‰¤768px) â€” dito puwedeng mag-scroll ===== */
 @media (max-width:768px){
 /* Sa mobile, hindi maayos ang background-attachment:fixed kaya scroll na lang,
    at SVG (maliit na file) ang background para mabilis ma-load sa data connection. */
@@ -96,7 +96,7 @@ body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.
 .card{padding:18px 14px}
 .auth-card{padding:24px 18px 22px}
 }
-/* ===== TINY PHONES (≤480px) ===== */
+/* ===== TINY PHONES (â‰¤480px) ===== */
 @media (max-width:480px){
 .split{padding:18px 12px 40px}
 .hero{padding:12px 0 4px}
@@ -121,8 +121,8 @@ body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.
 <section class="landing-side">
 <div class="hero">
 <div class="logo-frame"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Guiuan Logo"></div>
-<div class="badge">ESSU-GUIUAN &bull; ACADEMIC STRUGGLE SUPPORT SYSTEM CHATBOT</div>
-<h1>Academic Struggle Support System <span>Chatbot</span></h1>
+<div class="badge">ESSU-GUIUAN &bull; ACADEMIC SUPPORT CHATBOT</div>
+<h1>Academic Support Chatbot</h1>
 <p class="sub">A student-friendly guide for ESSU-Guiuan students facing academic challenges &mdash; exam stress, thesis, grades, and motivation. Chat with the assistant in <b>English, Tagalog, or Waray</b>, anytime.</p>
 </div>
 </section>
@@ -192,7 +192,7 @@ body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.
 <div class="card"><i class="fas fa-list-ol"></i><h3>How to Use</h3><p>1. Create an account and log in. 2. Type your academic concern. 3. Follow the study tips and log your mood daily.</p></div>
 </div>
 <p class="note">Reminder: this is a study guide only and not a replacement for professional counseling. In an emergency, contact a trusted person or crisis hotline immediately.</p>
-<footer style="margin-top:10px;text-align:center;font-size:11px;color:rgba(6,78,59,.7);line-height:1.6;padding:8px 10px;">© 2026 SANC.AI Team — Alex L. Caranza, Dio P. Alain, Trinidad G. Enderio (ESSU-Guiuan). All Rights Reserved.<br><span style="font-size:10.5px;">Third-party libraries (Flask, Font Awesome, Bootstrap, etc.) belong to their respective owners.</span></footer>
+<footer style="margin-top:10px;text-align:center;font-size:11px;color:rgba(6,78,59,.7);line-height:1.6;padding:8px 10px;">Â© 2026 SANC.AI Team â€” Alex L. Caranza, Dio P. Alain, Trinidad G. Enderio (ESSU-Guiuan). All Rights Reserved.<br><span style="font-size:10.5px;">Third-party libraries (Flask, Font Awesome, Bootstrap, etc.) belong to their respective owners.</span></footer>
 </section>
 
 </div>

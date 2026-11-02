@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Login | Academic Struggle Support System Chatbot ESSU-Guiuan</title>
+    <title>Admin Login | Academic Support Chatbot ESSU-Guiuan</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,7 @@
             background: linear-gradient(160deg,rgba(236,253,245,.28),rgba(236,253,245,.20));
             z-index: 1;
         }
-        /* ===== SPLIT: landing info sa KALIWA, admin login sa KANAN â€” walang page scroll sa desktop ===== */
+        /* ===== SPLIT: landing info sa KALIWA, admin login sa KANAN Ã¢â‚¬â€ walang page scroll sa desktop ===== */
         html,body{height:100%}
         body{height:100vh;overflow:hidden}
         .split{position:relative;z-index:2;max-width:1200px;height:100vh;margin:0 auto;padding:14px 20px;display:grid;grid-template-columns:1.15fr .85fr;grid-template-areas:"landing login";gap:12px 24px;align-items:center;overflow:hidden}
@@ -172,7 +172,7 @@
         .switch { margin-top: 16px; font-size: .87rem; color: var(--muted); text-align: center; }
         .switch a { color: #16a34a; font-weight: 600; text-decoration: none; }
         .switch a:hover { text-decoration: underline; }
-        /* ===== MOBILE / ANDROID RESPONSIVE (â‰¤768px) â€” dito puwedeng mag-scroll ===== */
+        /* ===== MOBILE / ANDROID RESPONSIVE (Ã¢â€°Â¤768px) Ã¢â‚¬â€ dito puwedeng mag-scroll ===== */
         @media (max-width:768px){
             body{height:auto;overflow:auto}
             body{background-image:url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}');background-size:cover;background-attachment:scroll;-webkit-text-size-adjust:100%}
@@ -204,8 +204,8 @@
 <div class="hero">
 <div class="logo-frame"><img src="{{ url_for('static', filename='images/essu_logo_bg.png') }}" alt="ESSU Guiuan Logo"></div>
 <div class="badge">ESSU-GUIUAN &bull; ADMIN PORTAL</div>
-<h1>Academic Struggle Support <span>Admin Panel</span></h1>
-<p class="sub">For ESSU-Guiuan administrators â€” manage users, monitor the community, and review system logs securely.</p>
+<h1>Academic Support Chatbot</h1>
+<p class="sub">For ESSU-Guiuan administrators Ã¢â‚¬â€ manage users, monitor the community, and review system logs securely.</p>
 </div>
 <div class="cards">
 <div class="card"><i class="fas fa-users-gear"></i><h3>User Management</h3><p>View, verify, and manage student accounts and access.</p></div>
@@ -301,3 +301,4 @@
 
 </body>
 </html>
+
