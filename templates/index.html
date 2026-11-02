@@ -16,6 +16,55 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@600;700&display=swap');
+
+/* =====================================================
+   SANC.AI MAIN CHATBOT — UNIFIED EMERALD GREEN THEME
+   ===================================================== */
+:root {
+    --primary: #10B981;
+    --primary-hover: #059669;
+    --primary-dark: #047857;
+    --emerald: #059669;
+    --emerald-light: #34D399;
+    --forest: #065F46;
+    --forest-dark: #064E3B;
+    --mint: #A7F3D0;
+    --mint-soft: #D1FAE5;
+    --bg-main: #ECFDF5;
+    --bg-light: #F0FDF4;
+    --bg-white: #FFFFFF;
+    --text-primary: #164E3B;
+    --text-secondary: #477B62;
+    --text-muted: #6B8F7A;
+    --border-light: #D1FAE5;
+    --border-mint: #A7F3D0;
+    --success: #16A34A;
+    --warning: #D97706;
+    --danger: #DC2626;
+    --main-gradient:
+        linear-gradient(
+            110deg,
+            #6EE7B7 0%,
+            #D1FAE5 48%,
+            #F0FDF4 100%
+        );
+    --sidebar-gradient:
+        linear-gradient(
+            180deg,
+            #065F46 0%,
+            #047857 55%,
+            #064E3B 100%
+        );
+    --button-gradient:
+        linear-gradient(
+            90deg,
+            #10B981,
+            #059669
+        );
+    --shadow-soft:
+        0 8px 24px rgba(6, 95, 70, 0.12);
+}
+
 *{
 margin:0;
 padding:0;
@@ -28,11 +77,12 @@ overflow-x:hidden;
 overflow-y:auto;
 min-height:100vh;
 padding-top:0;
-/* Green & yellow abstract fluid waves — pareho ng landing/login/register pages */
+/* Unified Emerald Green Theme — fluid waves bg + soft green overlay */
 background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
 background-attachment:fixed;
 -webkit-tap-highlight-color:transparent;
 display:flex;
+color:var(--text-primary);
 }
 
 /* ESSU watermark sa kaliwa taas: soft, hindi nakakasagabal */
@@ -54,7 +104,7 @@ pointer-events:none;
 body::after{display:none;}
 
 /* ============================================================
-   SIDEBAR — premium professional, modern SaaS style
+   SIDEBAR — premium professional, modern SaaS style — EMERALD GREEN
    ============================================================ */
 .sidebar{
 position:fixed;
@@ -62,14 +112,13 @@ top:0;
 left:0;
 bottom:0;
 width:272px;
-/* Gold fluid wavy abstract background — gold_fluid_waves_bg.svg */
-background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-color:#6d5a12;
+background:var(--sidebar-gradient);
+color:#FFFFFF;
 display:flex;
 flex-direction:column;
 z-index:50;
-box-shadow:4px 0 24px rgba(80,53,10,0.35), 1px 0 0 rgba(255,255,255,0.18);
-border-right:1px solid rgba(120,80,15,0.25);
+box-shadow:4px 0 24px rgba(6, 95, 70, 0.35), 1px 0 0 rgba(255,255,255,0.18);
+border-right:1px solid rgba(255,255,255,0.2);
 overflow-y:auto;
 overflow-x:hidden;
 }
@@ -85,8 +134,8 @@ font-family:'Poppins','Inter','Segoe UI',sans-serif;
 font-size:1.55rem;
 font-weight:700;
 letter-spacing:0.045em;
-color:#6d5a12;
-text-shadow:0 1px 0 rgba(255,255,255,0.5);
+color:#FFFFFF;
+text-shadow:0 1px 0 rgba(0,0,0,0.3);
 }
 .sidebar-brand .brand-ai{
 margin-left:2px;
@@ -95,9 +144,9 @@ border-radius:7px;
 font-size:0.58em;
 letter-spacing:0.06em;
 vertical-align:0.28em;
-color:#fff8e7;
-background:linear-gradient(135deg,#f59e0b,#b45309);
-box-shadow:0 3px 8px rgba(180,83,9,0.45), inset 0 1px 0 rgba(255,255,255,0.45);
+color:#ffffff;
+background:linear-gradient(135deg,#10B981,#059669);
+box-shadow:0 3px 8px rgba(5,150,105,0.4), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 .sidebar-brand .brand-wave{
 display:block;
@@ -112,7 +161,7 @@ display:flex;
 align-items:center;
 gap:12px;
 padding:24px 20px 20px;
-border-bottom:1px solid rgba(120,80,15,0.18);
+border-bottom:1px solid rgba(255,255,255,0.25);
 margin:0 4px 20px;
 }
 .sidebar-avatar{
@@ -120,13 +169,13 @@ flex-shrink:0;
 width:44px;
 height:44px;
 border-radius:14px;
-background:linear-gradient(135deg,#f59e0b,#d97706);
+background:linear-gradient(135deg,#10B981,#059669);
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:18px;
-color:#fffbea;
-box-shadow:0 8px 20px rgba(217,119,6,0.45);
+color:#FFFFFF;
+box-shadow:0 8px 20px rgba(5,150,105,0.45);
 position:relative;
 }
 .sidebar-avatar::after{
@@ -137,8 +186,8 @@ right:-2px;
 width:12px;
 height:12px;
 border-radius:50%;
-background:#16a34a;
-border:2px solid #fde68a;
+background:#22C55E;
+border:2px solid #D1FAE5;
 }
 .sidebar-user-info{
 min-width:0;
@@ -146,7 +195,7 @@ min-width:0;
 .sidebar-user-name{
 font-size:0.88rem;
 font-weight:700;
-color:#7c6a12;
+color:#FFFFFF;
 letter-spacing:-0.01em;
 white-space:nowrap;
 overflow:hidden;
@@ -154,7 +203,7 @@ text-overflow:ellipsis;
 }
 .sidebar-user-email{
 font-size:0.68rem;
-color:#9a8a1c;
+color:#A7F3D0;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -169,7 +218,7 @@ font-size:0.65rem;
 font-weight:700;
 text-transform:uppercase;
 letter-spacing:0.08em;
-color:#a5901e;
+color:#A7F3D0;
 }
 
 /* ---- Navigation nav ---- */
@@ -184,7 +233,7 @@ flex-direction:column;
 display:flex;
 align-items:center;
 gap:12px;
-color:#8a6d1a;
+color:#ECFDF5;
 text-decoration:none;
 padding:10px 14px;
 border-radius:10px;
@@ -200,36 +249,37 @@ width:20px;
 text-align:center;
 font-size:16px;
 transition:color 0.2s ease, transform 0.2s ease;
+color:#A7F3D0;
 }
 .sidebar a:hover{
-background:rgba(255,255,255,0.55);
-color:#5a4a0c;
-box-shadow:inset 0 0 0 1px rgba(217,119,6,0.25);
+background:#047857;
+color:#FFFFFF;
+box-shadow:inset 0 0 0 1px rgba(16,185,129,0.25);
 }
 .sidebar a:hover i{
-color:#b45309;
+color:#FFFFFF;
 transform:translateX(2px);
 }
 .sidebar a.active{
-background:linear-gradient(135deg,rgba(245,158,11,0.35),rgba(253,230,138,0.55));
-color:#5a4a0c;
-box-shadow:inset 0 0 0 1px rgba(180,83,9,0.45);
+background:#10B981;
+color:#FFFFFF;
+box-shadow:inset 0 0 0 1px rgba(255,255,255,0.45);
 }
 .sidebar a.active i{
-color:#92400e;
+color:#FFFFFF;
 }
 
 /* ---- Sidebar footer ---- */
 .sidebar-footer{
 padding:12px 16px 20px;
-border-top:1px solid rgba(120,80,15,0.2);
+border-top:1px solid rgba(255,255,255,0.15);
 margin:12px 12px 0;
 }
 .sidebar-footer a{
 display:flex;
 align-items:center;
 gap:10px;
-color:#7c2d12;
+color:#A7F3D0;
 text-decoration:none;
 padding:8px 10px;
 border-radius:8px;
@@ -238,26 +288,27 @@ font-weight:600;
 transition:all 0.2s ease;
 }
 .sidebar-footer a:hover{
-background:rgba(255,255,255,0.55);
-color:#b91c1c;
+background:rgba(255,255,255,0.15);
+color:#FFFFFF;
 }
 .sidebar-footer a:hover i{
-color:#dc2626;
+color:#FFFFFF;
 }
 .sidebar-footer a i{
 font-size:15px;
 transition:color 0.2s ease;
+color:#D1FAE5;
 }
 
 /* ---- Sidebar separator divider ---- */
 .sidebar-divider{
 height:1px;
-background:rgba(120,80,15,0.22);
+background:rgba(255,255,255,0.15);
 margin:8px 16px;
 }
 
 /* ============================================================
-   MAIN CONTENT AREA — chat on the right
+   MAIN CONTENT AREA — chat on the right — EMERALD GREEN
    ============================================================ */
 .main-content{
 margin-left:260px;
@@ -270,7 +321,7 @@ padding:20px;
 }
 
 /* ============================================================
-   Chat Container — Coastal Glass 🌊
+   Chat Container — Emerald Green
    ============================================================ */
 .chat-container{
 position:relative;
@@ -280,27 +331,27 @@ max-width:960px;
 min-height:620px;
 height:min(85vh, 760px);
 max-height:85vh;
-background:rgba(255,255,255,0.55);
-backdrop-filter:blur(28px);
--webkit-backdrop-filter:blur(28px);
-border-radius:20px;
+background:rgba(240,253,244,0.94);
+backdrop-filter:blur(10px);
+-webkit-backdrop-filter:blur(10px);
+border-radius:22px;
 display:flex;
 flex-direction:column;
-color:#1a3a4a;
-box-shadow:0 8px 40px rgba(20,83,45,0.18), 0 2px 8px rgba(20,83,45,0.10), inset 0 1px 0 rgba(255,255,255,0.6);
+color:var(--text-primary);
+box-shadow:var(--shadow-soft);
 overflow:hidden;
-border:1px solid rgba(255,255,255,0.65);
+border:1px solid var(--border-mint);
 }
 
-/* ---- Chat Header — frosted glass ---- */
+/* ---- Chat Header — frosted glass — EMERALD GREEN ---- */
 .chat-header{
 flex-shrink:0;
 display:flex;
 align-items:center;
 gap:10px;
 padding:12px 20px;
-background:rgba(255,255,255,0.25);
-border-bottom:1px solid rgba(255,255,255,0.4);
+background:rgba(255,255,255,0.90);
+border-bottom:1px solid #D1FAE5;
 }
 .chat-header-info{
 display:flex;
@@ -312,7 +363,7 @@ min-width:0;
 font-family:'Poppins','Inter','Segoe UI',sans-serif;
 font-weight:600;
 font-size:0.92rem;
-color:#1a4a5a;
+color:#065F46;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -323,28 +374,28 @@ display:flex;
 align-items:center;
 gap:5px;
 font-size:0.7rem;
-color:#5a8a9a;
+color:#477B62;
 }
 .status-dot{
 width:7px;
 height:7px;
 border-radius:50%;
-background:#2dd4bf;
+background:#22C55E;
 }
 
-/* Bot avatar — ocean teal */
+/* Bot avatar — emerald */
 .bot-avatar{
 flex-shrink:0;
 width:48px;
 height:22px;
 border-radius:12px;
-background:linear-gradient(135deg,#f59e0b 0%,#b45309 100%);
+background:#059669;
 color:#fff;
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:10.5px;
-box-shadow:0 4px 12px rgba(14,165,185,0.3);
+box-shadow:0 4px 12px rgba(5,150,105,0.2);
 }
 .bot-avatar.sm{
 width:36px;
@@ -364,7 +415,7 @@ height:32px;
 border-radius:8px;
 border:1px solid transparent;
 background:transparent;
-color:#5a8a9a;
+color:#477B62;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -373,8 +424,8 @@ font-size:14px;
 transition:background 0.15s ease, color 0.15s ease;
 }
 .menu-btn:hover{
-background:rgba(14,165,185,0.1);
-color:#0e6b7a;
+background:#ECFDF5;
+color:#047857;
 }
 .dropdown{
 position:absolute;
@@ -382,13 +433,13 @@ top:40px;
 right:0;
 background:rgba(255,255,255,0.95);
 backdrop-filter:blur(20px);
-border:1px solid rgba(255,255,255,0.6);
+border:1px solid var(--border-mint);
 border-radius:12px;
 overflow:hidden;
 display:none;
 flex-direction:column;
 min-width:200px;
-box-shadow:0 12px 32px rgba(0,60,80,0.15);
+box-shadow:0 12px 32px rgba(6, 95, 70, 0.15);
 z-index:60;
 padding:4px;
 }
@@ -401,7 +452,7 @@ align-items:center;
 gap:8px;
 padding:10px 12px;
 text-decoration:none;
-color:#3a6a7a;
+color:#477B62;
 font-size:13px;
 font-weight:500;
 border-radius:8px;
@@ -410,30 +461,30 @@ transition:background 0.12s ease;
 .dropdown a i{
 width:16px;
 text-align:center;
-color:#5a8a9a;
+color:#477B62;
 font-size:12px;
 }
 .dropdown a:hover{
-background:rgba(14,165,185,0.08);
-color:#0e6b7a;
+background:#ECFDF5;
+color:#047857;
 }
 .dropdown a:hover i{
-color:#0ea5b9;
+color:#059669;
 }
 
-/* Daily quote strip — coastal */
+/* Daily quote strip — emerald */
 .quote{
 flex-shrink:0;
 font-size:11px;
-color:#4a7a8a;
-background:rgba(255,255,255,0.2);
+color:#477B62;
+background:#ECFDF5;
 padding:7px 18px;
 text-align:center;
-border-bottom:1px solid rgba(255,255,255,0.3);
+border-bottom:1px solid #D1FAE5;
 letter-spacing:0.01em;
 }
 
-/* Chat body — frosted */
+/* Chat body — frosted emerald */
 #chat-box{
 flex:1 1 auto;
 min-height:0;
@@ -442,14 +493,14 @@ display:flex;
 flex-direction:column;
 gap:12px;
 padding:20px 22px;
-background:rgba(255,255,255,0.3);
+background:transparent;
 }
 
-/* Scrollbar */
+/* Scrollbar — emerald */
 #chat-box::-webkit-scrollbar{width:5px;}
 #chat-box::-webkit-scrollbar-track{background:transparent;}
-#chat-box::-webkit-scrollbar-thumb{background:rgba(14,165,185,0.2);border-radius:10px;}
-#chat-box::-webkit-scrollbar-thumb:hover{background:rgba(14,165,185,0.4);}
+#chat-box::-webkit-scrollbar-thumb{background:#A7F3D0;border-radius:10px;}
+#chat-box::-webkit-scrollbar-thumb:hover{background:#10B981;}
 
 /* Message rows */
 .message-row{
@@ -468,7 +519,7 @@ from{opacity:0; transform:translateY(6px);}
 to{opacity:1; transform:translateY(0);}
 }
 
-/* Message bubbles — coastal palette */
+/* Message bubbles — emerald palette */
 .message{
 max-width:76%;
 padding:12px 16px;
@@ -480,23 +531,25 @@ overflow-wrap: anywhere;
 white-space: pre-wrap;
 }
 .user-row .message{
-background:linear-gradient(135deg,#f59e4b,#f97316);
-color:#fff;
+background:#059669;
+color:#FFFFFF;
+border:1px solid #059669;
 border-bottom-right-radius:6px;
-box-shadow:0 4px 12px rgba(249,115,22,0.25);
+box-shadow:0 4px 12px rgba(5,150,105,0.15);
 }
 .bot-row .message{
-background:rgba(255,255,255,0.75);
-backdrop-filter:blur(8px);
-color:#1a4a5a;
-border:1px solid rgba(255,255,255,0.5);
+background:#FFFFFF;
+color:#164E3B;
+border:1px solid #D1FAE5;
+box-shadow:0 3px 10px rgba(6,95,70,0.05);
 border-bottom-left-radius:6px;
 }
 .bot-row .message p{margin:0 0 8px;}
 .bot-row .message p:last-child{margin-bottom:0;}
-.bot-row .message strong{color:#0f3a4a;font-weight:700;}
+.bot-row .message strong{color:#164E3B;font-weight:700;}
 .bot-row .message ol,.bot-row .message ul{margin:6px 0 8px;padding-left:20px;}
 .bot-row .message li{margin-bottom:4px;}
+.message-time{color:#6B8F7A;}
 
 /* Typing indicator */
 .typing{
@@ -520,15 +573,15 @@ animation:typingBounce 1.2s infinite ease-in-out;
 30%{transform:translateY(-4px);opacity:1;}
 }
 
-/* Chat footer */
+/* Chat footer — emerald */
 .chat-footer{
 flex-shrink:0;
-background:rgba(255,255,255,0.2);
-border-top:1px solid rgba(255,255,255,0.35);
+background:rgba(255,255,255,0.90);
+border-top:1px solid #D1FAE5;
 padding:12px 18px 16px;
 }
 
-/* Input — coastal */
+/* Input — emerald */
 .input-area{
 display:flex;
 gap:8px;
@@ -538,21 +591,19 @@ align-items:center;
 flex:1;
 padding:14px 22px !important;
 border-radius:999px;
-border:1px solid rgba(255,255,255,0.5);
+border:1px solid #A7F3D0;
 outline:none;
 font-size:16px !important;
-color:#1a4a5a;
-background:rgba(255,255,255,0.55);
-backdrop-filter:blur(6px);
-transition:border-color 0.15s ease, box-shadow 0.15s ease;
+color:#164E3B;
+background:#FFFFFF;
 }
 .input-area input::placeholder{
-color:#7aacbc;
+color:#94A3A0;
 }
 .input-area input:focus{
-border-color:#0ea5b9;
-background:rgba(255,255,255,0.7);
-box-shadow:0 0 0 4px rgba(14,165,185,0.15);
+border-color:#10B981;
+background:#FFFFFF;
+box-shadow:0 0 0 3px rgba(16,185,129,0.12);
 }
 .input-area button{
 flex-shrink:0;
@@ -562,31 +613,31 @@ min-width:42px !important;
 min-height:42px !important;
 border:none;
 border-radius:50%;
-background:linear-gradient(135deg,#0ea5b9,#0891b2);
+background:var(--button-gradient);
 color:#fff;
 cursor:pointer;
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:14px !important;
-box-shadow:0 4px 14px rgba(14,165,185,0.35);
-transition:background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+box-shadow:0 4px 12px rgba(5,150,105,0.20);
+transition:all 0.25s ease;
 }
 .input-area button:hover{
-background:linear-gradient(135deg,#0891b2,#0e6b7a);
+background:#047857;
+box-shadow:var(--shadow-soft);
 transform:scale(1.04);
-box-shadow:0 6px 20px rgba(14,165,185,0.45);
 }
 .input-area button:active{
 transform:scale(0.96);
 }
 
-/* Mood section */
+/* Mood section — emerald */
 .mood-section{
 text-align:center;
 margin-top:12px;
 font-size:12px;
-color:#4a7a8a;
+color:#477B62;
 }
 .mood-btn{
 margin:4px 3px 0;
@@ -594,28 +645,32 @@ padding:6px 12px;
 border:none;
 border-radius:999px;
 cursor:pointer;
-background:rgba(255,255,255,0.4);
-backdrop-filter:blur(4px);
-color:#3a6a7a;
+background:#FFFFFF;
+color:#065F46;
 font-family:'Poppins','Inter','Segoe UI',sans-serif;
 font-weight:500;
 font-size:11.5px;
-border:1px solid rgba(255,255,255,0.45);
-transition:transform 0.12s ease, background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+border:1px solid #D1FAE5;
+transition:all 0.2s ease;
 }
 .mood-btn:hover{
-background:rgba(14,165,185,0.15);
-border-color:rgba(14,165,185,0.4);
-color:#0e6b7a;
+background:#ECFDF5;
+border-color:#10B981;
+color:#047857;
 transform:translateY(-1px);
 }
+.mood-btn.active{
+background:#D1FAE5;
+color:#047857;
+border-color:#10B981;
+}
 
-/* Rating section — coastal */
+/* Rating section — emerald */
 .rating-section {
     text-align: center;
     margin-top: 12px;
     font-size: 12px;
-    color: #4a7a8a;
+    color: #477B62;
 }
 .rating-stars {
     display: inline-block;
@@ -623,7 +678,7 @@ transform:translateY(-1px);
 }
 .rating-stars .star {
     font-size: 18px;
-    color: rgba(255,255,255,0.35);
+    color: #D1D5DB;
     cursor: pointer;
     transition: color 0.15s, transform 0.15s;
 }
@@ -633,10 +688,14 @@ transform:translateY(-1px);
 .rating-stars:hover .star,
 .rating-stars .star:hover,
 .rating-stars .star:hover ~ .star {
-    color: #f59e0b;
+    color: #F59E0B;
+}
+.rating-stars .star.active,
+.rating-stars .star.selected {
+    color: #F59E0B;
 }
 
-/* Modal Styles — coastal glass */
+/* Modal Styles — emerald glass */
 .modal {
     display: none; 
     position: fixed; 
@@ -646,21 +705,21 @@ transform:translateY(-1px);
     width: 100%; 
     height: 100%; 
     overflow: auto; 
-    background-color: rgba(0,40,60,0.5); 
+    background-color: rgba(6,78,59,0.45); 
     backdrop-filter: blur(6px);
 }
 .modal-content {
-    background: rgba(255,255,255,0.9);
+    background: #FFFFFF;
     backdrop-filter: blur(20px);
     margin: 15% auto; 
     padding: 28px 24px; 
-    border: 1px solid rgba(255,255,255,0.5);
+    border: 1px solid #D1FAE5;
     width: 88%; 
     max-width: 420px;
-    border-radius: 16px;
-    color: #1a4a5a;
+    border-radius: 22px;
+    color: #164E3B;
     text-align: center;
-    box-shadow: 0 12px 40px rgba(0,60,80,0.2);
+    box-shadow: var(--shadow-soft);
     position: relative;
     animation: slideDown 0.35s cubic-bezier(0.22,1,0.36,1);
 }
@@ -668,9 +727,9 @@ transform:translateY(-1px);
     from {opacity: 0; transform: translateY(-24px);}
     to {opacity: 1; transform: translateY(0);}
 }
-.hotline-item { margin: 14px 0; padding: 12px 14px; background: rgba(255,255,255,0.5); border-radius: 10px; border:1px solid rgba(255,255,255,0.4); }
-.hotline-title { color: #0e6b7a; font-weight: 600; display: block; margin-bottom: 4px; font-size:0.85rem; }
-.hotline-number { font-size: 1.05em; letter-spacing: 0.5px; font-weight: 600; color:#1a4a5a; }
+.hotline-item { margin: 14px 0; padding: 12px 14px; background: rgba(248, 113, 113, 0.12); border-radius: 12px; border:1px solid rgba(248, 113, 113, 0.4); }
+.hotline-title { color: #b91c1c; font-weight: 600; display: block; margin-bottom: 4px; font-size:0.85rem; }
+.hotline-number { font-size: 1.05em; letter-spacing: 0.5px; font-weight: 600; color:#DC2626; }
 .modal-close {
     position: absolute;
     top: 14px;
@@ -678,29 +737,29 @@ transform:translateY(-1px);
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    border: 1px solid rgba(14,165,185,0.2);
-    background: rgba(255,255,255,0.6);
-    color: #5a8a9a;
+    border: 1px solid #A7F3D0;
+    background: rgba(255,255,255,0.9);
+    color: #059669;
     font-size: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     line-height: 1;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.15s ease;
 }
 .modal-close:hover {
-    background: rgba(14,165,185,0.15);
-    color: #0e6b7a;
+    background: #ECFDF5;
+    color:#047857;
 }
 
-/* Breathing Exercise — ocean waves */
+/* Breathing Exercise — emerald waves */
 .breath-container { position: relative; width: 150px; height: 150px; margin: 20px auto; display: flex; justify-content: center; align-items: center; }
 .breath-circle {
     width: 80px; height: 80px;
-    background: radial-gradient(circle, #0ea5b9 0%, rgba(14,165,185,0.2) 70%);
+    background: radial-gradient(circle, #10B981 0%, rgba(16,185,129,0.2) 70%);
     border-radius: 50%;
-    box-shadow: 0 0 30px rgba(14,165,185,0.4);
+    box-shadow: 0 0 30px rgba(16,185,129,0.4);
     transform: scale(1); opacity: 0.5;
 }
 .breath-circle.active { animation: breathing 4s infinite ease-in-out; }
@@ -708,14 +767,14 @@ transform:translateY(-1px);
     0%, 100% { transform: scale(1); opacity: 0.5; }
     50% { transform: scale(2); opacity: 1; }
 }
-.breath-text { font-size: 18px; font-weight: 600; margin-top: 10px; color: #0e6b7a; min-height: 30px; }
+.breath-text { font-size: 18px; font-weight: 600; margin-top: 10px; color: #065F46; min-height: 30px; }
 
 /* ======================================================
    RESPONSIVE – MOBILE & TABLET (≤768px)
    ====================================================== */
 @media (max-width: 768px) {
 
-  /* ---- sidebar – collapse to top bar ---- */
+  /* ---- sidebar – collapse to top bar — emerald ---- */
   .sidebar {
     width: 100%;
     height: auto;
@@ -730,8 +789,8 @@ transform:translateY(-1px);
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-    box-shadow:0 4px 16px rgba(80,53,10,0.2);
+    background:var(--sidebar-gradient);
+    box-shadow:0 4px 16px rgba(6, 95, 70, 0.2);
   }
   .sidebar-user { display: none; }
   .sidebar-divider { display: none; }
@@ -762,11 +821,12 @@ transform:translateY(-1px);
     margin: 0;
     padding: 0 0 0 6px;
     border-top: none;
-    border-left: 1px solid rgba(120,80,15,0.35);
+    border-left: 1px solid rgba(255,255,255,0.15);
   }
   .sidebar-footer a {
     padding:6px 8px;
     font-size:0.7rem;
+    color:#A7F3D0;
   }
 
   /* ---- body – lock sa isang screen, walang page scroll sa mobile ---- */
@@ -1063,25 +1123,26 @@ transform:translateY(-1px);
   .message-context-menu {
       position: fixed;
       background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(6, 95, 70, 0.18);
       padding: 4px;
       z-index: 9999;
       min-width: 150px;
+      border: 1px solid #A7F3D0;
   }
   .message-context-menu button {
       display: flex; align-items: center; gap: 8px;
       width: 100%; padding: 10px 12px;
       border: none; background: none;
-      color: #1a4a5a; font-size: 13px; font-weight: 600;
+      color: #164E3B; font-size: 13px; font-weight: 600;
       cursor: pointer; border-radius: 7px; text-align: left;
   }
-  .message-context-menu button:hover { background: #fef2f2; color: #ef4444; }
+  .message-context-menu button:hover { background: #ECFDF5; color: #047857; }
   .msg-options-btn {
       display: inline-block;
-      background: rgba(239,68,68,0.12);
+      background: rgba(16, 185, 129, 0.12);
       border: none;
-      color: #ef4444;
+      color: #059669;
       cursor: pointer;
       font-size: 13px;
       line-height: 1;
@@ -1091,7 +1152,7 @@ transform:translateY(-1px);
       flex-shrink: 0;
       transition: background 0.15s;
   }
-  .msg-options-btn:hover { background: rgba(239,68,68,0.28); }
+  .msg-options-btn:hover { background: rgba(16, 185, 129, 0.28); }
   </style>
   <div id="chat-box">
   {% if not messages %}
