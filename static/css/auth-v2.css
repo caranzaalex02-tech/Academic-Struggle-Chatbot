@@ -77,12 +77,25 @@ body {
     min-height: 100vh;
     font-family: 'Inter', 'Segoe UI', 'Poppins', sans-serif;
     color: var(--subheading);
-    background: linear-gradient(160deg, var(--bg-mint) 0%, var(--bg-main) 100%);
-    position: relative;
-    overflow: hidden;
+    background: #dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover fixed no-repeat;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: flex-start;
+    padding: 20px 24px 40px 24px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(220, 252, 231, 0.28), rgba(187, 247, 208, 0.20));
+    pointer-events: none;
 }
 
 /* ===== Auth Box / Login Card ===== */
