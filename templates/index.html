@@ -18,51 +18,51 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Poppins:wght@600;700&display=swap');
 
 /* =====================================================
-   SANC.AI MAIN CHATBOT — ARCHIVED ORANGE THEME
+   SANC.AI MAIN CHATBOT — EMERALD GREEN THEME (matches archived)
    ===================================================== */
 :root {
-    --primary: #F59E0B;
-    --primary-hover: #D97706;
-    --primary-dark: #B45309;
+    --primary: #10B981;
+    --primary-hover: #059669;
+    --primary-dark: #047857;
     --emerald: #059669;
     --emerald-light: #34D399;
     --forest: #065F46;
     --forest-dark: #064E3B;
     --mint: #A7F3D0;
     --mint-soft: #D1FAE5;
-    --bg-main: #FFFBEB;
-    --bg-light: #FEF3CF;
+    --bg-main: #ECFDF5;
+    --bg-light: #F0FDF4;
     --bg-white: #FFFFFF;
-    --text-primary: #92400E;
-    --text-secondary: #78350F;
-    --text-muted: #A16207;
-    --border-light: #FBBF24;
-    --border-mint: #F59E0B;
+    --text-primary: #164E3B;
+    --text-secondary: #477B62;
+    --text-muted: #6B8F7A;
+    --border-light: #D1FAE5;
+    --border-mint: #A7F3D0;
     --success: #16A34A;
     --warning: #D97706;
     --danger: #DC2626;
     --main-gradient:
         linear-gradient(
             110deg,
-            #FDE68A 0%,
-            #FBBF24 48%,
-            #FEF3CF 100%
+            #6EE7B7 0%,
+            #D1FAE5 48%,
+            #F0FDF4 100%
         );
     --sidebar-gradient:
         linear-gradient(
             180deg,
-            #D97706 0%,
-            #F59E0B 55%,
-            #B45309 100%
+            #065F46 0%,
+            #047857 55%,
+            #064E3B 100%
         );
     --button-gradient:
         linear-gradient(
             90deg,
-            #F59E0B,
-            #D97706
+            #10B981,
+            #059669
         );
     --shadow-soft:
-        0 8px 24px rgba(217, 119, 6, 0.12);
+        0 8px 24px rgba(6, 95, 70, 0.12);
 }
 
 *{
@@ -688,11 +688,11 @@ border-color:#10B981;
 .rating-stars:hover .star,
 .rating-stars .star:hover,
 .rating-stars .star:hover ~ .star {
-    color: #F59E0B;
+    color: #10B981;
 }
 .rating-stars .star.active,
 .rating-stars .star.selected {
-    color: #F59E0B;
+    color: #10B981;
 }
 
 /* Modal Styles — emerald glass */
@@ -1058,8 +1058,8 @@ border-color:#10B981;
   <div class="sidebar-brand">
     <span class="brand-name">SANC<span class="brand-ai">.AI</span></span>
     <svg class="brand-wave" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round"/>
-      <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+      <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#059669" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
     </svg>
   </div>
 
@@ -1084,8 +1084,8 @@ border-color:#10B981;
     <a href="{{ url_for('archived_room') }}"><i class="fas fa-box-archive"></i> Archived</a>
     <a href="{{ url_for('restart_chat') }}" onclick="return confirm('Clear and archive this chat?');"><i class="fas fa-undo-alt"></i> Restart Chat</a>
     <div class="sidebar-divider"></div>
-    <a href="#" onclick="event.preventDefault(); showHotlines();" style="color:#92400e;"><i class="fas fa-phone-alt"></i> Emergency Hotlines</a>
-    <a href="#" onclick="event.preventDefault(); showSafetyNotice();" style="color:#92400e;"><i class="fas fa-exclamation-triangle"></i> Safety Notice</a>
+    <a href="#" onclick="event.preventDefault(); showHotlines();" style="color:#065F46;"><i class="fas fa-phone-alt"></i> Emergency Hotlines</a>
+    <a href="#" onclick="event.preventDefault(); showSafetyNotice();" style="color:#065F46;"><i class="fas fa-exclamation-triangle"></i> Safety Notice</a>
   </nav>
 
   <!-- Footer -->
