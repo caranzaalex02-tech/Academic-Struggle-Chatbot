@@ -19,14 +19,14 @@ top:0;
 left:0;
 bottom:0;
 width:272px;
-/* Gold fluid wavy abstract background — gold_fluid_waves_bg.svg */
-background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-color:#6d5a12;
+/* Emerald Green — matches chatbot palette */
+background:linear-gradient(180deg,#065F46 0%,#047857 55%,#064E3B 100%) url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
+color:#FFFFFF;
 display:flex;
 flex-direction:column;
 z-index:50;
-box-shadow:4px 0 24px rgba(80,53,10,0.2), 1px 0 0 rgba(255,255,255,0.12);
-border-right:1px solid rgba(120,80,15,0.15);
+box-shadow:4px 0 24px rgba(6,95,70,0.35), 1px 0 0 rgba(255,255,255,0.18);
+border-right:1px solid rgba(255,255,255,0.2);
 overflow-y:auto;
 overflow-x:hidden;
 }
@@ -42,8 +42,8 @@ font-family:'Poppins','Inter','Segoe UI',sans-serif;
 font-size:1.55rem;
 font-weight:700;
 letter-spacing:0.045em;
-color:#6d5a12;
-text-shadow:0 1px 0 rgba(255,255,255,0.5);
+color:#FFFFFF;
+text-shadow:0 1px 0 rgba(0,0,0,0.3);
 }
 .sidebar-brand .brand-ai{
 margin-left:2px;
@@ -52,9 +52,9 @@ border-radius:7px;
 font-size:0.58em;
 letter-spacing:0.06em;
 vertical-align:0.28em;
-color:#fff8e7;
-background:linear-gradient(135deg,#f59e0b,#b45309);
-box-shadow:0 3px 8px rgba(180,83,9,0.45), inset 0 1px 0 rgba(255,255,255,0.45);
+color:#ffffff;
+background:linear-gradient(135deg,#10B981,#059669);
+box-shadow:0 3px 8px rgba(5,150,105,0.4), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 .sidebar-brand .brand-wave{
 display:block;
@@ -69,7 +69,7 @@ display:flex;
 align-items:center;
 gap:12px;
 padding:24px 20px 20px;
-border-bottom:1px solid rgba(120,80,15,0.18);
+border-bottom:1px solid rgba(255,255,255,0.25);
 margin:0 4px 20px;
 }
 .sidebar-avatar{
@@ -77,13 +77,13 @@ flex-shrink:0;
 width:44px;
 height:44px;
 border-radius:14px;
-background:linear-gradient(135deg,#f59e0b,#d97706);
+background:linear-gradient(135deg,#10B981,#059669);
 display:flex;
 align-items:center;
 justify-content:center;
 font-size:18px;
-color:#fffbea;
-box-shadow:0 8px 20px rgba(217,119,6,0.45);
+color:#FFFFFF;
+box-shadow:0 8px 20px rgba(5,150,105,0.45);
 position:relative;
 }
 .sidebar-avatar::after{
@@ -94,8 +94,8 @@ right:-2px;
 width:12px;
 height:12px;
 border-radius:50%;
-background:#16a34a;
-border:2px solid #fde68a;
+background:#22C55E;
+border:2px solid #D1FAE5;
 }
 .sidebar-user-info{
 min-width:0;
@@ -103,7 +103,7 @@ min-width:0;
 .sidebar-user-name{
 font-size:0.88rem;
 font-weight:700;
-color:#7c6a12;
+color:#FFFFFF;
 letter-spacing:-0.01em;
 white-space:nowrap;
 overflow:hidden;
@@ -111,7 +111,7 @@ text-overflow:ellipsis;
 }
 .sidebar-user-email{
 font-size:0.68rem;
-color:#9a8a1c;
+color:#A7F3D0;
 white-space:nowrap;
 overflow:hidden;
 text-overflow:ellipsis;
@@ -126,7 +126,7 @@ font-size:0.65rem;
 font-weight:700;
 text-transform:uppercase;
 letter-spacing:0.08em;
-color:#a5901e;
+color:#A7F3D0;
 }
 
 /* ---- Navigation nav ---- */
@@ -141,7 +141,7 @@ flex-direction:column;
 display:flex;
 align-items:center;
 gap:12px;
-color:#8a6d1a;
+color:#ECFDF5;
 text-decoration:none;
 padding:10px 14px;
 border-radius:10px;
@@ -160,33 +160,33 @@ transition:color 0.2s ease, transform 0.2s ease;
 }
 .sidebar a:hover{
 background:rgba(255,255,255,0.55);
-color:#5a4a0c;
-box-shadow:inset 0 0 0 1px rgba(217,119,6,0.25);
+color:#FFFFFF;
+box-shadow:inset 0 0 0 1px rgba(16,185,129,0.25);
 }
 .sidebar a:hover i{
-color:#b45309;
+color:#34D399;
 transform:translateX(2px);
 }
 .sidebar a.active{
-background:linear-gradient(135deg,rgba(245,158,11,0.35),rgba(253,230,138,0.55));
-color:#5a4a0c;
-box-shadow:inset 0 0 0 1px rgba(180,83,9,0.45);
+background:linear-gradient(135deg,rgba(16,185,129,0.35),rgba(209,250,229,0.55));
+color:#FFFFFF;
+box-shadow:inset 0 0 0 1px rgba(16,185,129,0.45);
 }
 .sidebar a.active i{
-color:#92400e;
+color:#34D399;
 }
 
 /* ---- Sidebar footer ---- */
 .sidebar-footer{
 padding:12px 16px 20px;
-border-top:1px solid rgba(120,80,15,0.2);
+border-top:1px solid rgba(255,255,255,0.2);
 margin:12px 12px 0;
 }
 .sidebar-footer a{
 display:flex;
 align-items:center;
 gap:10px;
-color:#7c2d12;
+color:#A7F3D0;
 text-decoration:none;
 padding:8px 10px;
 border-radius:8px;
@@ -196,10 +196,10 @@ transition:all 0.2s ease;
 }
 .sidebar-footer a:hover{
 background:rgba(255,255,255,0.55);
-color:#b91c1c;
+color:#34D399;
 }
 .sidebar-footer a:hover i{
-color:#dc2626;
+color:#34D399;
 }
 .sidebar-footer a i{
 font-size:15px;
@@ -209,7 +209,7 @@ transition:color 0.2s ease;
 /* ---- Sidebar separator divider ---- */
 .sidebar-divider{
 height:1px;
-background:rgba(120,80,15,0.22);
+background:rgba(255,255,255,0.2);
 margin:8px 16px;
 }
 .sidebar-page{margin-left:272px;flex:1;min-height:100vh;min-width:0;display:flex;justify-content:center;align-items:flex-start;padding:20px;}
@@ -231,8 +231,8 @@ margin:8px 16px;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    background:#fefdf0 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
-    box-shadow:0 4px 16px rgba(80,53,10,0.2);
+    background:linear-gradient(180deg,#065F46 0%,#047857 55%,#064E3B 100%) url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
+    box-shadow:0 4px 16px rgba(6,95,70,0.2);
   }
   .sidebar-user { display: none; }
   .sidebar-divider { display: none; }
@@ -263,7 +263,7 @@ margin:8px 16px;
     margin: 0;
     padding: 0 0 0 6px;
     border-top: none;
-    border-left: 1px solid rgba(120,80,15,0.35);
+    border-left: 1px solid rgba(255,255,255,0.35);
   }
   .sidebar-footer a {
     padding:6px 8px;
@@ -622,9 +622,9 @@ filter:brightness(1.1);
 }
 
 .btn-primary{
-background:linear-gradient(135deg,#4fc3ff,#3b82f6);
+background:linear-gradient(135deg,#10B981,#059669);
 color:white;
-box-shadow:0 8px 25px rgba(59,130,246,0.3);
+box-shadow:0 8px 25px rgba(16,185,129,0.3);
 width:100%;
 }
 
@@ -701,8 +701,8 @@ padding:8px 10px;
   <div class="sidebar-brand">
     <span class="brand-name">SANC<span class="brand-ai">.AI</span></span>
     <svg class="brand-wave" viewBox="0 0 140 14" preserveAspectRatio="none" aria-hidden="true">
-      <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#d97706" stroke-width="3.2" stroke-linecap="round"/>
-      <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+      <path d="M4 9 C30 2 52 13 78 7 C100 2 120 11 136 6" fill="none" stroke="#059669" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M20 12.5 C44 7.5 62 14 88 10.5" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
     </svg>
   </div>
   <div class="sidebar-user">
