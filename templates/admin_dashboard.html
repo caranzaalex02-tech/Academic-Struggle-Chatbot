@@ -12,34 +12,34 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/design-system.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <style>
-        /* ===== Admin dashboard theme ===== */
+        /* ===== Admin dashboard theme (Same as Chatbot - Emerald Green + Soft Mint) ===== */
         :root {
-            --sidebar-bg: #0F172A url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
+            --sidebar-bg: #065F46 url('{{ url_for('static', filename='images/gold_fluid_waves_bg.svg') }}') center/cover no-repeat;
             --card-bg: rgba(255,255,255,0.55);
-            --primary-text: #0F172A;
-            --secondary-text: #475569;
-            --accent-color: #1D4ED8;
-            --danger-color: #EF4444;
-            --warning-color: #F59E0B;
+            --primary-text: #064E3B;
+            --secondary-text: #477B62;
+            --accent-color: #10B981;
+            --danger-color: #DC2626;
+            --warning-color: #D97706;
             --success-color: #10B981;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
             color: var(--primary-text);
-            background: #F8FAFC url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
+            background: #ECFDF5 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
             background-attachment: fixed;
             min-height: 100vh;
         }
         .sidebar { width: 260px; }
-        .sidebar-header { margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid rgba(15,23,42,0.2); }
-        .sidebar-header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.5px; color: #92400E; }
+        .sidebar-header { margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid rgba(6,78,59,0.2); }
+        .sidebar-header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: 0.5px; color: #ECFDF5; }
         .sidebar nav { flex: 1; }
         .sidebar a {
             display: flex;
             align-items: center;
             gap: 12px;
-            color: #92400E;
+            color: #ECFDF5;
             text-decoration: none;
             padding: 12px 14px;
             border-radius: 0.625rem;
@@ -47,17 +47,17 @@
             transition: background 0.2s ease, color 0.2s ease;
             font-weight: 600;
         }
-        .sidebar a:hover { background: rgba(255,255,255,0.55); color: #92400E; }
-        .sidebar a.active { background: rgba(245,158,11,0.15); color: #B45309; font-weight: 700; }
-        .sidebar .logout-btn { margin-top: auto; border-top: 1px solid rgba(15,23,42,0.2); padding-top: 20px; color: #92400E; }
-        .sidebar .logout-btn:hover { color: #B91C1C; }
+        .sidebar a:hover { background: rgba(16,185,129,0.2); color: #ECFDF5; }
+        .sidebar a.active { background: rgba(16,185,129,0.2); color: #10B981; font-weight: 700; }
+        .sidebar .logout-btn { margin-top: auto; border-top: 1px solid rgba(6,78,59,0.2); padding-top: 20px; color: #ECFDF5; }
+        .sidebar .logout-btn:hover { color: #FCA5A5; }
         .main-content { padding: 32px; }
         .card {
             background: var(--card-bg);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 20px;
-            border: 1px solid var(--admin-border);
+            border: 1px solid #D1FAE5;
             box-shadow: 0 2px 12px rgba(15,23,42,0.06);
         }
         table {
