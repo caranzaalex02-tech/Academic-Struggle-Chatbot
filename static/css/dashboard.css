@@ -1,6 +1,60 @@
-/* =============================================================
-   SANC.AI � Dashboard Components
+﻿/* =============================================================
+   SANC.AI â€” ADMIN PANEL COLOR PALETTE
+   Royal Navy & Azure Theme (Contrast to User Emerald + Mint)
    ============================================================= */
+
+:root {
+    --admin-primary: #1D4ED8;
+    --admin-primary-hover: #2563EB;
+    --admin-primary-dark: #1E3A8A;
+
+    --admin-accent: #7C3AED;
+    --admin-accent-light: #A78BFA;
+
+    --admin-success: #10B981;
+    --admin-success-light: #6EE7B7;
+    --admin-success-soft: #D1FAE5;
+
+    --admin-warning: #F59E0B;
+    --admin-warning-light: #FBBF24;
+
+    --admin-danger: #EF4444;
+    --admin-danger-light: #F87171;
+
+    --admin-info: #0EA5B9;
+    --admin-info-light: #67E8F9;
+
+    --admin-bg-main: #F8FAFC;
+    --admin-bg-light: #FFFFFF;
+    --admin-bg-sidebar: #0F172A;
+    --admin-bg-sidebar-hover: #1E293B;
+
+    --admin-text-primary: #0F172A;
+    --admin-text-secondary: #475569;
+    --admin-text-muted: #94A3B8;
+
+    --admin-border: #E2E8F0;
+    --admin-border-light: #F1F5F9;
+    --admin-table-header: #EFF6FF;
+
+    --admin-sidebar-bg: #0F172A;
+    --admin-sidebar-text: #F1F5F9;
+    --admin-sidebar-icon: #94A3B8;
+    --admin-sidebar-divider: #334155;
+
+    --admin-card-bg: #FFFFFF;
+    --admin-card-border: #E2E8F0;
+    --admin-card-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+    --admin-shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.10);
+    --admin-shadow-card: 0 12px 40px -12px rgba(15, 23, 42, 0.18);
+}
+
+
+/* ==========================================
+   SANC.AI ADMIN PANEL
+   ROYAL NAVY & AZURE THEME
+   ========================================== */
 
 /* ---- Dashboard container ---- */
 .dashboard-container {
@@ -8,10 +62,10 @@
     max-width: 1000px;
     margin: 0 auto;
     padding: 24px 28px 40px;
-    background: #ffffff;
+    background: var(--admin-bg-light);
     border-radius: 20px;
-    box-shadow: 0 12px 40px -12px rgba(20,83,45,0.18), 0 4px 16px -6px rgba(20,83,45,0.08);
-    border: 1px solid rgba(134,239,172,0.28);
+    box-shadow: 0 12px 40px -12px rgba(15,23,42,0.18), 0 4px 16px -6px rgba(15,23,42,0.08);
+    border: 1px solid var(--admin-border);
     position: relative;
     z-index: 1;
 }
@@ -19,17 +73,18 @@
 .dashboard-header {
     text-align: center;
     padding: 20px 0 16px;
-    border-bottom: 1px solid rgba(134,239,172,0.28);
+    border-bottom: 1px solid var(--admin-border-light);
     margin-bottom: 20px;
 }
 
 .dashboard-header h1 {
     font-size: 1.6rem;
     margin-bottom: 4px;
+    color: var(--admin-text-primary);
 }
 
 .dashboard-header p {
-    color: #6B8F7A;
+    color: var(--admin-text-secondary);
     font-size: 0.92rem;
 }
 
@@ -50,27 +105,27 @@
     border-radius: 12px;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #064E3B;
-    background: rgba(255,255,255,0.55);
-    border: 1px solid rgba(134,239,172,0.55);
+    color: var(--admin-text-secondary);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid var(--admin-border);
     transition: all 0.2s ease;
 }
 
 .top-links a:hover {
-    background: #f0fdf4;
-    border-color: #10B981;
-    color: #064E3B;
+    background: var(--admin-bg-light);
+    border-color: var(--admin-primary);
+    color: var(--admin-primary);
     transform: translateY(-1px);
 }
 
 /* ---- Cards ---- */
 .card {
-    background: #ffffff;
-    border: 1px solid rgba(134,239,172,0.28);
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-card-border);
     border-radius: 16px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 12px rgba(20,83,45,0.06);
+    box-shadow: var(--admin-card-shadow);
 }
 
 .card-header {
@@ -84,6 +139,7 @@
     margin: 0;
     font-size: 1.1rem;
     flex: 1;
+    color: var(--admin-text-primary);
 }
 
 .card-body {
@@ -105,40 +161,79 @@
     transition: all 0.2s ease;
 }
 
-.btn-green {
-    background: #10B981;
+.btn-primary {
+    background: var(--admin-primary);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(29,78,216,0.35);
+}
+
+.btn-primary:hover {
+    background: var(--admin-primary-hover);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(29,78,216,0.45);
+}
+
+.btn-accent {
+    background: var(--admin-accent);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+}
+
+.btn-accent:hover {
+    background: #6D28D9;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(124,58,237,0.45);
+}
+
+.btn-success {
+    background: var(--admin-success);
     color: #fff;
     box-shadow: 0 4px 14px rgba(74,222,128,0.35);
 }
 
-.btn-green:hover {
+.btn-success:hover {
     background: #059669;
     color: #fff;
     transform: translateY(-1px);
     box-shadow: 0 6px 20px rgba(74,222,128,0.45);
 }
 
-.btn-yellow {
-    background: #ECFDF5;
-    color: #064E3B;
-    box-shadow: 0 4px 14px rgba(250,204,21,0.35);
+.btn-warning {
+    background: var(--admin-warning);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(245,158,11,0.35);
 }
 
-.btn-yellow:hover {
-    background: #047857;
-    color: #064E3B;
+.btn-warning:hover {
+    background: #D97706;
+    color: #fff;
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(250,204,21,0.45);
+    box-shadow: 0 6px 20px rgba(245,158,11,0.45);
+}
+
+.btn-danger {
+    background: var(--admin-danger);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(239,68,68,0.35);
+}
+
+.btn-danger:hover {
+    background: #DC2626;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(239,68,68,0.45);
 }
 
 .btn-outline {
     background: transparent;
-    border: 2px solid #10B981;
-    color: #10B981;
+    border: 2px solid var(--admin-primary);
+    color: var(--admin-primary);
 }
 
 .btn-outline:hover {
-    background: #10B981;
+    background: var(--admin-primary);
     color: #fff;
 }
 
@@ -153,6 +248,7 @@
     border-radius: 10px;
 }
 
+
 /* ---- Badges ---- */
 .badge {
     display: inline-flex;
@@ -165,41 +261,165 @@
     white-space: nowrap;
 }
 
-.badge-green {
-    background: rgba(74,222,128,0.14);
-    color: #15803d;
-    border: 1px solid rgba(74,222,128,0.35);
+.badge-primary {
+    background: rgba(29,78,216,0.14);
+    color: #1D4ED8;
+    border: 1px solid rgba(29,78,216,0.45);
 }
 
-.badge-yellow {
-    background: rgba(250,204,21,0.14);
-    color: #92400e;
-    border: 1px solid rgba(250,204,21,0.35);
+.badge-accent {
+    background: rgba(124,58,237,0.14);
+    color: #6D28D9;
+    border: 1px solid rgba(124,58,237,0.45);
 }
 
-.badge-red {
-    background: rgba(248,113,113,0.14);
-    color: #b91c1c;
-    border: 1px solid rgba(248,113,113,0.35);
-}
-
-.badge-blue {
-    background: rgba(16,185,129,0.12);
+.badge-success {
+    background: rgba(16,185,129,0.14);
     color: #0f766e;
-    border: 1px solid rgba(16,185,129,0.25);
+    border: 1px solid rgba(16,185,129,0.35);
+}
+
+.badge-warning {
+    background: rgba(245,158,11,0.14);
+    color: #92400E;
+    border: 1px solid rgba(245,158,11,0.35);
+}
+
+.badge-danger {
+    background: rgba(239,68,68,0.14);
+    color: #b91c1c;
+    border: 1px solid rgba(239,68,68,0.35);
+}
+
+.badge-info {
+    background: rgba(14,165,185,0.14);
+    color: #0f766e;
+    border: 1px solid rgba(14,165,185,0.35);
+}
+
+/* ---- Table ---- */
+.table-container {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--admin-border);
+    background: var(--admin-bg-light);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--admin-bg-light);
+}
+
+.table th {
+    background: var(--admin-table-header);
+    color: var(--admin-text-primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    padding: 16px 20px;
+    border-bottom: 2px solid var(--admin-border);
+    text-align: left;
+}
+
+.table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--admin-border-light);
+    color: var(--admin-text-secondary);
+    font-size: 0.9rem;
+}
+
+.table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(29,78,216,0.04);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ---- Forms ---- */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--admin-text-primary);
+    margin-bottom: 8px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--admin-border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--admin-text-primary);
+    background: var(--admin-bg-light);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 4px rgba(29,78,216,0.12);
+    outline: none;
+}
+
+/* ---- Stats grid ---- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: var(--admin-bg-light);
+    border: 1px solid var(--admin-card-border);
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    box-shadow: var(--admin-card-shadow);
+}
+
+.stat-card .number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--admin-text-primary);
+}
+
+.stat-card .label {
+    font-size: 0.82rem;
+    color: var(--admin-text-secondary);
+    margin-top: 4px;
+}
+
+.stat-card .icon {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
 }
 
 /* ---- Mood chart ---- */
 .mood-chart {
-    background: #ffffff;
-    border: 1px solid rgba(134,239,172,0.28);
+    background: var(--admin-bg-light);
+    border: 1px solid var(--admin-card-border);
     border-radius: 16px;
     padding: 20px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--admin-card-shadow);
 }
 
 .mood-chart h3 {
     margin-bottom: 14px;
+    color: var(--admin-text-primary);
 }
 
 .chart-wrapper {
@@ -215,67 +435,35 @@
     aspect-ratio: 1 / 1;
 }
 
-/* ---- Stats grid ---- */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.stat-card {
-    background: #ffffff;
-    border: 1px solid rgba(134,239,172,0.28);
-    border-radius: 16px;
-    padding: 18px;
-    text-align: center;
-    box-shadow: 0 2px 12px rgba(20,83,45,0.06);
-}
-
-.stat-card .number {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #064E3B;
-}
-
-.stat-card .label {
-    font-size: 0.82rem;
-    color: #6B8F7A;
-    margin-top: 4px;
-}
-
-.stat-card .icon {
-    font-size: 1.4rem;
-    margin-bottom: 6px;
-}
-
 /* ---- Tip of the day ---- */
 .tip-box {
-    background: #fef9c3;
-    border: 1px solid rgba(253,230,138,0.45);
+    background: linear-gradient(135deg, #FEF3C7 0%, #FEF9C3 100%);
+    border: 1px solid rgba(245,158,11,0.45);
     border-radius: 14px;
     padding: 16px 20px;
     text-align: center;
-    color: #8a6d00;
+    color: #92400E;
     margin-bottom: 24px;
+    box-shadow: var(--admin-card-shadow);
 }
 
 .tip-box strong {
-    color: #8a6d00;
+    color: #92400E;
 }
 
 /* ---- Archived conversations ---- */
 .archived-item {
-    background: #ffffff;
-    border: 1px solid rgba(134,239,172,0.28);
+    background: var(--admin-bg-light);
+    border: 1px solid var(--admin-card-border);
     border-radius: 14px;
     padding: 16px;
     margin-bottom: 14px;
+    box-shadow: var(--admin-card-shadow);
 }
 
 .archived-item .timestamp {
     font-size: 0.8rem;
-    color: #6B8F7A;
+    color: var(--admin-text-muted);
     margin-bottom: 6px;
 }
 
@@ -283,14 +471,15 @@
     font-size: 0.88rem;
     line-height: 1.5;
     margin-bottom: 4px;
+    color: var(--admin-text-secondary);
 }
 
 .archived-item .chat-line.user {
-    color: #064E3B;
+    color: var(--admin-text-primary);
 }
 
 .archived-item .chat-line.bot {
-    color: #4d7c0f;
+    color: var(--admin-text-secondary);
 }
 
 .restore-link {
@@ -302,13 +491,13 @@
     border-radius: 8px;
     font-size: 0.82rem;
     font-weight: 600;
-    color: #10B981;
-    background: rgba(74,222,128,0.14);
-    border: 1px solid rgba(74,222,128,0.35);
+    color: var(--admin-success);
+    background: rgba(16,185,129,0.14);
+    border: 1px solid rgba(16,185,129,0.35);
 }
 
 .restore-link:hover {
-    background: #10B981;
+    background: var(--admin-success);
     color: #fff;
 }
 
@@ -326,158 +515,84 @@
     align-items: center;
     gap: 8px;
     padding: 18px 14px;
-    background: #ffffff;
-    border: 1px solid rgba(134,239,172,0.28);
+    background: var(--admin-bg-light);
+    border: 1px solid var(--admin-card-border);
     border-radius: 16px;
     text-decoration: none;
-    color: #064E3B;
+    color: var(--admin-text-primary);
     transition: all 0.2s ease;
+    box-shadow: var(--admin-card-shadow);
 }
 
 .quick-action:hover {
-    border-color: #10B981;
-    box-shadow: 0 6px 20px rgba(74,222,128,0.2);
+    border-color: var(--admin-primary);
+    box-shadow: 0 6px 20px rgba(29,78,216,0.2);
     transform: translateY(-2px);
+    color: var(--admin-primary);
 }
 
-.quick-action .icon {
-    font-size: 1.6rem;
-}
-
-.quick-action .label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #064E3B;
-}
-
-/* ---- Mood indicator dots ---- */
-.mood-dots {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin: 12px 0;
-}
-
-.mood-dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 2px solid rgba(20,83,45,0.15);
-}
-
-.mood-dot.happy { background: #10B981; border-color: #10B981; }
-.mood-dot.neutral { background: #ECFDF5; border-color: #ECFDF5; }
-.mood-dot.sad { background: #f87171; border-color: #f87171; }
-
-/* ---- Layout helpers ---- */
-.row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-}
-
-.col {
-    flex: 1;
-    min-width: 0;
-}
-
-.flex-between {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* ---- Scrollbar ---- */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #fef9c3;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #10B981;
-    border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #059669;
-}
-
-/* ============================================================
-   SANC.AI � 3D CSS Effects
-   Pure CSS 3D depth, no JavaScript required
-   ============================================================ */
-
-/* ---- Perspective base for 3D children ---- */
-.perspective-1000 {
-    perspective: 1000px;
-    transform-style: preserve-3d;
-}
-
-/* ---- Depth shadow layers ---- */
-.depth-1 {
-    box-shadow: 0 4px 6px -1px rgba(20, 83, 45, 0.1), 0 2px 4px -1px rgba(20, 83, 45, 0.06);
-}
-.depth-2 {
-    box-shadow: 0 10px 15px -3px rgba(20, 83, 45, 0.12), 0 4px 6px -2px rgba(20, 83, 45, 0.08);
-}
-.depth-3 {
-    box-shadow: 0 20px 25px -5px rgba(20, 83, 45, 0.15), 0 8px 10px -6px rgba(20, 83, 45, 0.08);
-}
-
-/* ---- 3D Card: tilts slightly on hover with depth shadow ---- */
-.card-3d {
-    position: relative;
-    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
-    transform-style: preserve-3d;
-    box-shadow: 0 10px 15px -3px rgba(20, 83, 45, 0.12), 0 4px 6px -2px rgba(20, 83, 45, 0.08);
-    border: 1px solid rgba(134, 239, 172, 0.28);
-    background: #ffffff;
-    border-radius: 20px;
-}
-
-.card-3d:hover {
-    transform: rotateX(5deg) rotateY(3deg) scale(1.02);
-    box-shadow: 0 25px 50px -12px rgba(20, 83, 45, 0.25), 0 8px 16px -4px rgba(20, 83, 45, 0.15);
-    border-color: rgba(74, 222, 128, 0.55);
-}
 
 /* ---- 3D Button: pressed effect on click/depth on hover ---- */
 .btn-3d {
     position: relative;
     transition: transform 0.15s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.2s ease;
     transform-style: preserve-3d;
-    box-shadow: 0 6px 0 rgba(20, 83, 45, 0.15), 0 4px 12px rgba(20, 83, 45, 0.12);
+    box-shadow: 0 6px 0 rgba(15,23,42,0.15), 0 4px 12px rgba(15,23,42,0.12);
 }
 
 .btn-3d:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 0 rgba(20, 83, 45, 0.15), 0 6px 16px rgba(20, 83, 45, 0.18);
+    box-shadow: 0 8px 0 rgba(15,23,42,0.15), 0 6px 16px rgba(15,23,42,0.18);
 }
 
 .btn-3d:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 0 rgba(20, 83, 45, 0.15), 0 2px 6px rgba(20, 83, 45, 0.1);
+    box-shadow: 0 2px 0 rgba(15,23,42,0.15), 0 2px 6px rgba(15,23,42,0.1);
 }
 
-.btn-3d-green {
-    background: #10B981;
+.btn-3d-primary {
+    background: var(--admin-primary);
     color: #fff;
 }
-.btn-3d-green:hover {
+
+.btn-3d-primary:hover {
+    background: var(--admin-primary-hover);
+}
+
+.btn-3d-accent {
+    background: var(--admin-accent);
+    color: #fff;
+}
+
+.btn-3d-accent:hover {
+    background: #6D28D9;
+}
+
+.btn-3d-success {
+    background: var(--admin-success);
+    color: #fff;
+}
+
+.btn-3d-success:hover {
     background: #059669;
 }
 
-.btn-3d-yellow {
-    background: #ECFDF5;
-    color: #064E3B;
+.btn-3d-warning {
+    background: var(--admin-warning);
+    color: #fff;
 }
-.btn-3d-yellow:hover {
-    background: #047857;
+
+.btn-3d-warning:hover {
+    background: #D97706;
+}
+
+.btn-3d-danger {
+    background: var(--admin-danger);
+    color: #fff;
+}
+
+.btn-3d-danger:hover {
+    background: #DC2626;
 }
 
 /* ---- Glassmorphism 3D Card ---- */
@@ -490,7 +605,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.75);
     border-left: 1px solid rgba(255, 255, 255, 0.75);
     box-shadow:
-        0 8px 32px 0 rgba(20, 83, 45, 0.12),
+        0 8px 32px 0 rgba(15, 23, 42, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.9),
         inset 0 -1px 0 rgba(0, 0, 0, 0.05);
     border-radius: 20px;
@@ -500,6 +615,7 @@
 .tilt-hover {
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+
 .tilt-hover:hover {
     transform: rotateX(3deg) rotateY(-3deg);
 }
@@ -513,6 +629,7 @@
     transform-style: preserve-3d;
     border-radius: 20px;
 }
+
 .flip-card-inner {
     position: relative;
     width: 100%;
@@ -522,9 +639,11 @@
     transform-style: preserve-3d;
     border-radius: 20px;
 }
+
 .flip-card:hover .flip-card-inner {
     transform: rotateY(180deg);
 }
+
 .flip-card-front, .flip-card-back {
     position: absolute;
     width: 100%;
@@ -539,18 +658,20 @@
     padding: 24px;
     box-sizing: border-box;
 }
+
 .flip-card-front {
-    background: #ffffff;
-    border: 1px solid rgba(134, 239, 172, 0.28);
-    color: #064E3B;
-    box-shadow: 0 10px 25px -5px rgba(20, 83, 45, 0.12);
+    background: var(--admin-bg-light);
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-primary);
+    box-shadow: var(--admin-shadow-card);
 }
+
 .flip-card-back {
-    background: linear-gradient(135deg, #f0fdf4 0%, #fef9c3 100%);
-    border: 1px solid rgba(74, 222, 128, 0.35);
-    color: #064E3B;
+    background: linear-gradient(135deg, var(--admin-bg-main) 0%, #FEF9C3 100%);
+    border: 1px solid rgba(124,58,237,0.35);
+    color: var(--admin-text-primary);
     transform: rotateY(180deg);
-    box-shadow: 0 10px 25px -5px rgba(74, 222, 128, 0.25);
+    box-shadow: var(--admin-shadow-card);
 }
 
 /* ---- 3D Layered Badge ---- */
@@ -568,14 +689,17 @@
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12), 0 6px 12px rgba(0, 0, 0, 0.1);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .badge-3d:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 0 rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.12);
 }
+
 .badge-3d:active {
     transform: translateY(1px);
     box-shadow: 0 2px 0 rgba(0, 0, 0, 0.12);
 }
+
 .badge-3d::after {
     content: '';
     position: absolute;
@@ -597,19 +721,80 @@
     background: #fff;
     display: inline-block;
 }
-.mood-dot-3d.happy { background: #10B981; box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
-.mood-dot-3d.neutral { background: #ECFDF5; box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
-.mood-dot-3d.sad { background: #f87171; box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.35), 0 4px 6px rgba(0,0,0,0.15); }
+
+.mood-dot-3d.happy { background: var(--admin-success); box-shadow: 0 0 0 4px rgba(74,222,128,0.35), 0 4px 6px rgba(0,0,0,0.15); }
+.mood-dot-3d.neutral { background: #ECFDF5; box-shadow: 0 0 0 4px rgba(250,204,21,0.35), 0 4px 6px rgba(0,0,0,0.15); }
+.mood-dot-3d.sad { background: var(--admin-danger-light); box-shadow: 0 0 0 4px rgba(248,113,113,0.35), 0 4px 6px rgba(0,0,0,0.15); }
 
 /* ---- Pressed 3D utility for any clickable ---- */
 .press-3d {
     transition: transform 0.1s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+
 .press-3d:active {
     transform: scale(0.96);
     filter: brightness(0.92);
 }
 
+/* ---- Scrollbar styling ---- */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
 
+::-webkit-scrollbar-track {
+    background: var(--admin-bg-main);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--admin-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--admin-primary-dark);
+}
+
+
+/* =============================================================
+   SANC.AI â€” 3D CSS Effects
+   Pure CSS 3D depth, no JavaScript required
+   ============================================================ */
+
+/* ---- Perspective base for 3D children ---- */
+.perspective-1000 {
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+/* ---- Depth shadow layers ---- */
+.depth-1 {
+    box-shadow: 0 4px 6px -1px rgba(15,23,42,0.1), 0 2px 4px -1px rgba(15,23,42,0.06);
+}
+
+.depth-2 {
+    box-shadow: 0 10px 15px -3px rgba(15,23,42,0.12), 0 4px 6px -2px rgba(15,23,42,0.08);
+}
+
+.depth-3 {
+    box-shadow: 0 20px 25px -5px rgba(15,23,42,0.15), 0 8px 10px -6px rgba(15,23,42,0.08);
+}
+
+/* ---- 3D Card: tilts slightly on hover with depth shadow ---- */
+.card-3d {
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+    box-shadow: 0 10px 15px -3px rgba(15,23,42,0.12), 0 4px 6px -2px rgba(15,23,42,0.08);
+    border: 1px solid var(--admin-border);
+    background: var(--admin-bg-light);
+    border-radius: 20px;
+}
+
+.card-3d:hover {
+    transform: rotateX(5deg) rotateY(3deg) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(15,23,42,0.25), 0 8px 16px -4px rgba(15,23,42,0.15);
+    border-color: rgba(29,78,216,0.55);
+}
 
 
