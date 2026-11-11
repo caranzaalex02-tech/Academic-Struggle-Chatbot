@@ -345,7 +345,7 @@
 
     <main class="main-content">
         <header class="main-header">
-            <h2>User Details: {{ user.username }}</h2>
+            <h2>User Details: {{ user.first_name }} {{ user.last_name }}</h2>
         </header>
 
         <div class="grid-container">
@@ -353,7 +353,7 @@
                 <h3>Profile Information</h3>
                 <div class="info-item">
                     <span class="label">Username</span>
-                    <span class="value">{{ user.username }}</span>
+                    <span class="value">{{ user.email }}</span>
                 </div>
                 <div class="info-item">
                     <span class="label">Age</span>
