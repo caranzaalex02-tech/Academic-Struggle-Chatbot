@@ -51,7 +51,14 @@
         overflow-y: auto;
         overflow-x: hidden;
     }
-    .main-content { margin-left: 272px; flex: 1; padding: 24px; }
+    .main-content {
+        margin-left: 272px !important;
+        flex: 1;
+        min-height: 100vh;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+    }
     /* ---- SANC.AI logo wordmark ---- */
     .sidebar-brand {
         padding: 18px 14px 8px;
