@@ -34,16 +34,13 @@
         background-attachment: fixed;
         min-height: 100vh;
     }
-    .dashboard-layout { display: flex; flex-direction: row; min-height: 100vh; }
+    .dashboard-layout { display: flex; flex-direction: row; }
     .sidebar {
-        position: static;
-        top: auto;
-        left: auto;
-        bottom: auto;
         width: 240px;
         flex-shrink: 0;
         background: var(--sidebar-gradient);
         color: #FFFFFF;
+        padding: 20px 14px 20px;
         display: flex;
         flex-direction: column;
         z-index: 50;
@@ -54,8 +51,8 @@
     }
     .main-content {
         flex: 1;
-        min-height: 100vh;
         padding: 24px;
+        overflow-y: auto;
         margin-left: 0;
         display: flex;
         flex-direction: column;
