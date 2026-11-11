@@ -2365,8 +2365,15 @@ def admin_unban_user(username):
 @app.route("/admin/logs")
 @admin_required
 def admin_logs():
-    # This route is disabled as per user request. Redirect to the main dashboard.
-    return redirect(url_for("admin_dashboard"))
+    db = get_db()
+    c = db.cursor()
+    # Fetch all action logs (newest first) so the Action Logs page can display them
+    if is_postgres_db():
+        c.execute("SELECT admin_username, action, target_username, timestamp FROM admin_logs ORDER BY id DESC")
+    else:
+        c.execute("SELECT admin_username, action, target_username, timestamp FROM admin_logs ORDER BY id DESC")
+    logs = c.fetchall()
+    return render_template("admin_logs.html", logs=logs)
 
 # ================= USER SETTINGS =================
 @app.route("/settings", methods=["GET", "POST"])
