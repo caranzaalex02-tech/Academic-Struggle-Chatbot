@@ -33,13 +33,15 @@
         }
         .dashboard-layout {
             display: flex !important;
+            flex-direction: row !important;
             min-height: 100vh !important;
             gap: 0 !important;
             overflow: hidden !important;
         }
         .sidebar {
-            width: 260px !important;
+            width: 240px !important;
             flex-shrink: 0 !important;
+            min-height: 100vh !important;
             background: var(--sidebar-gradient) !important;
             color: #FFFFFF !important;
             display: flex !important;
@@ -53,7 +55,6 @@
             top: auto !important;
             left: auto !important;
             bottom: auto !important;
-            height: 100vh !important;
         }
         .main-content {
             flex: 1 !important;
