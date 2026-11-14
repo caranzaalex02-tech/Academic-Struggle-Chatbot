@@ -36,7 +36,7 @@
     }
     .dashboard-layout { display: flex; flex-direction: row; }
     .sidebar {
-        width: 260px;
+        width: 240px;
         flex-shrink: 0;
         background: var(--sidebar-gradient);
         color: #FFFFFF;
@@ -53,6 +53,7 @@
         flex: 1;
         padding: 24px;
         overflow-y: auto;
+        margin-left: 0;
         display: flex;
         flex-direction: column;
     }
@@ -237,22 +238,6 @@
         padding: 25px;
     }
     .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
-    /* ---- Responsive sa admin user details ---- */
-    @media (max-width: 1024px) {
-        .sidebar { width: 220px; }
-        .grid-container { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-        .sidebar { width: 60px; padding: 12px 8px; }
-        .sidebar-user, .sidebar-brand { display: none; }
-        .sidebar nav { flex: none; }
-        .sidebar-footer { display: none; }
-        .main-content { padding: 16px; }
-        .grid-container { grid-template-columns: 1fr; }
-        .main-header h2 { font-size: 1.5rem; }
-        .msg { max-width: 90%; }
-        .chat-box { height: 250px; }
-    }
     .grid-col-span-1 { grid-column: span 1 / span 1; }
     .grid-col-span-2 { grid-column: span 2 / span 2; }
     .grid-col-span-3 { grid-column: span 3 / span 3; }
