@@ -300,6 +300,7 @@ input::placeholder {
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 /* ===== Layout Stacks ===== */
+@media (max-width: 768px) {
 .dashboard-layout { flex-direction: column; }
 .dashboard-layout .sidebar {
   width: 100%;
@@ -315,6 +316,7 @@ input::placeholder {
 .dashboard-layout .sidebar nav { display: flex; flex-wrap: wrap; gap: 6px; }
 .dashboard-layout .sidebar a { padding: 10px 14px; margin-bottom: 0; width: auto; }
 .dashboard-layout .sidebar .logout-btn { margin-top: 0; padding-top: 10px; }
+}
 
 /* ===== Tables ===== */
 .card { overflow-x: auto; }
