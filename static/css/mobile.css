@@ -446,6 +446,8 @@ th:not(#archived-table th), td:not(#archived-table td) { padding: 10px 12px; fon
   .dashboard-layout { flex-direction: column !important; }
   .dashboard-layout .sidebar {
     width: 100% !important;
+    position: static !important;
+    height: auto !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
     align-items: center !important;
@@ -453,6 +455,9 @@ th:not(#archived-table th), td:not(#archived-table td) { padding: 10px 12px; fon
     padding: 12px !important;
     border-radius: 16px !important;
     margin-bottom: 16px !important;
+  }
+  .dashboard-layout .main-content {
+    margin-left: 0 !important;
   }
 
   .card { overflow-x: auto !important; }

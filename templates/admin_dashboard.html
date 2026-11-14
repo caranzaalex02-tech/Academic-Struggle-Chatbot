@@ -39,8 +39,9 @@
         .sidebar {
             width: 240px;
             flex-shrink: 0;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
             height: 100vh;
             background: var(--sidebar-gradient);
             color: #FFFFFF;
@@ -57,7 +58,7 @@
             flex: 1;
             padding: 24px;
             overflow-y: auto;
-            margin-left: 0;
+            margin-left: 240px;
             display: flex;
             flex-direction: column;
         }
