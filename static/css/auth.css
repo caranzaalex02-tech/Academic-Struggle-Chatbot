@@ -379,7 +379,7 @@ body::after {
     letter-spacing: 0.06em;
     vertical-align: 0.28em;
     color: #fff8e7;
-    background: linear-gradient(135deg,#f59e0b,#b45309);
+    background: linear-gradient(135deg,#10B981,#059669);
     box-shadow: 0 3px 8px rgba(180,83,9,0.45), inset 0 1px 0 rgba(255,255,255,0.45);
 }
 
