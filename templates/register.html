@@ -189,6 +189,35 @@
                 min-width: 100%;
             }
         }
+
+        /* Terms modal close button — small X like hotline/safety modals */
+        .terms-modal .close,
+        #termsModal .close {
+            position: absolute;
+            top: 10px !important;
+            right: 10px !important;
+            width: 24px !important;
+            height: 24px !important;
+            border-radius: 50%;
+            border: 1px solid #A7F3D0;
+            background: rgba(255,255,255,0.9);
+            color: #059669;
+            font-size: 14px !important;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            padding: 0;
+            opacity: 1;
+            text-shadow: none;
+            z-index: 10;
+        }
+        .terms-modal .close:hover,
+        #termsModal .close:hover {
+            background: #ECFDF5;
+            color: #047857;
+        }
     </style>
   </head>
 <body>
