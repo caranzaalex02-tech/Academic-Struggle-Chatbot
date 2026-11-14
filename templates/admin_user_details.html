@@ -51,6 +51,7 @@
     }
     .main-content {
         flex: 1;
+        min-width: 0;
         padding: 24px;
         overflow-y: auto;
         margin-left: 0;
@@ -238,6 +239,22 @@
         padding: 25px;
     }
     .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; }
+    /* ---- Responsive: sidebar hindi nag-cover ng content sa maliliit na screen ---- */
+    @media (max-width: 1024px) {
+        .dashboard-layout { flex-direction: column; }
+        .sidebar { width: 100%; flex-shrink: 0; z-index: auto; }
+        .main-content { margin-left: 0; padding: 16px; }
+        .grid-container { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    }
+    @media (max-width: 768px) {
+        .dashboard-layout { flex-direction: column; }
+        .sidebar { width: 100%; padding: 12px 14px; }
+        .main-content { padding: 16px; }
+        .grid-container { grid-template-columns: 1fr; gap: 16px; }
+        .main-header h2 { font-size: 1.5rem; }
+        .chat-box { height: 250px; }
+        .msg { max-width: 90%; }
+    }
     .grid-col-span-1 { grid-column: span 1 / span 1; }
     .grid-col-span-2 { grid-column: span 2 / span 2; }
     .grid-col-span-3 { grid-column: span 3 / span 3; }
