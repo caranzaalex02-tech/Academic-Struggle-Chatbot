@@ -12,8 +12,8 @@
 * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
 body {
     min-height:100vh;
-    background:url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center fixed;
-    background-size:cover; color:#1a4a5a;
+    background:#dcfce7 url('{{ url_for('static', filename='images/fluid_waves_bg.svg') }}') center/cover no-repeat;
+    background-attachment:fixed; color:#1a4a5a;
     padding:20px; display:flex; justify-content:center; align-items:flex-start;
 }
 .container {
